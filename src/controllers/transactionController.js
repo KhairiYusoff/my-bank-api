@@ -1,4 +1,5 @@
 const Account = require('../models/Account');
+const Transaction = require('../models/Transaction');
 
 exports.transferFunds = async (req, res) => {
     const { fromAccountNumber, toAccountNumber, amount } = req.body;
@@ -45,6 +46,26 @@ exports.withdrawFunds = async (req, res) => {
         await account.save();
 
         res.json({ msg: `Withdrawn ${amount} successfully`, account });
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+};
+
+exports.getTransactionHistory = async (req, res) => {
+    const { accountNumber } = req.params;
+
+    try {
+        const account = await Account.findOne({ accountNumber });
+
+        if (!account) {
+            return res.status(404).json({ msg: 'Account not found' });
+        }
+
+        const transactions = await Transaction.find({
+            $or: [{ fromAccountNumber: accountNumber }, { toAccountNumber: accountNumber }]
+        });
+
+        res.json(transactions);
     } catch (err) {
         res.status(500).send('Server error');
     }
