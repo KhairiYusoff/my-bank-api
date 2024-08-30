@@ -29,3 +29,19 @@ exports.getAccounts = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+exports.getBalance = async (req, res) => {
+    const { accountNumber } = req.params;
+
+    try {
+        const account = await Account.findOne({ accountNumber });
+
+        if (!account) {
+            return res.status(404).json({ msg: 'Account not found' });
+        }
+
+        res.json({ balance: account.balance });
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+};  
