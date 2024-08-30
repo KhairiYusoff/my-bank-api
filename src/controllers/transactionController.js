@@ -22,9 +22,18 @@ exports.transferFunds = async (req, res) => {
         await fromAccount.save();
         await toAccount.save();
 
-        res.json({ msg: 'Transfer successful' });
+        // Create a new transaction record
+        const newTransaction = new Transaction({
+            fromAccountNumber,
+            toAccountNumber,
+            amount,
+            type: 'transfer'
+        });
+        await newTransaction.save();
+
+        res.json({ msg: 'Transfer successful', transaction: newTransaction });
     } catch (err) {
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: 'Server error', error: err.message });
     }
 };
 
@@ -45,9 +54,18 @@ exports.withdrawFunds = async (req, res) => {
         account.balance -= amount;
         await account.save();
 
-        res.json({ msg: `Withdrawn ${amount} successfully`, account });
+        // Create a new transaction record
+        const newTransaction = new Transaction({
+            fromAccountNumber: accountNumber,
+            toAccountNumber: accountNumber,  // For withdrawal, both are the same
+            amount,
+            type: 'withdrawal'
+        });
+        await newTransaction.save();
+
+        res.json({ msg: `Withdrawn ${amount} successfully`, transaction: newTransaction });
     } catch (err) {
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: 'Server error', error: err.message });
     }
 };
 
@@ -63,10 +81,19 @@ exports.getTransactionHistory = async (req, res) => {
 
         const transactions = await Transaction.find({
             $or: [{ fromAccountNumber: accountNumber }, { toAccountNumber: accountNumber }]
-        });
+        }).sort({ date: -1 });
 
-        res.json(transactions);
+        res.json({
+            accountNumber,
+            transactions: transactions.map(t => ({
+                type: t.type,
+                amount: t.amount,
+                date: t.date,
+                fromAccount: t.fromAccountNumber,
+                toAccount: t.toAccountNumber
+            }))
+        });
     } catch (err) {
-        res.status(500).send('Server error');
+        res.status(500).json({ msg: 'Server error', error: err.message });
     }
 };
