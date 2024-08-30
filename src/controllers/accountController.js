@@ -44,4 +44,26 @@ exports.getBalance = async (req, res) => {
     } catch (err) {
         res.status(500).send('Server error');
     }
-};  
+};
+
+exports.deleteAccount = async (req, res) => {
+    const { accountNumber } = req.params;
+
+    try {
+        const account = await Account.findOne({ accountNumber });
+
+        if (!account) {
+            return res.status(404).json({ msg: 'Account not found' });
+        }
+
+        if (account.balance !== 0) {
+            return res.status(400).json({ msg: 'Account balance must be 0 to delete' });
+        }
+
+        await Account.deleteOne({ accountNumber });
+
+        res.json({ msg: 'Account closed successfully' });
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+};
