@@ -15,6 +15,18 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phoneNumber: {
+        type: String,
+    },
+    address: {
+        street: String,
+        city: String,
+        state: String,
+        postalCode: String,
+    },
+    dateOfBirth: {
+        type: Date,
+    },
 });
 
 UserSchema.pre('save', async function (next) {
