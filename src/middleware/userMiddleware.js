@@ -19,4 +19,27 @@ const validateProfileUpdate = [
     }
 ];
 
-module.exports = { validateProfileUpdate };
+const validatePasswordChange = [
+    check('currentPassword', 'Current password is required').not().isEmpty(),
+    check('newPassword', 'New password is required')
+        .not().isEmpty()
+        .isLength({ min: 8 })
+        .withMessage('New password must be at least 8 characters long')
+        .matches(/\d/)
+        .withMessage('New password must contain a number')
+        .matches(/[A-Z]/)
+        .withMessage('New password must contain an uppercase letter')
+        .matches(/[a-z]/)
+        .withMessage('New password must contain a lowercase letter')
+        .matches(/[!@#$%^&*(),.?":{}|<>]/)
+        .withMessage('New password must contain a special character'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+module.exports = { validateProfileUpdate, validatePasswordChange };
