@@ -5,7 +5,7 @@ exports.transferFunds = async (req, res) => {
     const { fromAccountNumber, toAccountNumber, amount } = req.body;
 
     try {
-        const fromAccount = await Account.findOne({ accountNumber: fromAccountNumber });
+        const fromAccount = await Account.findOne({ accountNumber: fromAccountNumber, user: req.user.id });
         const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
 
         if (!fromAccount || !toAccount) {
@@ -41,7 +41,7 @@ exports.withdrawFunds = async (req, res) => {
     const { accountNumber, amount } = req.body;
 
     try {
-        const account = await Account.findOne({ accountNumber });
+        const account = await Account.findOne({ accountNumber, user: req.user.id });
 
         if (!account) {
             return res.status(404).json({ msg: 'Account not found' });
@@ -65,6 +65,7 @@ exports.withdrawFunds = async (req, res) => {
 
         res.json({ msg: `Withdrawn ${amount} successfully`, transaction: newTransaction });
     } catch (err) {
+        console.error(err.message);
         res.status(500).json({ msg: 'Server error', error: err.message });
     }
 };
@@ -73,7 +74,7 @@ exports.getTransactionHistory = async (req, res) => {
     const { accountNumber } = req.params;
 
     try {
-        const account = await Account.findOne({ accountNumber });
+        const account = await Account.findOne({ accountNumber, user: req.user.id });
 
         if (!account) {
             return res.status(404).json({ msg: 'Account not found' });
@@ -94,6 +95,7 @@ exports.getTransactionHistory = async (req, res) => {
             }))
         });
     } catch (err) {
+        console.error(err.message);
         res.status(500).json({ msg: 'Server error', error: err.message });
     }
 };
