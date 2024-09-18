@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { validationResult } = require('express-validator');
 
+// Register
 exports.register = async (req, res) => {
     // Validate input
     const errors = validationResult(req);
@@ -29,21 +30,20 @@ exports.register = async (req, res) => {
             dateOfBirth
         });
 
-        // Save user to database
-        // Note: Password hashing is handled by the pre-save hook in the User model
+        // Save user to database (Password hashing handled by pre-save hook in User model)
         await user.save();
 
-        // Create and send JWT
+        // Create and send both JWT and refresh token
         const payload = { user: { id: user.id } };
-        jwt.sign(
-            payload,
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' },
-            (err, token) => {
-                if (err) throw err;
-                res.json({ token });
-            }
-        );
+
+        // Generate access token (JWT)
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // Generate refresh token
+        const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+        // Return both tokens
+        res.json({ token, refreshToken });
     } catch (err) {
         console.error(err.message);
         if (err.name === 'ValidationError') {
@@ -60,6 +60,8 @@ exports.register = async (req, res) => {
     }
 };
 
+
+//login
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -74,11 +76,56 @@ exports.login = async (req, res) => {
         }
 
         const payload = { user: { id: user.id } };
+
+        // Generate access token (JWT)
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
-            res.json({ token });
+
+            // Generate refresh token
+            jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' }, (err, refreshToken) => {
+                if (err) throw err;
+                res.json({ token, refreshToken });
+            });
         });
     } catch (err) {
         res.status(500).send('Server error');
     }
+};
+
+
+// Refresh token
+exports.refreshToken = async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+        return res.status(401).json({ msg: 'No refresh token provided' });
+    }
+
+    try {
+        // Verify the refresh token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+        const user = await User.findById(decoded.user.id);
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Generate a new access token (JWT)
+        const payload = { user: { id: user.id } };
+        const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        res.json({ token: newToken });
+    } catch (err) {
+        res.status(401).json({ msg: 'Invalid refresh token' });
+    }
+};
+
+
+// Logout 
+exports.logout = async (req, res) => {
+    res.json({ msg: 'Logged out successfully.' });
+};
+
+// Check token validity
+exports.checkToken = async (req, res) => {
+    res.json({ msg: 'Token is valid', user: req.user });
 };

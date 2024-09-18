@@ -42,4 +42,17 @@ const validatePasswordChange = [
     }
 ];
 
-module.exports = { validateProfileUpdate, validatePasswordChange };
+const validatePreferencesUpdate = [
+    check('theme').optional().isIn(['light', 'dark']).withMessage('Theme must be either light or dark'),
+    check('language').optional().isLength({ min: 2, max: 5 }).withMessage('Invalid language code'),
+    check('notifications').optional().isBoolean().withMessage('Notifications must be a boolean value'),
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    }
+];
+
+module.exports = { validateProfileUpdate, validatePasswordChange, validatePreferencesUpdate };
