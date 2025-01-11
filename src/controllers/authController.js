@@ -95,26 +95,22 @@ exports.login = async (req, res) => {
     const payload = { user: { id: user.id } };
 
     // Generate access token (JWT)
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-      (err, token) => {
-        if (err) throw err;
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
-        // Generate refresh token
-        jwt.sign(
-          payload,
-          process.env.JWT_REFRESH_SECRET,
-          { expiresIn: "7d" },
-          (err, refreshToken) => {
-            if (err) throw err;
-            res.json({ token, refreshToken });
-          }
-        );
-      }
-    );
+    // Generate refresh token and store in database
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: "7d",
+    });
+
+    // Store refresh token in the user document
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.json({ token, refreshToken });
   } catch (err) {
+    console.error(err.message);
     res.status(500).send("Server error");
   }
 };
@@ -149,7 +145,17 @@ exports.refreshToken = async (req, res) => {
 
 // Logout
 exports.logout = async (req, res) => {
-  res.json({ msg: "Logged out successfully." });
+  try {
+    const user = await User.findById(req.user.id);
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
+    res.json({ msg: "Logged out successfully." });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
 };
 
 // Check token validity
