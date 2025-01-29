@@ -3,8 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 
-// Register
-exports.register = async (req, res) => {
+// Register Customer
+exports.registerCustomer = async (req, res) => {
   console.log("req", req.body);
   // Validate input
   const errors = validationResult(req);
@@ -48,6 +48,7 @@ exports.register = async (req, res) => {
       address,
       dateOfBirth,
       identityNumber,
+      role: "customer",
       isVerified: false,
     });
 
