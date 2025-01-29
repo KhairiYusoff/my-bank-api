@@ -19,6 +19,7 @@ exports.register = async (req, res) => {
     phoneNumber = "",
     address = {},
     dateOfBirth = null,
+    identityNumber,
   } = req.body;
 
   try {
@@ -30,6 +31,14 @@ exports.register = async (req, res) => {
         .json({ msg: "User with this email already exists" });
     }
 
+    // Check if identity number is already used
+    let existingIdentity = await User.findOne({ identityNumber });
+    if (existingIdentity) {
+      return res
+        .status(400)
+        .json({ msg: "Identity number is already registered" });
+    }
+
     // Create new user
     user = new User({
       name,
@@ -38,26 +47,18 @@ exports.register = async (req, res) => {
       phoneNumber,
       address,
       dateOfBirth,
+      identityNumber,
+      isVerified: false,
     });
 
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();
 
-    // Create and send both JWT and refresh token
-    const payload = { user: { id: user.id } };
-
-    // Generate access token (JWT)
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    // Generate refresh token
-    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
-      expiresIn: "7d",
-    });
-
-    // Return both tokens
-    res.json({ token, refreshToken });
+    res
+      .status(201)
+      .json({
+        msg: "User registered successfully. Please verify your identity.",
+      });
   } catch (err) {
     console.error(err.message);
     if (err.name === "ValidationError") {
