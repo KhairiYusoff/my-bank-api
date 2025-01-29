@@ -107,3 +107,21 @@ exports.updatePreferences = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
+exports.getAllCustomers = async (req, res) => {
+  try {
+    // Ensure the logged-in user is a banker or admin
+    const banker = await User.findById(req.user.id);
+    if (!banker || (banker.role !== "banker" && banker.role !== "admin")) {
+      return res.status(403).json({ msg: "Access denied" });
+    }
+
+    // Fetch all users with the role 'customer'
+    const customers = await User.find({ role: "customer" });
+
+    res.json({ customers });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: "Server error. Please try again later." });
+  }
+};
