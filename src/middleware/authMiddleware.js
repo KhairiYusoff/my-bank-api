@@ -24,6 +24,26 @@ const authMiddleware = async function (req, res, next) {
   }
 };
 
+const authorizeRoles = (...allowedRoles) => {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ msg: "Access denied" });
+      }
+
+      next();
+    } catch (err) {
+      res.status(500).json({ msg: "Server error" });
+    }
+  };
+};
+
 const validateRegistration = [
   check("name", "Name is required").not().isEmpty().trim().escape(),
   check("email", "Please include a valid email")
@@ -51,5 +71,6 @@ const validateRegistration = [
 
 module.exports = {
   authMiddleware,
+  authorizeRoles,
   validateRegistration,
 };
