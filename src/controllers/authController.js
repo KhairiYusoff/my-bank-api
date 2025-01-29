@@ -19,7 +19,7 @@ exports.registerCustomer = async (req, res) => {
     phoneNumber = "",
     address = {},
     dateOfBirth = null,
-    identityNumber,
+    identityNumber = "",
   } = req.body;
 
   try {
@@ -31,12 +31,14 @@ exports.registerCustomer = async (req, res) => {
         .json({ msg: "User with this email already exists" });
     }
 
-    // Check if identity number is already used
-    let existingIdentity = await User.findOne({ identityNumber });
-    if (existingIdentity) {
-      return res
-        .status(400)
-        .json({ msg: "Identity number is already registered" });
+    // If identity number is provided, check if it exists in the DB
+    if (identityNumber) {
+      let existingIdentity = await User.findOne({ identityNumber });
+      if (existingIdentity) {
+        return res
+          .status(400)
+          .json({ msg: "Identity number is already registered" });
+      }
     }
 
     // Create new user

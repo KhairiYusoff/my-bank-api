@@ -10,6 +10,11 @@ exports.verifyUser = async (req, res) => {
       return res.status(404).json({ msg: "User not found" });
     }
 
+    // Only allow verification for users who are not already verified
+    if (user.isVerified) {
+      return res.status(400).json({ msg: "User is already verified" });
+    }
+
     user.isVerified = true;
     await user.save();
 
