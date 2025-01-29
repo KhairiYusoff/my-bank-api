@@ -20,6 +20,10 @@ exports.registerCustomer = async (req, res) => {
     address = {},
     dateOfBirth = null,
     identityNumber = "",
+    job,
+    age,
+    nationality,
+    accountType,
   } = req.body;
 
   try {
@@ -52,6 +56,10 @@ exports.registerCustomer = async (req, res) => {
       identityNumber,
       role: "customer",
       isVerified: false,
+      job,
+      age,
+      nationality,
+      accountType,
     });
 
     // Save user to database (Password hashing handled by pre-save hook in User model)

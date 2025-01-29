@@ -61,12 +61,19 @@ const validateRegistration = [
     .withMessage("Password must contain a lowercase letter")
     .matches(/[!@#$%^&*(),.?":{}|<>]/)
     .withMessage("Password must contain a special character"),
-  check("phoneNumber", "Phone number is optional").optional().isMobilePhone(),
-  check("address", "Address is optional").optional(),
-  check("dateOfBirth", "Date of birth is optional")
+  check("phoneNumber")
+    .optional()
+    .isMobilePhone("any")
+    .withMessage("Invalid phone number format"),
+  check("address").optional(),
+  check("dateOfBirth", "Invalid date of birth format")
     .optional()
     .isISO8601()
     .toDate(),
+  check("job", "Job is required").not().isEmpty(),
+  check("age", "Age must be a number").isInt({ min: 18, max: 100 }),
+  check("nationality", "Nationality is required").not().isEmpty(),
+  check("accountType", "Account type is required").not().isEmpty(),
 ];
 
 module.exports = {
