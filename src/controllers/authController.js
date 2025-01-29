@@ -54,11 +54,9 @@ exports.register = async (req, res) => {
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();
 
-    res
-      .status(201)
-      .json({
-        msg: "User registered successfully. Please verify your identity.",
-      });
+    res.status(201).json({
+      msg: "User registered successfully. Please verify your identity.",
+    });
   } catch (err) {
     console.error(err.message);
     if (err.name === "ValidationError") {
@@ -86,6 +84,12 @@ exports.login = async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ msg: "Invalid credentials" });
+    }
+
+    if (!user.isVerified) {
+      return res
+        .status(403)
+        .json({ msg: "User is not verified. Please complete verification." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
