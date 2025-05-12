@@ -15,7 +15,17 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
-  const { name, email, phoneNumber, address, dateOfBirth } = req.body;
+  const {
+    name,
+    email,
+    phoneNumber,
+    address,
+    dateOfBirth,
+    identityNumber,
+    employmentType,
+    salary,
+    accountType,
+  } = req.body;
 
   try {
     const user = await User.findById(req.user.id);
@@ -25,9 +35,12 @@ exports.updateProfile = async (req, res) => {
     if (phoneNumber) user.phoneNumber = phoneNumber;
     if (address) user.address = address;
     if (dateOfBirth) user.dateOfBirth = dateOfBirth;
+    if (identityNumber) user.identityNumber = identityNumber;
+    if (employmentType) user.employmentType = employmentType;
+    if (salary) user.salary = salary;
+    if (accountType) user.accountType = accountType;
 
     await user.save();
-
     res.json(user);
   } catch (err) {
     res.status(500).send("Server error");
