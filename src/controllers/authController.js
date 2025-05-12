@@ -24,6 +24,14 @@ exports.registerCustomer = async (req, res) => {
     age,
     nationality,
     accountType,
+    employerName,
+    employmentType,
+    salary,
+    purposeOfAccount,
+    maritalStatus,
+    educationLevel,
+    residencyStatus,
+    nextOfKin = {},
   } = req.body;
 
   try {
@@ -60,8 +68,15 @@ exports.registerCustomer = async (req, res) => {
       age,
       nationality,
       accountType,
+      employerName,
+      employmentType,
+      salary,
+      purposeOfAccount,
+      maritalStatus,
+      educationLevel,
+      residencyStatus,
+      nextOfKin,
     });
-
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();
 
@@ -70,6 +85,7 @@ exports.registerCustomer = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
+
     if (err.name === "ValidationError") {
       // Handle Mongoose validation errors
       const validationErrors = Object.values(err.errors).map(
