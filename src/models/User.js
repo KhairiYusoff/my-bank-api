@@ -103,6 +103,105 @@ const UserSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    employerName: {
+      type: String,
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    employmentType: {
+      type: String,
+      enum: ["salaried", "self-employed", "unemployed", "retired", "student"],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    salary: {
+      type: String,
+      enum: [
+        "<1000",
+        "1000-2999",
+        "3000-4999",
+        "5000-6999",
+        "7000-9999",
+        "10000+",
+      ],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    purposeOfAccount: {
+      type: String,
+      enum: [
+        "savings",
+        "salary credit",
+        "investment",
+        "business",
+        "education",
+        "travel",
+        "others",
+      ],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    nextOfKin: {
+      name: {
+        type: String,
+        required: function () {
+          return this.role === "customer";
+        },
+      },
+      relationship: {
+        type: String,
+        enum: [
+          "parent",
+          "spouse",
+          "child",
+          "sibling",
+          "relative",
+          "friend",
+          "other",
+        ],
+        required: function () {
+          return this.role === "customer";
+        },
+      },
+      phone: {
+        type: String,
+        required: function () {
+          return this.role === "customer";
+        },
+      },
+    },
+    maritalStatus: {
+      type: String,
+      enum: ["single", "married", "divorced", "widowed"],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    educationLevel: {
+      type: String,
+      enum: [
+        "none",
+        "primary",
+        "secondary",
+        "diploma",
+        "degree",
+        "postgraduate",
+      ],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
+    residencyStatus: {
+      type: String,
+      enum: ["citizen", "permanent resident", "foreigner"],
+      required: function () {
+        return this.role === "customer";
+      },
+    },
   },
   {
     timestamps: true,
