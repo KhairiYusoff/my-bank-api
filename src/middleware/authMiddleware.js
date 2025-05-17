@@ -37,6 +37,7 @@ const authorizeRoles = (...allowedRoles) => {
         return res.status(403).json({ msg: "Access denied" });
       }
 
+      req.userObj = user;
       next();
     } catch (err) {
       res.status(500).json({ msg: "Server error" });
