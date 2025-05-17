@@ -25,6 +25,16 @@ exports.updateProfile = async (req, res) => {
     employmentType,
     salary,
     accountType,
+    job,
+    age,
+    nationality,
+    employerName,
+    purposeOfAccount,
+    nextOfKin,
+    maritalStatus,
+    educationLevel,
+    residencyStatus,
+    preferences,
   } = req.body;
 
   try {
@@ -33,15 +43,36 @@ exports.updateProfile = async (req, res) => {
     if (name) user.name = name;
     if (email) user.email = email;
     if (phoneNumber) user.phoneNumber = phoneNumber;
-    if (address) user.address = address;
+    if (address) {
+      user.address = { ...user.address, ...address };
+    }
     if (dateOfBirth) user.dateOfBirth = dateOfBirth;
     if (identityNumber) user.identityNumber = identityNumber;
     if (employmentType) user.employmentType = employmentType;
     if (salary) user.salary = salary;
     if (accountType) user.accountType = accountType;
+    if (job) user.job = job;
+    if (age) user.age = age;
+    if (nationality) user.nationality = nationality;
+    if (employerName) user.employerName = employerName;
+    if (purposeOfAccount) user.purposeOfAccount = purposeOfAccount;
+    if (nextOfKin) {
+      user.nextOfKin = { ...user.nextOfKin, ...nextOfKin };
+    }
+    if (maritalStatus) user.maritalStatus = maritalStatus;
+    if (educationLevel) user.educationLevel = educationLevel;
+    if (residencyStatus) user.residencyStatus = residencyStatus;
+    if (preferences) {
+      user.preferences = { ...user.preferences, ...preferences };
+    }
 
     await user.save();
-    res.json(user);
+
+    const userResponse = user.toObject();
+    delete userResponse.password;
+    delete userResponse.refreshToken;
+
+    res.json(userResponse);
   } catch (err) {
     res.status(500).send("Server error");
   }
