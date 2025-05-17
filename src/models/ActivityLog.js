@@ -12,60 +12,22 @@ const ActivityLogSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: [
-        // Authentication Actions
+        // Critical Security Events
         "CUSTOMER_REGISTRATION",
         "LOGIN",
         "LOGOUT",
         "LOGIN_FAILED",
-        "PASSWORD_CHANGE",
-        "PASSWORD_RESET",
-        "REFRESH_TOKEN",
 
-        // Profile Actions
-        "PROFILE_UPDATE",
-        "PROFILE_VERIFICATION",
-        "CONTACT_UPDATE",
-        "ADDRESS_UPDATE",
-
-        // Account Actions
-        "ACCOUNT_CREATION",
-        "ACCOUNT_UPDATE",
-        "ACCOUNT_CLOSURE",
-        "ACCOUNT_FREEZE",
-        "ACCOUNT_UNFREEZE",
-
-        // Transaction Actions
+        // Critical Financial Events
         "TRANSACTION_CREATE",
         "TRANSACTION_COMPLETE",
-        "TRANSACTION_FAILED",
-        "TRANSACTION_REVERSAL",
         "TRANSFER_INITIATED",
         "TRANSFER_COMPLETED",
         "TRANSFER_FAILED",
-        "DEPOSIT",
-        "WITHDRAWAL",
 
-        // Document Actions
-        "DOCUMENT_UPLOAD",
-        "DOCUMENT_VERIFICATION",
-        "DOCUMENT_REJECTION",
-        "DOCUMENT_EXPIRY",
-
-        // Security Actions
-        "SECURITY_SETTINGS_UPDATE",
-        "2FA_ENABLE",
-        "2FA_DISABLE",
-        "PIN_CHANGE",
-        "SECURITY_QUESTIONS_UPDATE",
-
-        // Notification Actions
-        "NOTIFICATION_PREFERENCES_UPDATE",
-        "NOTIFICATION_SENT",
-
-        // System Actions
-        "SYSTEM_ERROR",
-        "MAINTENANCE_MODE",
-        "OTHER",
+        // Critical Account Events
+        "ACCOUNT_CREATION",
+        "ACCOUNT_CLOSURE",
       ],
     },
     details: {
@@ -82,17 +44,19 @@ const ActivityLogSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["SUCCESS", "FAILED", "PENDING", "CANCELLED", "REVERSED"],
+      enum: ["SUCCESS", "FAILED"],
       default: "SUCCESS",
     },
     severity: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
-      default: "LOW",
+      enum: ["MEDIUM", "HIGH", "CRITICAL"],
+      default: "MEDIUM",
     },
     metadata: {
-      type: Map,
-      of: mongoose.Schema.Types.Mixed,
+      method: String,
+      path: String,
+      statusCode: Number,
+      responseTime: Number,
     },
     relatedEntity: {
       type: mongoose.Schema.Types.ObjectId,
@@ -100,7 +64,7 @@ const ActivityLogSchema = new mongoose.Schema(
     },
     relatedEntityModel: {
       type: String,
-      enum: ["User", "Account", "Transaction", "Document", "Notification"],
+      enum: ["User", "Account", "Transaction"],
     },
     location: {
       country: String,
@@ -158,8 +122,7 @@ ActivityLogSchema.methods.requiresAttention = function () {
   return (
     this.severity === "HIGH" ||
     this.severity === "CRITICAL" ||
-    this.status === "FAILED" ||
-    this.action.includes("SECURITY")
+    this.status === "FAILED"
   );
 };
 

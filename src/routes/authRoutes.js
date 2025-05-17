@@ -10,7 +10,7 @@ const {
   authMiddleware,
   validateRegistration,
 } = require("../middleware/authMiddleware");
-const { activityLogger } = require("../middleware/activityMiddleware");
+const { activityLogger } = require("../services/activityService");
 const router = express.Router();
 
 // Register new customer

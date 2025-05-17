@@ -5,7 +5,6 @@ const { validationResult } = require("express-validator");
 
 // Register Customer
 exports.registerCustomer = async (req, res) => {
-  console.log("req", req.body);
   // Validate input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -80,11 +79,13 @@ exports.registerCustomer = async (req, res) => {
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();
 
-    res.status(201).json({
+    const response = {
       msg: "User registered successfully. Please verify your identity.",
-    });
+      userId: user._id.toString(),
+    };
+    res.status(201).json(response);
   } catch (err) {
-    console.error(err.message);
+    console.error("Registration error:", err.message);
 
     if (err.name === "ValidationError") {
       // Handle Mongoose validation errors
