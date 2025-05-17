@@ -1,5 +1,5 @@
 const User = require("../models/User");
-
+const ActivityLog = require("../models/ActivityLog");
 const bcrypt = require("bcryptjs");
 
 exports.getProfile = async (req, res) => {
@@ -119,13 +119,84 @@ exports.deleteAccount = async (req, res) => {
 // Get user activity log
 exports.getUserActivity = async (req, res) => {
   try {
-    const activities = await ActivityLog.find({ user: req.user.id })
-      .sort({ date: -1 })
-      .limit(10);
-    res.json(activities);
+    const {
+      page = 1,
+      limit = 10,
+      action,
+      status,
+      severity,
+      startDate,
+      endDate,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    // Build query
+    const query = { user: req.user.id };
+
+    // Add filters if provided
+    if (action) query.action = action;
+    if (status) query.status = status;
+    if (severity) query.severity = severity;
+
+    // Add date range if provided
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // Validate sort parameters
+    const validSortFields = ["createdAt", "action", "status", "severity"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
+
+    // Get total count for pagination
+    const total = await ActivityLog.countDocuments(query);
+
+    // Get activities with pagination and sorting
+    const activities = await ActivityLog.find(query)
+      .sort({ [sortField]: sortDirection })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("relatedEntity", "accountNumber name email"); // Populate related entity details
+
+    // Format the response
+    const formattedActivities = activities.map((activity) => activity.format());
+
+    res.json({
+      activities: formattedActivities,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / parseInt(limit)),
+      },
+      filters: {
+        action,
+        status,
+        severity,
+        startDate,
+        endDate,
+        sortBy: sortField,
+        sortOrder,
+      },
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send("Server error");
+    console.error("Error in getUserActivity:", err);
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        msg: "Invalid query parameters",
+        error: err.message,
+      });
+    }
+    res.status(500).json({
+      msg: "Server error",
+      error: err.message,
+    });
   }
 };
 
