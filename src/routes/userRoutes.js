@@ -4,6 +4,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../middleware/authMiddleware");
+const { checkActivityAccess } = require("../middleware/activityMiddleware");
 const {
   getProfile,
   updateProfile,
@@ -18,7 +19,9 @@ const {
   validatePasswordChange,
   validatePreferencesUpdate,
 } = require("../middleware/userMiddleware");
+const User = require("../models/User");
 
+// Profile routes
 router.get("/me", authMiddleware, getProfile);
 router.put("/me", authMiddleware, validateProfileUpdate, updateProfile);
 router.put(
@@ -28,13 +31,26 @@ router.put(
   changePassword
 );
 router.delete("/me", authMiddleware, deleteAccount);
+
+// Activity routes
 router.get("/me/activity", authMiddleware, getUserActivity);
+router.get(
+  "/activity/:userId",
+  authMiddleware,
+  authorizeRoles("banker", "admin"),
+  checkActivityAccess,
+  getUserActivity
+);
+
+// Preferences route
 router.put(
   "/me/preferences",
   authMiddleware,
   validatePreferencesUpdate,
   updatePreferences
 );
+
+// Admin/Banker routes
 router.get(
   "/customers",
   authMiddleware,
