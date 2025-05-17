@@ -13,6 +13,7 @@ const ActivityLogSchema = new mongoose.Schema(
       required: true,
       enum: [
         // Authentication Actions
+        "CUSTOMER_REGISTRATION",
         "LOGIN",
         "LOGOUT",
         "LOGIN_FAILED",

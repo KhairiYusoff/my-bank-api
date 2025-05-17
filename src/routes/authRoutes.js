@@ -10,12 +10,28 @@ const {
   authMiddleware,
   validateRegistration,
 } = require("../middleware/authMiddleware");
+const { activityLogger } = require("../middleware/activityMiddleware");
 const router = express.Router();
 
-router.post("/register-customer", validateRegistration, registerCustomer);
-router.post("/login", login);
+// Register new customer
+router.post("/register-customer", [
+  validateRegistration,
+  activityLogger("CUSTOMER_REGISTRATION", "New customer registration"),
+  registerCustomer,
+]);
+
+// Login
+router.post("/login", [activityLogger("LOGIN", "User login attempt"), login]);
+
+// Logout
+router.post("/logout", [
+  authMiddleware,
+  activityLogger("LOGOUT", "User logout"),
+  logout,
+]);
+
+// Token management (no activity logging needed)
 router.post("/refresh-token", refreshToken);
-router.post("/logout", authMiddleware, logout);
 router.get("/check-token", authMiddleware, checkToken);
 
 module.exports = router;
