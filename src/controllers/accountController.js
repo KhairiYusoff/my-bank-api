@@ -3,6 +3,7 @@ const User = require("../models/User");
 
 exports.createAccount = async (req, res) => {
   const {
+    userId, // Customer ID
     accountType,
     branch,
     balance,
@@ -11,25 +12,34 @@ exports.createAccount = async (req, res) => {
     overdraftLimit,
     minimumBalance,
   } = req.body;
-  const accountNumber = `MYB${Date.now()}`;
 
   try {
-    const user = await User.findById(req.user.id);
+    // 1. Verify the customer exists
+    const customer = await User.findOne({
+      _id: userId,
+      role: "customer", // Ensure it's a customer
+    });
 
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+    if (!customer) {
+      return res.status(404).json({
+        msg: "Customer not found or is not a customer",
+      });
     }
 
+    // 2. Create the account
+    const accountNumber = `MYB${Date.now()}`;
     const newAccount = new Account({
-      user: req.user.id,
+      user: userId, // Link to the customer
       accountNumber,
       accountType,
       branch,
-      balance,
+      balance: balance || 0, // Default to 0 if no initial deposit
       interestRate,
       currency,
       overdraftLimit,
       minimumBalance,
+      status: "Active",
+      dateOpened: new Date(),
     });
 
     const account = await newAccount.save();

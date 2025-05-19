@@ -225,18 +225,13 @@ exports.updatePreferences = async (req, res) => {
 
 exports.getAllCustomers = async (req, res) => {
   try {
-    // Ensure the logged-in user is a banker or admin
-    const banker = await User.findById(req.user.id);
-    if (!banker || (banker.role !== "banker" && banker.role !== "admin")) {
-      return res.status(403).json({ msg: "Access denied" });
-    }
+    const customers = await User.find({ role: "customer" })
+      .select("-password -refreshToken") // Exclude sensitive data
+      .sort({ createdAt: -1 }); // Sort by newest first
 
-    // Fetch all users with the role 'customer'
-    const customers = await User.find({ role: "customer" });
-
-    res.json({ customers });
+    res.json(customers);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).send("Server error");
   }
 };
