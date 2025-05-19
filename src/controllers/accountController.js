@@ -1,5 +1,7 @@
 const Account = require("../models/Account");
 const User = require("../models/User");
+const Transaction = require("../models/Transaction");
+const mongoose = require("mongoose");
 
 exports.createAccount = async (req, res) => {
   const {
@@ -120,23 +122,58 @@ exports.deleteAccount = async (req, res) => {
 
 // Deposit: banker (any), customer (own)
 exports.deposit = async (req, res) => {
-  const { accountNumber, amount } = req.body;
+  const { accountNumber, amount, description } = req.body;
+
   if (!amount || amount <= 0) {
     return res.status(400).json({ msg: "Invalid deposit amount" });
   }
+
   try {
+    // 1. Find account
     let account;
     if (req.user.role === "customer") {
       account = await Account.findOne({ accountNumber, user: req.user.id });
     } else if (req.user.role === "banker") {
       account = await Account.findOne({ accountNumber });
     }
+
     if (!account) {
       return res.status(404).json({ msg: "Account not found" });
     }
+
+    // 2. Create transaction record
+    const transaction = new Transaction({
+      toAccount: account._id,
+      amount,
+      type: "deposit",
+      description: description || "Deposit",
+      performedBy: req.user.id,
+      status: "completed",
+    });
+
+    // 3. Update account balance
     account.balance += amount;
-    await account.save();
-    res.json({ msg: "Deposit successful", account });
+
+    // 4. Save both transaction and account in a session
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      await transaction.save({ session });
+      await account.save({ session });
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+
+    res.json({
+      msg: "Deposit successful",
+      account,
+      transaction,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -145,26 +182,63 @@ exports.deposit = async (req, res) => {
 
 // Withdraw: banker (any), customer (own)
 exports.withdraw = async (req, res) => {
-  const { accountNumber, amount } = req.body;
+  const { accountNumber, amount, description } = req.body;
+
   if (!amount || amount <= 0) {
     return res.status(400).json({ msg: "Invalid withdraw amount" });
   }
+
   try {
+    // 1. Find account
     let account;
     if (req.user.role === "customer") {
       account = await Account.findOne({ accountNumber, user: req.user.id });
     } else if (req.user.role === "banker") {
       account = await Account.findOne({ accountNumber });
     }
+
     if (!account) {
       return res.status(404).json({ msg: "Account not found" });
     }
+
+    // 2. Check sufficient balance
     if (account.balance < amount) {
       return res.status(400).json({ msg: "Insufficient funds" });
     }
+
+    // 3. Create transaction record
+    const transaction = new Transaction({
+      fromAccount: account._id,
+      amount,
+      type: "withdrawal",
+      description: description || "Withdrawal",
+      performedBy: req.user.id,
+      status: "completed",
+    });
+
+    // 4. Update account balance
     account.balance -= amount;
-    await account.save();
-    res.json({ msg: "Withdraw successful", account });
+
+    // 5. Save both transaction and account in a session
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      await transaction.save({ session });
+      await account.save({ session });
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+
+    res.json({
+      msg: "Withdrawal successful",
+      account,
+      transaction,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -173,18 +247,52 @@ exports.withdraw = async (req, res) => {
 
 // Airdrop: admin only
 exports.airdrop = async (req, res) => {
-  const { accountNumber, amount } = req.body;
+  const { accountNumber, amount, description } = req.body;
+
   if (!amount || amount <= 0) {
     return res.status(400).json({ msg: "Invalid airdrop amount" });
   }
+
   try {
+    // 1. Find account
     const account = await Account.findOne({ accountNumber });
     if (!account) {
       return res.status(404).json({ msg: "Account not found" });
     }
+
+    // 2. Create transaction record
+    const transaction = new Transaction({
+      toAccount: account._id,
+      amount,
+      type: "airdrop",
+      description: description || "Airdrop",
+      performedBy: req.user.id,
+      status: "completed",
+    });
+
+    // 3. Update account balance
     account.balance += amount;
-    await account.save();
-    res.json({ msg: "Airdrop successful", account });
+
+    // 4. Save both transaction and account in a session
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      await transaction.save({ session });
+      await account.save({ session });
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+
+    res.json({
+      msg: "Airdrop successful",
+      account,
+      transaction,
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
