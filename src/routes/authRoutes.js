@@ -15,6 +15,7 @@ const router = express.Router();
 
 // Register new customer
 router.post("/register-customer", [
+  authMiddleware,
   validateRegistration,
   activityLogger("CUSTOMER_REGISTRATION", "New customer registration"),
   registerCustomer,
