@@ -143,7 +143,7 @@ exports.deposit = async (req, res) => {
 
     // 2. Create transaction record
     const transaction = new Transaction({
-      toAccount: account._id,
+      account: account._id,
       amount,
       type: "deposit",
       description: description || "Deposit",
@@ -208,7 +208,7 @@ exports.withdraw = async (req, res) => {
 
     // 3. Create transaction record
     const transaction = new Transaction({
-      fromAccount: account._id,
+      account: account._id,
       amount,
       type: "withdrawal",
       description: description || "Withdrawal",
@@ -262,7 +262,7 @@ exports.airdrop = async (req, res) => {
 
     // 2. Create transaction record
     const transaction = new Transaction({
-      toAccount: account._id,
+      account: account._id,
       amount,
       type: "airdrop",
       description: description || "Airdrop",
