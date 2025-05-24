@@ -129,13 +129,8 @@ exports.deposit = async (req, res) => {
   }
 
   try {
-    // 1. Find account
-    let account;
-    if (req.user.role === "customer") {
-      account = await Account.findOne({ accountNumber, user: req.user.id });
-    } else if (req.user.role === "banker") {
-      account = await Account.findOne({ accountNumber });
-    }
+    // 1. Find account without user restriction
+    const account = await Account.findOne({ accountNumber });
 
     if (!account) {
       return res.status(404).json({ msg: "Account not found" });
