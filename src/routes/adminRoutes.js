@@ -1,5 +1,5 @@
 const express = require("express");
-const { createStaff } = require("../controllers/adminController");
+const { createStaff, registerCustomer, getPendingApplications } = require("../controllers/adminController");
 const {
   authMiddleware,
   authorizeRoles,
@@ -14,6 +14,23 @@ router.post(
   authorizeRoles("admin"),
   validateRegistration,
   createStaff
+);
+
+// Register new customer (admin/banker only)
+router.post(
+  "/register-customer",
+  authMiddleware,
+  authorizeRoles("admin", "banker"),
+  validateRegistration,
+  registerCustomer
+);
+
+// Get pending customer applications
+router.get(
+  "/pending-applications",
+  authMiddleware,
+  authorizeRoles("admin", "banker"),
+  getPendingApplications
 );
 
 module.exports = router;
