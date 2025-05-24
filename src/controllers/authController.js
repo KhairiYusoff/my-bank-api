@@ -141,7 +141,17 @@ exports.login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.json({ token, refreshToken });
+    res.json({
+      token,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+      },
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
