@@ -2,9 +2,10 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
+const { notifyNewApplication } = require("../services/websocketService");
 
-// Register Customer
-exports.registerCustomer = async (req, res) => {
+// Public application for new customers
+exports.apply = async (req, res) => {
   // Validate input
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -15,22 +16,8 @@ exports.registerCustomer = async (req, res) => {
     name,
     email,
     password,
-    phoneNumber = "",
-    address = {},
-    dateOfBirth = null,
-    identityNumber = "",
-    job,
-    age,
-    nationality,
-    accountType,
-    employerName,
-    employmentType,
-    salary,
-    purposeOfAccount,
-    maritalStatus,
-    educationLevel,
-    residencyStatus,
-    nextOfKin = {},
+    phoneNumber,
+    identityNumber
   } = req.body;
 
   try {
@@ -52,35 +39,24 @@ exports.registerCustomer = async (req, res) => {
       }
     }
 
-    // Create new user
+    // Create application
     user = new User({
       name,
       email,
       password,
       phoneNumber,
-      address,
-      dateOfBirth,
       identityNumber,
       role: "customer",
-      isVerified: false,
-      job,
-      age,
-      nationality,
-      accountType,
-      employerName,
-      employmentType,
-      salary,
-      purposeOfAccount,
-      maritalStatus,
-      educationLevel,
-      residencyStatus,
-      nextOfKin,
+      isVerified: false
     });
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();
 
+    // Notify staff about new application
+    notifyNewApplication(user);
+
     const response = {
-      msg: "User registered successfully. Please verify your identity.",
+      msg: "Application submitted successfully. A bank representative will contact you.",
       userId: user._id.toString(),
     };
     res.status(201).json(response);

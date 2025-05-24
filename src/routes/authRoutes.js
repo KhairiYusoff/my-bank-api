@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  registerCustomer,
+  apply,
   login,
   refreshToken,
   logout,
@@ -13,12 +13,11 @@ const {
 const { activityLogger } = require("../services/activityService");
 const router = express.Router();
 
-// Register new customer
-router.post("/register-customer", [
-  authMiddleware,
+// Public application for new account
+router.post("/apply", [
   validateRegistration,
-  activityLogger("CUSTOMER_REGISTRATION", "New customer registration"),
-  registerCustomer,
+  activityLogger("CUSTOMER_APPLICATION", "New customer application"),
+  apply
 ]);
 
 // Login
