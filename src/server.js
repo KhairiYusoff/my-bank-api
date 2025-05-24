@@ -1,4 +1,6 @@
 const express = require("express");
+const http = require('http');
+const { initializeSocket } = require('./services/websocketService');
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -26,4 +28,11 @@ app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize WebSocket
+initializeSocket(server);
+
+// Start server
+server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
