@@ -2,23 +2,23 @@ const { check } = require("express-validator");
 
 // Basic validation for customer's initial application
 const validateInitialApplication = [
-  // Only these 3 fields are required
-  check("name", "Name is required").not().isEmpty().trim().escape(),
-  check("email", "Please include a valid email")
+  check("name", "Full name is required")
+    .not()
+    .isEmpty()
+    .trim()
+    .escape()
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Name must be between 2 and 100 characters"),
+  check("email", "Valid email address is required")
     .isEmail()
     .normalizeEmail()
-    .isLength({ max: 255 }),
-  check("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long")
-    .matches(/\\d/)
-    .withMessage("Password must contain a number")
-    .matches(/[A-Z]/)
-    .withMessage("Password must contain an uppercase letter")
-    .matches(/[a-z]/)
-    .withMessage("Password must contain a lowercase letter")
-    .matches(/[!@#$%^&*(),.?":{}|<>]/)
-    .withMessage("Password must contain a special character"),
+    .isLength({ max: 255 })
+    .withMessage("Email must not exceed 255 characters"),
+  check("phoneNumber", "Valid phone number is required")
+    .not()
+    .isEmpty()
+    .isMobilePhone("any")
+    .withMessage("Please enter a valid phone number")
 ];
 
 // Full validation for banker registering a customer

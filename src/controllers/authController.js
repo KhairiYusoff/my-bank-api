@@ -12,42 +12,30 @@ exports.apply = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const {
-    name,
-    email,
-    password,
-    phoneNumber,
-    identityNumber
-  } = req.body;
+  const { name, email, phoneNumber } = req.body;
 
   try {
     // Check if user already exists
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
     if (user) {
       return res
         .status(400)
-        .json({ msg: "User with this email already exists" });
+        .json({ 
+          msg: user.email === email 
+            ? "An application with this email already exists"
+            : "An application with this phone number already exists"
+        });
     }
 
-    // If identity number is provided, check if it exists in the DB
-    if (identityNumber) {
-      let existingIdentity = await User.findOne({ identityNumber });
-      if (existingIdentity) {
-        return res
-          .status(400)
-          .json({ msg: "Identity number is already registered" });
-      }
-    }
-
-    // Create application
+    // Create initial application with basic info
     user = new User({
       name,
       email,
-      password,
       phoneNumber,
-      identityNumber,
       role: "customer",
-      isVerified: false
+      isVerified: false,
+      isProfileComplete: false,
+      applicationStatus: "pending" // Track application status
     });
     // Save user to database (Password hashing handled by pre-save hook in User model)
     await user.save();

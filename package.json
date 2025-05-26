@@ -15,7 +15,8 @@
     "jsonwebtoken": "^8.5.1",
     "libphonenumber-js": "^1.11.7",
     "mongoose": "^6.0.12",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.14",

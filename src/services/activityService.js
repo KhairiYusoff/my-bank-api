@@ -6,6 +6,14 @@ const mongoose = require("mongoose");
 // Core activity types with their configurations
 const ACTIVITY_TYPES = {
   // Critical Security Events
+  CUSTOMER_APPLICATION: {
+    severity: "HIGH",
+    getUserId: async (req, data) => {
+      // For applications, we might not have a user ID yet
+      return null;
+    },
+  },
+
   CUSTOMER_REGISTRATION: {
     severity: "HIGH",
     getUserId: async (req, data) => {
@@ -71,7 +79,8 @@ const logActivity = async (req, res, action, details = "") => {
     // Get user ID based on activity type
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
-    if (!userId) {
+    // For some activities like CUSTOMER_APPLICATION, userId might be null
+    if (!userId && action !== 'CUSTOMER_APPLICATION') {
       console.error(`Could not determine user ID for activity: ${action}`);
       return;
     }

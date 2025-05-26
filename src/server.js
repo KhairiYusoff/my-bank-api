@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require('http');
+const cors = require('cors');
 const { initializeSocket } = require('./services/websocketService');
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
@@ -16,6 +17,7 @@ const app = express();
 connectDB();
 
 // Init Middleware
+app.use(cors());
 app.use(express.json({ extended: false }));
 
 // Define Routes

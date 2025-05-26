@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { check } = require("express-validator");
 
 const authMiddleware = async function (req, res, next) {
   const token = req.header("x-auth-token");
@@ -45,40 +44,7 @@ const authorizeRoles = (...allowedRoles) => {
   };
 };
 
-const validateRegistration = [
-  check("name", "Name is required").not().isEmpty().trim().escape(),
-  check("email", "Please include a valid email")
-    .isEmail()
-    .normalizeEmail()
-    .isLength({ max: 255 }),
-  check("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters long")
-    .matches(/\d/)
-    .withMessage("Password must contain a number")
-    .matches(/[A-Z]/)
-    .withMessage("Password must contain an uppercase letter")
-    .matches(/[a-z]/)
-    .withMessage("Password must contain a lowercase letter")
-    .matches(/[!@#$%^&*(),.?":{}|<>]/)
-    .withMessage("Password must contain a special character"),
-  check("phoneNumber")
-    .optional()
-    .isMobilePhone("any")
-    .withMessage("Invalid phone number format"),
-  check("address").optional(),
-  check("dateOfBirth", "Invalid date of birth format")
-    .optional()
-    .isISO8601()
-    .toDate(),
-  check("job", "Job is required").not().isEmpty(),
-  check("age", "Age must be a number").isInt({ min: 18, max: 100 }),
-  check("nationality", "Nationality is required").not().isEmpty(),
-  check("accountType", "Account type is required").not().isEmpty(),
-];
-
 module.exports = {
   authMiddleware,
   authorizeRoles,
-  validateRegistration,
 };

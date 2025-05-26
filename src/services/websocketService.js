@@ -11,26 +11,47 @@ const STAFF_ROLES = ["admin", "banker"];
 const initializeSocket = (server) => {
   io = socketIo(server, {
     cors: {
-      origin: "*", // In production, set this to your frontend URL
-      methods: ["GET", "POST"],
-    },
+      origin: '*',
+      methods: ['GET', 'POST']
+    }
   });
 
   io.on("connection", (socket) => {
-    console.log("New client connected");
+    console.log("New client connected, ID:", socket.id);
+
+    // Handle any message
+    socket.onAny((eventName, ...args) => {
+      console.log('Received event:', eventName, 'with args:', args);
+    });
 
     // Staff authentication
     socket.on("staffAuth", (data) => {
-      if (STAFF_ROLES.includes(data.role)) {
-        // Store staff info
-        connectedStaff.set(socket.id, {
-          _id: data._id,
-          role: data.role,
-        });
+      try {
+        console.log('Received staffAuth with data:', data);
+        
+        // Parse data if it's a string
+        const authData = typeof data === 'string' ? JSON.parse(data) : data;
+        
+        if (STAFF_ROLES.includes(authData.role)) {
+          // Store staff info
+          connectedStaff.set(socket.id, {
+            _id: authData._id,
+            role: authData.role
+          });
 
-        // Join role-specific room
-        socket.join(data.role); // 'admin' or 'banker' room
-        console.log(`${data.role} ${data._id} connected`);
+          socket.join(authData.role);
+          
+          // Send confirmation back to client
+          socket.emit('authSuccess', { message: 'Authentication successful' });
+          
+          console.log(`${authData.role} ${authData._id} connected`);
+        } else {
+          console.log('Invalid role:', authData.role);
+          socket.emit('authError', { message: 'Invalid role' });
+        }
+      } catch (error) {
+        console.error('Error in staffAuth:', error);
+        socket.emit('authError', { message: 'Authentication failed' });
       }
     });
 
