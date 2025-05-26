@@ -6,18 +6,18 @@ const {
   logout,
   checkToken,
 } = require("../controllers/authController");
+const { authMiddleware } = require("../middleware/authMiddleware");
 const {
-  authMiddleware,
-  validateRegistration,
-} = require("../middleware/authMiddleware");
+  validateInitialApplication,
+} = require("../middleware/validationMiddleware");
 const { activityLogger } = require("../services/activityService");
 const router = express.Router();
 
 // Public application for new account
 router.post("/apply", [
-  validateRegistration,
+  validateInitialApplication,
   activityLogger("CUSTOMER_APPLICATION", "New customer application"),
-  apply
+  apply,
 ]);
 
 // Login

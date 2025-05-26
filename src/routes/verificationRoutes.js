@@ -7,11 +7,8 @@ const {
 
 const router = express.Router();
 
-router.post(
-  "/verify",
-  authMiddleware,
-  authorizeRoles("banker", "admin"),
-  verifyUser
-);
+router.use(authMiddleware);
+
+router.post("/verify", authorizeRoles("banker", "admin"), verifyUser);
 
 module.exports = router;

@@ -1,35 +1,46 @@
 const express = require("express");
-const { createStaff, registerCustomer, getPendingApplications } = require("../controllers/adminController");
+const {
+  createStaff,
+  registerCustomer,
+  getPendingApplications,
+} = require("../controllers/adminController");
 const {
   authMiddleware,
   authorizeRoles,
-  validateRegistration,
 } = require("../middleware/authMiddleware");
+const {
+  validateFullRegistration,
+  validateStaffRegistration,
+} = require("../middleware/validationMiddleware");
+const { activityLogger } = require("../services/activityService");
 
 const router = express.Router();
 
+router.use(authMiddleware);
+
+// Create staff (admin only)
 router.post(
   "/create-staff",
-  authMiddleware,
   authorizeRoles("admin"),
-  validateRegistration,
+  validateStaffRegistration,
+  activityLogger("CREATE_STAFF", "Admin creating new staff"),
   createStaff
 );
 
-// Register new customer (admin/banker only)
+// Register a customer (admin/banker only)
 router.post(
   "/register-customer",
-  authMiddleware,
   authorizeRoles("admin", "banker"),
-  validateRegistration,
+  validateFullRegistration, // Full validation for banker registration
+  activityLogger("REGISTER_CUSTOMER", "Staff registering a customer"),
   registerCustomer
 );
 
-// Get pending customer applications
+// Get pending customer applications (admin/banker only)
 router.get(
   "/pending-applications",
-  authMiddleware,
   authorizeRoles("admin", "banker"),
+  activityLogger("VIEW_APPLICATIONS", "Staff viewing pending applications"),
   getPendingApplications
 );
 

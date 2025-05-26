@@ -11,16 +11,18 @@ const {
   getTransactionDetails,
 } = require("../controllers/transactionController");
 
+router.use(authMiddleware);
+
 // Transfer funds between accounts
-router.post("/transfer", authMiddleware, transferFunds);
+router.post("/transfer", transferFunds);
 
 // Get transactions for a specific account
-router.get("/account/:accountNumber", authMiddleware, getAccountTransactions);
+router.get("/account/:accountNumber", getAccountTransactions);
 
 // Get all transactions (admin only)
-router.get("/all", authMiddleware, authorizeRoles("admin"), getAllTransactions);
+router.get("/all", authorizeRoles("admin"), getAllTransactions);
 
 // Get transaction details
-router.get("/:transactionId", authMiddleware, getTransactionDetails);
+router.get("/:transactionId", getTransactionDetails);
 
 module.exports = router;
