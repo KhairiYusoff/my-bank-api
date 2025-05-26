@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:5001', {
+            transports: ['websocket']
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            document.getElementById('status').textContent = 'Connected';
+            
+            // Send auth data
+            socket.emit('staffAuth', {
+                _id: '679a429b56a472decca5b486',
+                role: 'banker'
+            });
+        });
+
+        socket.on('authSuccess', (data) => {
+            console.log('Auth success:', data);
+            document.getElementById('status').textContent = 'Authenticated';
+        });
+
+        socket.on('authError', (data) => {
+            console.log('Auth error:', data);
+            document.getElementById('status').textContent = 'Auth Failed';
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+            document.getElementById('status').textContent = 'Disconnected';
+        });
+
+        socket.on('newApplication', (data) => {
+            console.log('New application:', data);
+            document.getElementById('notifications').innerHTML += 
+                `<div>New application from ${data.application.name}</div>`;
+        });
+    </script>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <div>Status: <span id="status">Not connected</span></div>
+    <div id="notifications"></div>
+</body>
+</html>
