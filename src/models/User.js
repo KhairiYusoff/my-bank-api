@@ -20,7 +20,9 @@ const UserSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
+      required: function() {
+        return this.role === 'customer';
+      },
       unique: true,
       trim: true
     },
