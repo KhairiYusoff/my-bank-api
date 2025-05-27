@@ -4,32 +4,32 @@ const TransactionSchema = new mongoose.Schema({
   account: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Account",
-    required: true,
+    required: true
   },
   type: {
     type: String,
     enum: ["deposit", "withdrawal", "airdrop", "transfer"],
-    required: true,
+    required: true
   },
   amount: {
     type: Number,
-    required: true,
+    required: true
   },
   description: String,
   status: {
     type: String,
     enum: ["pending", "completed", "failed"],
-    default: "completed",
+    default: "completed"
   },
   performedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: true
   },
   date: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
 });
 
 module.exports = mongoose.model("Transaction", TransactionSchema);

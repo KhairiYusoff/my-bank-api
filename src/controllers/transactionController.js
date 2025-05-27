@@ -25,15 +25,23 @@ exports.transferFunds = async (req, res) => {
       return res.status(400).json({ msg: "Insufficient funds" });
     }
 
-    // 2. Create transaction record
-    const transaction = new Transaction({
-      fromAccount: fromAccount._id,
-      toAccount: toAccount._id,
-      amount,
+    // 2. Create transaction records (one for each account)
+    const fromTransaction = new Transaction({
+      account: fromAccount._id,
+      amount: -amount,
       type: "transfer",
-      description: description || "Transfer",
+      description: `Transfer to ${toAccountNumber}`,
       performedBy: req.user.id,
-      status: "completed",
+      status: "completed"
+    });
+
+    const toTransaction = new Transaction({
+      account: toAccount._id,
+      amount: amount,
+      type: "transfer",
+      description: `Transfer from ${fromAccountNumber}`,
+      performedBy: req.user.id,
+      status: "completed"
     });
 
     // 3. Update account balances
@@ -45,7 +53,8 @@ exports.transferFunds = async (req, res) => {
     session.startTransaction();
 
     try {
-      await transaction.save({ session });
+      await fromTransaction.save({ session });
+      await toTransaction.save({ session });
       await fromAccount.save({ session });
       await toAccount.save({ session });
       await session.commitTransaction();
@@ -58,9 +67,9 @@ exports.transferFunds = async (req, res) => {
 
     res.json({
       msg: "Transfer successful",
-      transaction,
+      transactions: [fromTransaction, toTransaction],
       fromAccount,
-      toAccount,
+      toAccount
     });
   } catch (err) {
     console.error(err.message);
@@ -89,24 +98,21 @@ exports.getAccountTransactions = async (req, res) => {
     }
 
     // 3. Build query
-    const query = {
-      $or: [{ fromAccount: account._id }, { toAccount: account._id }],
-    };
+    const query = { account: account._id };
 
     if (type) query.type = type;
     if (startDate || endDate) {
-      query.createdAt = {};
-      if (startDate) query.createdAt.$gte = new Date(startDate);
-      if (endDate) query.createdAt.$lte = new Date(endDate);
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate);
+      if (endDate) query.date.$lte = new Date(endDate);
     }
 
     // 4. Get transactions with pagination
     const transactions = await Transaction.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ date: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate("fromAccount", "accountNumber")
-      .populate("toAccount", "accountNumber")
+      .populate("account", "accountNumber")
       .populate("performedBy", "name role");
 
     // 5. Get total count for pagination
@@ -143,11 +149,10 @@ exports.getAllTransactions = async (req, res) => {
 
     // 2. Get transactions with pagination
     const transactions = await Transaction.find(query)
-      .sort({ createdAt: -1 })
+      .sort({ date: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate("fromAccount", "accountNumber")
-      .populate("toAccount", "accountNumber")
+      .populate("account", "accountNumber")
       .populate("performedBy", "name role");
 
     // 3. Get total count for pagination
@@ -173,31 +178,31 @@ exports.getTransactionDetails = async (req, res) => {
   const { transactionId } = req.params;
 
   try {
-    const transaction = await Transaction.findById(transactionId)
-      .populate("fromAccount", "accountNumber user")
-      .populate("toAccount", "accountNumber user")
-      .populate("performedBy", "name role");
-
+    // First get the transaction without populating (faster for permission check)
+    const transaction = await Transaction.findById(transactionId);
+    
     if (!transaction) {
       return res.status(404).json({ msg: "Transaction not found" });
     }
 
-    // Check permissions
+    // For customers, verify ownership first
     if (req.user.role === "customer") {
-      const fromAccount = transaction.fromAccount;
-      const toAccount = transaction.toAccount;
-
-      if (
-        fromAccount &&
-        fromAccount.user.toString() !== req.user.id &&
-        toAccount &&
-        toAccount.user.toString() !== req.user.id
-      ) {
+      const account = await Account.findOne({
+        _id: transaction.account,
+        user: req.user.id
+      });
+      
+      if (!account) {
         return res.status(403).json({ msg: "Access denied" });
       }
     }
 
-    res.json(transaction);
+    // If we get here, user has permission - now get full details
+    const populatedTransaction = await Transaction.findById(transactionId)
+      .populate("account", "accountNumber user")
+      .populate("performedBy", "name role");
+
+    res.json(populatedTransaction);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
