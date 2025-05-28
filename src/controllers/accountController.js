@@ -184,24 +184,23 @@ exports.withdraw = async (req, res) => {
   }
 
   try {
-    // 1. Find account
-    let account;
-    if (req.user.role === "customer") {
-      account = await Account.findOne({ accountNumber, user: req.user.id });
-    } else if (req.user.role === "banker") {
-      account = await Account.findOne({ accountNumber });
-    }
+    const query = { accountNumber };
+    // 1. Only allow customer and banker to withdraw from their OWN account
+    // 2. No one shall be able to withdraw from other account
+    query.user = req.user.id;
+
+    const account = await Account.findOne(query);
 
     if (!account) {
       return res.status(404).json({ msg: "Account not found" });
     }
 
-    // 2. Check sufficient balance
+    // 3. Check sufficient balance
     if (account.balance < amount) {
       return res.status(400).json({ msg: "Insufficient funds" });
     }
 
-    // 3. Create transaction record
+    // 4. Create transaction record
     const transaction = new Transaction({
       account: account._id,
       amount,
@@ -211,10 +210,10 @@ exports.withdraw = async (req, res) => {
       status: "completed",
     });
 
-    // 4. Update account balance
+    // 5. Update account balance
     account.balance -= amount;
 
-    // 5. Save both transaction and account in a session
+    // 6. Save both transaction and account in a session
     const session = await mongoose.startSession();
     session.startTransaction();
 
