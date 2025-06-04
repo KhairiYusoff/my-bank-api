@@ -131,14 +131,32 @@ exports.getPendingApplications = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Find all unverified customers
-    const applications = await User.find({ 
+    let applications = await User.find({ 
       isVerified: false,
       role: 'customer'
     })
     .select('name email phoneNumber identityNumber createdAt')
     .sort({ [sortBy]: order })
     .skip(skip)
-    .limit(limit);
+    .limit(limit)
+    .lean();
+
+    // Decode HTML entities in the response
+    const decodeHtmlEntities = (str) => {
+      if (!str) return str;
+      return str
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'")
+        .replace(/&#x2F;/g, '/');
+    };
+
+    applications = applications.map(app => ({
+      ...app,
+      name: decodeHtmlEntities(app.name)
+    }));
 
     // Get total count for pagination
     const total = await User.countDocuments({ 
