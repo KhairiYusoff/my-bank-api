@@ -13,6 +13,7 @@ const ActivityLogSchema = new mongoose.Schema(
       required: true,
       enum: [
         // Critical Security Events
+        "CUSTOMER_APPLICATION",
         "CUSTOMER_REGISTRATION",
         "LOGIN",
         "LOGOUT",

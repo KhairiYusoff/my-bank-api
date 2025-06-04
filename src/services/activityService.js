@@ -9,7 +9,15 @@ const ACTIVITY_TYPES = {
   CUSTOMER_APPLICATION: {
     severity: "HIGH",
     getUserId: async (req, data) => {
-      // For applications, we might not have a user ID yet
+      // For new applications, the user ID will be in the response data
+      if (data?.userId) {
+        return new mongoose.Types.ObjectId(data.userId);
+      }
+      // Try to find user by email if not in response
+      if (req.body?.email) {
+        const user = await User.findOne({ email: req.body.email });
+        return user?._id;
+      }
       return null;
     },
   },
