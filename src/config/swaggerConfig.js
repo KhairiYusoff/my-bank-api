@@ -10,11 +10,11 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
+        url: 'http://localhost:5001/api',
         description: 'Development server (V1)',
       },
       {
-        url: 'http://localhost:5000/api/v2',
+        url: 'http://localhost:5001/api/v2',
         description: 'Development server (V2)',
       },
     ],
