@@ -73,6 +73,16 @@ const ACTIVITY_TYPES = {
     severity: "CRITICAL",
     getUserId: (req) => req.user.id,
   },
+
+  // V2 Onboarding Flow
+  APPROVE_APPLICATION: {
+    severity: 'HIGH',
+    getUserId: (req) => req.params.userId,
+  },
+  VERIFY_CUSTOMER: {
+    severity: 'HIGH',
+    getUserId: (req) => req.params.userId,
+  },
 };
 
 // Main logging function

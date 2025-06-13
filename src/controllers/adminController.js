@@ -26,6 +26,7 @@ exports.createStaff = async (req, res) => {
       password,
       role,
       isVerified: true,
+      isProfileComplete: true  // Staff should have complete profiles
     });
 
     await user.save();
@@ -33,90 +34,6 @@ exports.createStaff = async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: "Server error. Please try again later." });
-  }
-};
-
-// Register new customer (admin/banker only)
-exports.registerCustomer = async (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    phoneNumber = "",
-    address = {},
-    dateOfBirth = null,
-    identityNumber = "",
-    job,
-    age,
-    nationality,
-    accountType,
-    employerName,
-    employmentType,
-    salary,
-    purposeOfAccount,
-    maritalStatus,
-    educationLevel,
-    residencyStatus,
-    nextOfKin = {}
-  } = req.body;
-
-  try {
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: "User with this email already exists" });
-    }
-
-    // If identity number is provided, check if it exists
-    if (identityNumber) {
-      let existingIdentity = await User.findOne({ identityNumber });
-      if (existingIdentity) {
-        return res.status(400).json({ msg: "Identity number is already registered" });
-      }
-    }
-
-    // Create new user
-    user = new User({
-      name,
-      email,
-      password,
-      phoneNumber,
-      address,
-      dateOfBirth,
-      identityNumber,
-      role: "customer",
-      isVerified: false,
-      job,
-      age,
-      nationality,
-      accountType,
-      employerName,
-      employmentType,
-      salary,
-      purposeOfAccount,
-      maritalStatus,
-      educationLevel,
-      residencyStatus,
-      nextOfKin
-    });
-
-    await user.save();
-
-    res.status(201).json({
-      msg: "Customer registered successfully. Pending verification.",
-      userId: user._id.toString()
-    });
-  } catch (err) {
-    console.error("Registration error:", err.message);
-
-    if (err.name === "ValidationError") {
-      const validationErrors = Object.values(err.errors).map(error => error.message);
-      return res.status(400).json({ msg: "Invalid user data", errors: validationErrors });
-    } else if (err.code === 11000) {
-      return res.status(400).json({ msg: "Email already in use" });
-    } else {
-      res.status(500).json({ msg: "Server error. Please try again later." });
-    }
   }
 };
 

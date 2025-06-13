@@ -1,7 +1,6 @@
 const express = require("express");
 const {
   createStaff,
-  registerCustomer,
   getPendingApplications,
 } = require("../controllers/adminController");
 const {
@@ -9,7 +8,6 @@ const {
   authorizeRoles,
 } = require("../middleware/authMiddleware");
 const {
-  validateFullRegistration,
   validateStaffRegistration,
 } = require("../middleware/validationMiddleware");
 const { activityLogger } = require("../services/activityService");
@@ -27,14 +25,6 @@ router.post(
   createStaff
 );
 
-// Register a customer (admin/banker only)
-router.post(
-  "/register-customer",
-  authorizeRoles("admin", "banker"),
-  validateFullRegistration, // Full validation for banker registration
-  activityLogger("REGISTER_CUSTOMER", "Staff registering a customer"),
-  registerCustomer
-);
 
 // Get pending customer applications (admin/banker only)
 router.get(
