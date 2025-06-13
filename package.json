@@ -4,7 +4,8 @@
   "description": "Backend for myBank application",
   "main": "src/server.js",
   "scripts": {
-    "start": "nodemon --inspect src/server.js"
+    "start": "node src/server.js",
+    "dev": "nodemon --inspect src/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
