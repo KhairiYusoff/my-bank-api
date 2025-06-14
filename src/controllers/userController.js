@@ -1,16 +1,17 @@
 const User = require("../models/User");
 const ActivityLog = require("../models/ActivityLog");
 const bcrypt = require("bcryptjs");
+const { success, error } = require("../utils/response");
 
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return error(res, { message: "User not found", statusCode: 404 });
     }
-    res.json(user);
+    return success(res, { data: user });
   } catch (err) {
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -72,9 +73,9 @@ exports.updateProfile = async (req, res) => {
     delete userResponse.password;
     delete userResponse.refreshToken;
 
-    res.json(userResponse);
+    return success(res, { message: "Profile updated", data: userResponse });
   } catch (err) {
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -86,7 +87,7 @@ exports.changePassword = async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Current password is incorrect" });
+      return error(res, { message: "Current password is incorrect", statusCode: 400 });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -94,9 +95,9 @@ exports.changePassword = async (req, res) => {
 
     await user.save();
 
-    res.json({ msg: "Password changed successfully" });
+    return success(res, { message: "Password changed successfully" });
   } catch (err) {
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -105,14 +106,14 @@ exports.deleteAccount = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return error(res, { message: "User not found", statusCode: 404 });
     }
 
     await User.findByIdAndDelete(req.user.id);
-    res.json({ msg: "User account deleted successfully" });
+    return success(res, { message: "User account deleted successfully" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -167,36 +168,32 @@ exports.getUserActivity = async (req, res) => {
     // Format the response
     const formattedActivities = activities.map((activity) => activity.format());
 
-    res.json({
-      activities: formattedActivities,
-      pagination: {
-        total,
+    return success(res, {
+      message: "User activities fetched",
+      data: formattedActivities,
+      meta: {
         page: parseInt(page),
         limit: parseInt(limit),
+        total,
         pages: Math.ceil(total / parseInt(limit)),
+        filters: {
+          action,
+          status,
+          severity,
+          startDate,
+          endDate,
+          sortBy: sortField,
+          sortOrder,
+        },
       },
-      filters: {
-        action,
-        status,
-        severity,
-        startDate,
-        endDate,
-        sortBy: sortField,
-        sortOrder,
-      },
+
     });
   } catch (err) {
     console.error("Error in getUserActivity:", err);
     if (err.name === "CastError") {
-      return res.status(400).json({
-        msg: "Invalid query parameters",
-        error: err.message,
-      });
+      return error(res, { message: "Invalid query parameters", statusCode: 400, errors: err.message });
     }
-    res.status(500).json({
-      msg: "Server error",
-      error: err.message,
-    });
+    return error(res, { message: "Server error", statusCode: 500, errors: err.message });
   }
 };
 
@@ -207,31 +204,49 @@ exports.updatePreferences = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return error(res, { message: "User not found", statusCode: 404 });
     }
 
     user.preferences = { ...user.preferences, theme, language, notifications };
     await user.save();
 
-    res.json({
-      msg: "User preferences updated successfully",
-      preferences: user.preferences,
-    });
+    return success(res, { message: "User preferences updated successfully", data: { preferences: user.preferences } });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
 exports.getAllCustomers = async (req, res) => {
   try {
-    const customers = await User.find({ role: "customer" })
-      .select("-password -refreshToken") // Exclude sensitive data
-      .sort({ createdAt: -1 }); // Sort by newest first
+    const { page = 1, limit = 20, sort = "desc" } = req.query;
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
 
-    res.json(customers);
+    const [total, customers] = await Promise.all([
+      User.countDocuments({ role: "customer" }),
+      User.find({ role: "customer" })
+        .select("-password -refreshToken")
+        .sort({ createdAt: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit),
+    ]);
+
+    const totalPages = Math.ceil(total / numericLimit);
+
+    return success(res, {
+      message: "Customers fetched",
+      data: customers,
+      meta: {
+        page: numericPage,
+        limit: numericLimit,
+        total,
+        pages: totalPages,
+      },
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
