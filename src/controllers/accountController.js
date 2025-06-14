@@ -2,6 +2,7 @@ const Account = require("../models/Account");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
+const { success, error } = require("../utils/response");
 
 exports.createAccount = async (req, res) => {
   const {
@@ -23,9 +24,7 @@ exports.createAccount = async (req, res) => {
     });
 
     if (!customer) {
-      return res.status(404).json({
-        msg: "Customer not found or is not a customer",
-      });
+      return error(res, { message: "Customer not found or is not a customer", statusCode: 404 });
     }
 
     // 2. Create the account
@@ -45,36 +44,120 @@ exports.createAccount = async (req, res) => {
     });
 
     const account = await newAccount.save();
-    res.json(account);
+    return success(res, { message: "Account created", data: account, statusCode: 201 });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
+// Get accounts for the authenticated user with pagination, filtering & sorting
 exports.getAccounts = async (req, res) => {
   try {
-    const accounts = await Account.find({ user: req.user.id });
+    // Parse query params
+    const {
+      page = 1,
+      limit = 20,
+      sort = "desc",
+      accountType,
+      branch,
+      status,
+      currency,
+    } = req.query;
+
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
+
+    // Build filter
+    const filter = { user: req.user.id };
+    if (accountType) filter.accountType = accountType;
+    if (branch) filter.branch = branch;
+    if (status) filter.status = status;
+    if (currency) filter.currency = currency;
+
+    // Query DB
+    const [total, accounts] = await Promise.all([
+      Account.countDocuments(filter),
+      Account.find(filter)
+        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit),
+    ]);
 
     if (!accounts || accounts.length === 0) {
-      return res.status(404).json({ msg: "No accounts found for this user" });
+      return error(res, { message: "No accounts found for this user", statusCode: 404 });
     }
 
-    res.json(accounts);
+    const totalPages = Math.ceil(total / numericLimit);
+
+    return success(res, {
+      message: "Accounts fetched",
+      data: accounts,
+      meta: {
+        page: numericPage,
+        limit: numericLimit,
+        total,
+        pages: totalPages,
+      },
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
 // Get all accounts (admin only)
+// Get all accounts (admin only) with pagination, filtering & sorting
 exports.getAllAccounts = async (req, res) => {
   try {
-    const accounts = await Account.find().populate("user", "name email role");
-    res.json(accounts);
+    const {
+      page = 1,
+      limit = 20,
+      sort = "desc",
+      accountType,
+      branch,
+      status,
+      currency,
+      userId,
+    } = req.query;
+
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
+
+    // Build dynamic filter for admin
+    const filter = {};
+    if (accountType) filter.accountType = accountType;
+    if (branch) filter.branch = branch;
+    if (status) filter.status = status;
+    if (currency) filter.currency = currency;
+    if (userId) filter.user = userId; // allow admin to filter by customer id
+
+    const [total, accounts] = await Promise.all([
+      Account.countDocuments(filter),
+      Account.find(filter)
+        .populate("user", "name email role")
+        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit),
+    ]);
+
+    const totalPages = Math.ceil(total / numericLimit);
+
+    return success(res, {
+      message: "Accounts fetched",
+      data: accounts,
+      meta: {
+        page: numericPage,
+        limit: numericLimit,
+        total,
+        pages: totalPages,
+      },
+    });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -85,13 +168,13 @@ exports.getBalance = async (req, res) => {
     const account = await Account.findOne({ accountNumber, user: req.user.id });
 
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
-    res.json({ balance: account.balance });
+    return success(res, { data: { balance: account.balance } });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -102,21 +185,19 @@ exports.deleteAccount = async (req, res) => {
     const account = await Account.findOne({ accountNumber });
 
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     if (account.balance !== 0) {
-      return res
-        .status(400)
-        .json({ msg: "Account balance must be 0 to delete" });
+      return error(res, { message: "Account balance must be 0 to delete", statusCode: 400 });
     }
 
     await Account.deleteOne({ accountNumber });
 
-    res.json({ msg: "Account closed successfully" });
+    return success(res, { message: "Account closed successfully." });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -125,7 +206,7 @@ exports.deposit = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
   if (!amount || amount <= 0) {
-    return res.status(400).json({ msg: "Invalid deposit amount" });
+    return error(res, { message: "Invalid deposit amount", statusCode: 400 });
   }
 
   try {
@@ -133,7 +214,7 @@ exports.deposit = async (req, res) => {
     const account = await Account.findOne({ accountNumber });
 
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     // 2. Create transaction record
@@ -164,14 +245,10 @@ exports.deposit = async (req, res) => {
       session.endSession();
     }
 
-    res.json({
-      msg: "Deposit successful",
-      account,
-      transaction,
-    });
+    return success(res, { message: "Deposit successful", data: { account, transaction } });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -180,7 +257,7 @@ exports.withdraw = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
   if (!amount || amount <= 0) {
-    return res.status(400).json({ msg: "Invalid withdraw amount" });
+    return error(res, { message: "Invalid withdraw amount", statusCode: 400 });
   }
 
   try {
@@ -192,12 +269,12 @@ exports.withdraw = async (req, res) => {
     const account = await Account.findOne(query);
 
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     // 3. Check sufficient balance
     if (account.balance < amount) {
-      return res.status(400).json({ msg: "Insufficient funds" });
+      return error(res, { message: "Insufficient funds", statusCode: 400 });
     }
 
     // 4. Create transaction record
@@ -228,14 +305,10 @@ exports.withdraw = async (req, res) => {
       session.endSession();
     }
 
-    res.json({
-      msg: "Withdrawal successful",
-      account,
-      transaction,
-    });
+    return success(res, { message: "Withdrawal successful", data: { account, transaction } });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -244,14 +317,14 @@ exports.airdrop = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
   if (!amount || amount <= 0) {
-    return res.status(400).json({ msg: "Invalid airdrop amount" });
+    return error(res, { message: "Invalid airdrop amount", statusCode: 400 });
   }
 
   try {
     // 1. Find account
     const account = await Account.findOne({ accountNumber });
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     // 2. Create transaction record
@@ -282,13 +355,9 @@ exports.airdrop = async (req, res) => {
       session.endSession();
     }
 
-    res.json({
-      msg: "Airdrop successful",
-      account,
-      transaction,
-    });
+    return success(res, { message: "Airdrop successful", data: { account, transaction } });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
