@@ -84,6 +84,7 @@ exports.getPendingApplications = async (req, res) => {
       data: applications,
       meta: {
         page: page,
+        limit: limit,
         pages: Math.ceil(total / limit),
         total: total,
         hasMore: skip + applications.length < total
