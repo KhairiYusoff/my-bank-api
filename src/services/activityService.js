@@ -77,11 +77,23 @@ const ACTIVITY_TYPES = {
   // V2 Onboarding Flow
   APPROVE_APPLICATION: {
     severity: 'HIGH',
-    getUserId: (req) => req.params.userId,
+    getUserId: (req) => req.user?.id,
   },
   VERIFY_CUSTOMER: {
     severity: 'HIGH',
-    getUserId: (req) => req.params.userId,
+    getUserId: (req) => req.user.id
+  },
+  
+  // User completes their profile
+  PROFILE_COMPLETED: {
+    severity: 'HIGH',
+    getUserId: (req) => req.user?.id || req.body.userId
+  },
+  
+  // Admin Actions
+  VIEW_APPLICATIONS: {
+    severity: 'LOW',
+    getUserId: (req) => req.user?.id
   },
 };
 
