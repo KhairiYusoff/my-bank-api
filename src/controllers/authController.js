@@ -3,13 +3,18 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const { notifyNewApplication } = require("../services/websocketService");
+const { success, error } = require("../utils/response");
 
 // Public application for new customers
 exports.apply = async (req, res) => {
   // Validate input
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+  const errorsResult = validationResult(req);
+  if (!errorsResult.isEmpty()) {
+    return error(res, {
+      message: "Validation failed",
+      errors: errorsResult.array(),
+      statusCode: 400,
+    });
   }
 
   const { name, email, phoneNumber } = req.body;
@@ -18,12 +23,11 @@ exports.apply = async (req, res) => {
     // Check if user already exists
     let user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
     if (user) {
-      return res.status(400).json({
-        msg:
-          user.email === email
-            ? "An application with this email already exists"
-            : "An application with this phone number already exists",
-      });
+      const duplicateMsg =
+        user.email === email
+          ? "An application with this email already exists"
+          : "An application with this phone number already exists";
+      return error(res, { message: duplicateMsg, statusCode: 400 });
     }
 
     // Create initial application with basic info
@@ -42,11 +46,11 @@ exports.apply = async (req, res) => {
     // Notify staff about new application
     notifyNewApplication(user);
 
-    const response = {
-      msg: "Application submitted successfully. A bank representative will contact you.",
-      userId: user._id.toString(),
-    };
-    res.status(201).json(response);
+    return success(res, {
+      message: "Application submitted successfully. A bank representative will contact you.",
+      data: { userId: user._id.toString() },
+      statusCode: 201,
+    });
   } catch (err) {
     console.error("Registration error:", err.message);
 
@@ -55,15 +59,17 @@ exports.apply = async (req, res) => {
       const validationErrors = Object.values(err.errors).map(
         (error) => error.message
       );
-      return res
-        .status(400)
-        .json({ msg: "Invalid user data", errors: validationErrors });
+      return error(res, {
+        message: "Invalid user data",
+        errors: validationErrors,
+        statusCode: 400,
+      });
     } else if (err.code === 11000) {
       // Handle duplicate key error (likely email)
-      return res.status(400).json({ msg: "Email already in use" });
+      return error(res, { message: "Email already in use", statusCode: 400 });
     } else {
       // Handle other types of errors
-      res.status(500).json({ msg: "Server error. Please try again later." });
+      return error(res, { message: "Server error. Please try again later.", statusCode: 500 });
     }
   }
 };
@@ -74,18 +80,16 @@ exports.login = async (req, res) => {
   try {
     let user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return error(res, { message: "Invalid credentials", statusCode: 400 });
     }
 
     if (!user.isVerified) {
-      return res
-        .status(403)
-        .json({ msg: "User is not verified. Please complete verification." });
+      return error(res, { message: "User is not verified. Please complete verification.", statusCode: 403 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Invalid credentials" });
+      return error(res, { message: "Invalid credentials", statusCode: 400 });
     }
 
     const payload = { user: { id: user.id } };
@@ -104,15 +108,18 @@ exports.login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    res.json({
-      token,
-      refreshToken,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isVerified: user.isVerified,
+    return success(res, {
+      message: "Login successful",
+      data: {
+        token,
+        refreshToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isVerified: user.isVerified,
+        },
       },
     });
   } catch (err) {
@@ -125,7 +132,7 @@ exports.login = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
-    return res.status(401).json({ msg: "No refresh token provided" });
+    return error(res, { message: "No refresh token provided", statusCode: 401 });
   }
 
   try {
@@ -134,7 +141,7 @@ exports.refreshToken = async (req, res) => {
     const user = await User.findById(decoded.user.id);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return error(res, { message: "User not found", statusCode: 404 });
     }
 
     // Generate a new access token (JWT)
@@ -143,9 +150,9 @@ exports.refreshToken = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.json({ token: newToken });
+    return success(res, { message: "Token refreshed", data: { token: newToken } });
   } catch (err) {
-    res.status(401).json({ msg: "Invalid refresh token" });
+    return error(res, { message: "Invalid refresh token", statusCode: 401 });
   }
 };
 
@@ -157,7 +164,7 @@ exports.logout = async (req, res) => {
       user.refreshToken = null;
       await user.save();
     }
-    res.json({ msg: "Logged out successfully." });
+    return success(res, { message: "Logged out successfully." });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
@@ -166,5 +173,5 @@ exports.logout = async (req, res) => {
 
 // Check token validity
 exports.checkToken = async (req, res) => {
-  res.json({ msg: "Token is valid", user: req.user });
+  return success(res, { message: "Token is valid", data: { user: req.user } });
 };
