@@ -29,6 +29,14 @@ const ActivityLogSchema = new mongoose.Schema(
         // Critical Account Events
         "ACCOUNT_CREATION",
         "ACCOUNT_CLOSURE",
+
+        // V2 Onboarding Flow
+        "APPROVE_APPLICATION",
+        "VERIFY_CUSTOMER",
+        "PROFILE_COMPLETED",
+        
+        // Admin Actions
+        "VIEW_APPLICATIONS",
       ],
     },
     details: {
@@ -50,7 +58,7 @@ const ActivityLogSchema = new mongoose.Schema(
     },
     severity: {
       type: String,
-      enum: ["MEDIUM", "HIGH", "CRITICAL"],
+      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
       default: "MEDIUM",
     },
     metadata: {
