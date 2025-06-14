@@ -1,12 +1,13 @@
 const Account = require("../models/Account");
 const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
+const { success, error } = require("../utils/response");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
 
   if (!amount || amount <= 0) {
-    return res.status(400).json({ msg: "Invalid transfer amount" });
+    return error(res, { message: "Invalid transfer amount", statusCode: 400 });
   }
 
   try {
@@ -18,11 +19,11 @@ exports.transferFunds = async (req, res) => {
     const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
 
     if (!fromAccount || !toAccount) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     if (fromAccount.balance < amount) {
-      return res.status(400).json({ msg: "Insufficient funds" });
+      return error(res, { message: "Insufficient funds", statusCode: 400 });
     }
 
     // 2. Create transaction records (one for each account)
@@ -65,15 +66,15 @@ exports.transferFunds = async (req, res) => {
       session.endSession();
     }
 
-    res.json({
-      msg: "Transfer successful",
+    return success(res, {
+      message: "Transfer successful",
       transactions: [fromTransaction, toTransaction],
       fromAccount,
       toAccount
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -86,7 +87,7 @@ exports.getAccountTransactions = async (req, res) => {
     // 1. Find the account
     const account = await Account.findOne({ accountNumber });
     if (!account) {
-      return res.status(404).json({ msg: "Account not found" });
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
     // 2. Check permissions
@@ -94,7 +95,7 @@ exports.getAccountTransactions = async (req, res) => {
       req.user.role === "customer" &&
       account.user.toString() !== req.user.id
     ) {
-      return res.status(403).json({ msg: "Access denied" });
+      return error(res, { message: "Access denied", statusCode: 403 });
     }
 
     // 3. Build query
@@ -118,9 +119,9 @@ exports.getAccountTransactions = async (req, res) => {
     // 5. Get total count for pagination
     const total = await Transaction.countDocuments(query);
 
-    res.json({
+    return success(res, {
       transactions,
-      pagination: {
+      meta: {
         total,
         page: parseInt(page),
         limit: parseInt(limit),
@@ -129,7 +130,7 @@ exports.getAccountTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -158,9 +159,9 @@ exports.getAllTransactions = async (req, res) => {
     // 3. Get total count for pagination
     const total = await Transaction.countDocuments(query);
 
-    res.json({
+    return success(res, {
       transactions,
-      pagination: {
+      meta: {
         total,
         page: parseInt(page),
         limit: parseInt(limit),
@@ -169,7 +170,7 @@ exports.getAllTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
@@ -182,7 +183,7 @@ exports.getTransactionDetails = async (req, res) => {
     const transaction = await Transaction.findById(transactionId);
     
     if (!transaction) {
-      return res.status(404).json({ msg: "Transaction not found" });
+      return error(res, { message: "Transaction not found", statusCode: 404 });
     }
 
     // For customers, verify ownership first
@@ -193,7 +194,7 @@ exports.getTransactionDetails = async (req, res) => {
       });
       
       if (!account) {
-        return res.status(403).json({ msg: "Access denied" });
+        return error(res, { message: "Access denied", statusCode: 403 });
       }
     }
 
@@ -202,9 +203,9 @@ exports.getTransactionDetails = async (req, res) => {
       .populate("account", "accountNumber user")
       .populate("performedBy", "name role");
 
-    res.json(populatedTransaction);
+    return success(res, { data: populatedTransaction });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
