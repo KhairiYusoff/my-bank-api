@@ -68,9 +68,11 @@ exports.transferFunds = async (req, res) => {
 
     return success(res, {
       message: "Transfer successful",
-      transactions: [fromTransaction, toTransaction],
-      fromAccount,
-      toAccount
+      data: {
+        transactions: [fromTransaction, toTransaction],
+        fromAccount,
+        toAccount
+      }
     });
   } catch (err) {
     console.error(err.message);
@@ -120,7 +122,7 @@ exports.getAccountTransactions = async (req, res) => {
     const total = await Transaction.countDocuments(query);
 
     return success(res, {
-      transactions,
+      data: transactions,
       meta: {
         total,
         page: parseInt(page),
@@ -160,7 +162,7 @@ exports.getAllTransactions = async (req, res) => {
     const total = await Transaction.countDocuments(query);
 
     return success(res, {
-      transactions,
+      data: transactions,
       meta: {
         total,
         page: parseInt(page),
