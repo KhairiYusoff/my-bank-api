@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const { success, error } = require("../utils/response");
 
 // Only Admins Can Create Other Admins & Bankers
 exports.createStaff = async (req, res) => {
@@ -8,16 +9,14 @@ exports.createStaff = async (req, res) => {
   // Ensure only valid roles can be assigned
   const validRoles = ["admin", "banker"];
   if (!validRoles.includes(role)) {
-    return res.status(400).json({ msg: "Invalid role assignment" });
+    return error(res, { message: "Invalid role assignment", statusCode: 400 });
   }
 
   try {
     // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
-      return res
-        .status(400)
-        .json({ msg: "User with this email already exists" });
+      return error(res, { message: "User with this email already exists", statusCode: 400 });
     }
 
     user = new User({
@@ -30,10 +29,10 @@ exports.createStaff = async (req, res) => {
     });
 
     await user.save();
-    res.status(201).json({ msg: `${role} created successfully.` });
+    return success(res, { message: `${role} created successfully.`, statusCode: 201 });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    return error(res, { message: "Server error. Please try again later.", statusCode: 500 });
   }
 };
 
@@ -81,17 +80,17 @@ exports.getPendingApplications = async (req, res) => {
       role: 'customer'
     });
 
-    res.json({
-      applications,
-      pagination: {
-        currentPage: page,
-        totalPages: Math.ceil(total / limit),
-        totalApplications: total,
+    return success(res, {
+      data: applications,
+      meta: {
+        page: page,
+        pages: Math.ceil(total / limit),
+        total: total,
         hasMore: skip + applications.length < total
       }
     });
   } catch (err) {
     console.error('Error fetching pending applications:', err.message);
-    res.status(500).json({ msg: 'Server error. Please try again later.' });
+    return error(res, { message: "Server error. Please try again later.", statusCode: 500 });
   }
 };
