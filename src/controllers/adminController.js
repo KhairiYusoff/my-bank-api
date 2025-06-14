@@ -86,8 +86,7 @@ exports.getPendingApplications = async (req, res) => {
         page: page,
         limit: limit,
         pages: Math.ceil(total / limit),
-        total: total,
-        hasMore: skip + applications.length < total
+        total: total
       }
     });
   } catch (err) {
