@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require('http');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const { initializeSocket } = require('./services/websocketService');
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
@@ -27,6 +28,7 @@ connectDB();
 
 // Init Middleware
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json({ extended: false }));
 
 // Define Routes

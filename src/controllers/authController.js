@@ -93,13 +93,10 @@ exports.login = async (req, res) => {
     }
 
     const payload = { user: { id: user.id } };
-
-    // Generate access token (JWT)
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // Generate refresh token and store in database
     const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
       expiresIn: "7d",
     });
@@ -108,11 +105,24 @@ exports.login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // Set HttpOnly cookies
+    res.cookie('access_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000 // 1 hour
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 604800000 // 7 days
+    });
+
     return success(res, {
       message: "Login successful",
       data: {
-        token,
-        refreshToken,
         user: {
           id: user._id,
           name: user.name,
@@ -130,7 +140,7 @@ exports.login = async (req, res) => {
 
 // Refresh token
 exports.refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  const { refreshToken } = req.cookies;
   if (!refreshToken) {
     return error(res, { message: "No refresh token provided", statusCode: 401 });
   }
@@ -150,7 +160,15 @@ exports.refreshToken = async (req, res) => {
       expiresIn: "1h",
     });
 
-    return success(res, { message: "Token refreshed", data: { token: newToken } });
+    // Set HttpOnly cookie
+    res.cookie('access_token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000 // 1 hour
+    });
+
+    return success(res, { message: "Token refreshed" });
   } catch (err) {
     return error(res, { message: "Invalid refresh token", statusCode: 401 });
   }
@@ -164,6 +182,8 @@ exports.logout = async (req, res) => {
       user.refreshToken = null;
       await user.save();
     }
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
     return success(res, { message: "Logged out successfully." });
   } catch (err) {
     console.error(err.message);
