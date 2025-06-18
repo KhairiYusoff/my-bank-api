@@ -27,7 +27,12 @@ const app = express();
 connectDB();
 
 // Init Middleware
-app.use(cors());
+// Allow frontend on Vite dev server to send cookies
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json({ extended: false }));
 
