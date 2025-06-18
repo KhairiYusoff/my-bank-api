@@ -1,8 +1,8 @@
 const express = require("express");
-const http = require('http');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const { initializeSocket } = require('./services/websocketService');
+const http = require("http");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const { initializeSocket } = require("./services/websocketService");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -16,8 +16,8 @@ const adminRoutesV2 = require("./routes/v2/adminRoutes");
 const userRoutesV2 = require("./routes/v2/userRoutes");
 
 // Swagger for API Documentation
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./config/swaggerConfig');
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swaggerConfig");
 
 require("dotenv").config();
 
@@ -27,12 +27,18 @@ const app = express();
 connectDB();
 
 // Init Middleware
-// Allow frontend on Vite dev server to send cookies
-const corsOptions = {
-  origin: 'http://localhost:5173',
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// Simple CORS setup for development
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5180", // Match your frontend URL exactly
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Handle preflight requests
+app.options("*", cors());
 app.use(cookieParser());
 app.use(express.json({ extended: false }));
 
@@ -49,7 +55,7 @@ app.use("/api/v2/admin", adminRoutesV2);
 app.use("/api/v2/users", userRoutesV2);
 
 // API Documentation Route
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = process.env.PORT || 5001;
 

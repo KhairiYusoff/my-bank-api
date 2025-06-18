@@ -105,18 +105,21 @@ exports.login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Set HttpOnly cookies
-    res.cookie('access_token', token, {
+    // Development cookie settings - HTTP only, no secure flag
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000 // 1 hour
-    });
+      secure: false, // Allow HTTP in development
+      sameSite: 'lax', // More permissive than 'strict' but still secure
+      maxAge: 3600000, // 1 hour
+      path: '/'
+      // No domain - let browser handle it
+    };
 
+    res.cookie('access_token', token, cookieOptions);
+    
+    // Set refresh token with longer expiration
     res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      ...cookieOptions,
       maxAge: 604800000 // 7 days
     });
 
@@ -160,12 +163,13 @@ exports.refreshToken = async (req, res) => {
       expiresIn: "1h",
     });
 
-    // Set HttpOnly cookie
+    // Simplified cookie settings for development
     res.cookie('access_token', newToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000 // 1 hour
+      secure: false, // Disable secure for localhost
+      sameSite: 'lax', // More relaxed setting for development
+      maxAge: 3600000, // 1 hour
+      path: '/', // Explicitly set path
     });
 
     return success(res, { message: "Token refreshed" });
@@ -182,8 +186,16 @@ exports.logout = async (req, res) => {
       user.refreshToken = null;
       await user.save();
     }
-    res.clearCookie('access_token');
-    res.clearCookie('refresh_token');
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      domain: isProduction ? process.env.COOKIE_DOMAIN : 'localhost',
+      path: '/',
+      httpOnly: true,
+      secure: isProduction
+    };
+    
+    res.clearCookie('access_token', cookieOptions);
+    res.clearCookie('refresh_token', cookieOptions);
     return success(res, { message: "Logged out successfully." });
   } catch (err) {
     console.error(err.message);
