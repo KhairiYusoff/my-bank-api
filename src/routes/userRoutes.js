@@ -10,6 +10,7 @@ const {
   updateProfile,
   changePassword,
   deleteAccount,
+  getOwnActivity,
   getUserActivity,
   updatePreferences,
   getAllCustomers,
@@ -119,7 +120,7 @@ router.put("/me/password", validatePasswordChange, changePassword);
  *       200:
  *         description: A list of user activities.
  */
-router.get("/me/activity", getUserActivity);
+router.get("/me/activity", getOwnActivity);
 
 /**
  * @swagger

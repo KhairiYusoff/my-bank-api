@@ -120,7 +120,81 @@ exports.deleteAccount = async (req, res) => {
   }
 };
 
-// Get user activity log
+// Get activity log for the currently logged-in user
+exports.getOwnActivity = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      action,
+      status,
+      severity,
+      startDate,
+      endDate,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+    } = req.query;
+
+    const query = { user: req.user.id };
+
+    if (action) query.action = action;
+    if (status) query.status = status;
+    if (severity) query.severity = severity;
+
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const validSortFields = ["createdAt", "action", "status", "severity"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+    const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
+    const total = await ActivityLog.countDocuments(query);
+    const activities = await ActivityLog.find(query)
+      .sort({ [sortField]: sortDirection })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("relatedEntity", "accountNumber name email");
+    const formattedActivities = activities.map((activity) => activity.format());
+    return success(res, {
+      message: "User activities fetched",
+      data: formattedActivities,
+      meta: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit)),
+        filters: {
+          action,
+          status,
+          severity,
+          startDate,
+          endDate,
+          sortBy: sortField,
+          sortOrder,
+        },
+      },
+    });
+  } catch (err) {
+    console.error("Error in getOwnActivity:", err);
+    if (err.name === "CastError") {
+      return error(res, {
+        message: "Invalid query parameters",
+        statusCode: 400,
+        errors: err.message,
+      });
+    }
+    return error(res, {
+      message: "Server error",
+      statusCode: 500,
+      errors: err.message,
+    });
+  }
+};
+
+// Get activity log for a specific user (admin/banker only)
 exports.getUserActivity = async (req, res) => {
   try {
     const {
@@ -139,39 +213,27 @@ exports.getUserActivity = async (req, res) => {
     const targetUserId = req.params.userId;
     const query = { user: targetUserId };
 
-    // Add filters if provided
     if (action) query.action = action;
     if (status) query.status = status;
     if (severity) query.severity = severity;
 
-    // Add date range if provided
     if (startDate || endDate) {
       query.createdAt = {};
       if (startDate) query.createdAt.$gte = new Date(startDate);
       if (endDate) query.createdAt.$lte = new Date(endDate);
     }
 
-    // Calculate pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Validate sort parameters
     const validSortFields = ["createdAt", "action", "status", "severity"];
     const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
     const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
-
-    // Get total count for pagination
     const total = await ActivityLog.countDocuments(query);
-
-    // Get activities with pagination and sorting
     const activities = await ActivityLog.find(query)
       .sort({ [sortField]: sortDirection })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("relatedEntity", "accountNumber name email"); // Populate related entity details
-
-    // Format the response
+      .populate("relatedEntity", "accountNumber name email");
     const formattedActivities = activities.map((activity) => activity.format());
-
     return success(res, {
       message: "User activities fetched",
       data: formattedActivities,
