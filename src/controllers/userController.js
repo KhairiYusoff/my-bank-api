@@ -87,7 +87,10 @@ exports.changePassword = async (req, res) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return error(res, { message: "Current password is incorrect", statusCode: 400 });
+      return error(res, {
+        message: "Current password is incorrect",
+        statusCode: 400,
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -132,8 +135,9 @@ exports.getUserActivity = async (req, res) => {
       sortOrder = "desc",
     } = req.query;
 
-    // Build query
-    const query = { user: req.user.id };
+    // Use the userId from params (middleware already ensures access control)
+    const targetUserId = req.params.userId;
+    const query = { user: targetUserId };
 
     // Add filters if provided
     if (action) query.action = action;
@@ -186,14 +190,21 @@ exports.getUserActivity = async (req, res) => {
           sortOrder,
         },
       },
-
     });
   } catch (err) {
     console.error("Error in getUserActivity:", err);
     if (err.name === "CastError") {
-      return error(res, { message: "Invalid query parameters", statusCode: 400, errors: err.message });
+      return error(res, {
+        message: "Invalid query parameters",
+        statusCode: 400,
+        errors: err.message,
+      });
     }
-    return error(res, { message: "Server error", statusCode: 500, errors: err.message });
+    return error(res, {
+      message: "Server error",
+      statusCode: 500,
+      errors: err.message,
+    });
   }
 };
 
@@ -210,7 +221,10 @@ exports.updatePreferences = async (req, res) => {
     user.preferences = { ...user.preferences, theme, language, notifications };
     await user.save();
 
-    return success(res, { message: "User preferences updated successfully", data: { preferences: user.preferences } });
+    return success(res, {
+      message: "User preferences updated successfully",
+      data: { preferences: user.preferences },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
