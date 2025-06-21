@@ -326,3 +326,37 @@ exports.getAllCustomers = async (req, res) => {
     return error(res, { message: "Server error", statusCode: 500 });
   }
 };
+
+exports.getAllStaff = async (req, res) => {
+  try {
+    const { page = 1, limit = 20, sort = "desc" } = req.query;
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
+
+    const [total, staff] = await Promise.all([
+      User.countDocuments({ role: "banker" }),
+      User.find({ role: "banker" })
+        .select("-password -refreshToken")
+        .sort({ createdAt: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit),
+    ]);
+
+    const totalPages = Math.ceil(total / numericLimit);
+
+    return success(res, {
+      message: "Staff fetched",
+      data: staff,
+      meta: {
+        page: numericPage,
+        limit: numericLimit,
+        total,
+        pages: totalPages,
+      },
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, { message: "Server error", statusCode: 500 });
+  }
+};

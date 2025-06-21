@@ -14,6 +14,7 @@ const {
   getUserActivity,
   updatePreferences,
   getAllCustomers,
+  getAllStaff,
 } = require("../controllers/userController");
 const {
   validateProfileUpdate,
@@ -192,5 +193,21 @@ router.put("/me/preferences", validatePreferencesUpdate, updatePreferences);
  *         description: Forbidden.
  */
 router.get("/customers", authorizeRoles("banker", "admin"), getAllCustomers);
+
+/**
+ * @swagger
+ * /users/staff:
+ *   get:
+ *     summary: Get a list of all staff (admin only)
+ *     tags: [V1 - Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of all staff users.
+ *       403:
+ *         description: Forbidden.
+ */
+router.get("/staff", authorizeRoles("admin"), getAllStaff);
 
 module.exports = router;
