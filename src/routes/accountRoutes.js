@@ -69,6 +69,7 @@ router.post(
   "/create",
   authorizeRoles("banker"),
   validateAccountCreation,
+  activityLogger("ACCOUNT_CREATION", "Banker created a new account"),
   createAccount
 );
 
@@ -95,7 +96,7 @@ router.post(
  *       404:
  *         description: Account not found.
  */
-router.delete("/:accountNumber", authorizeRoles("banker"), deleteAccount);
+router.delete("/:accountNumber", authorizeRoles("banker"), activityLogger("ACCOUNT_CLOSURE", "Banker deleted an account"), deleteAccount);
 
 /**
  * @swagger
@@ -188,7 +189,7 @@ router.get("/balance/:accountNumber", authorizeRoles("customer"), getBalance);
  *       404:
  *         description: Account not found.
  */
-router.post("/deposit", authorizeRoles("customer", "banker"), deposit);
+router.post("/deposit", authorizeRoles("customer", "banker"), activityLogger("DEPOSIT", "Deposit made to account"), deposit);
 
 /**
  * @swagger
@@ -224,7 +225,7 @@ router.post("/deposit", authorizeRoles("customer", "banker"), deposit);
  *       404:
  *         description: Account not found.
  */
-router.post("/withdraw", authorizeRoles("customer", "banker"), withdraw);
+router.post("/withdraw", authorizeRoles("customer", "banker"), activityLogger("WITHDRAW", "Withdrawal from account"), withdraw);
 
 /**
  * @swagger
@@ -257,6 +258,6 @@ router.post("/withdraw", authorizeRoles("customer", "banker"), withdraw);
  *       404:
  *         description: User not found.
  */
-router.post("/airdrop", authorizeRoles("admin"), airdrop);
+router.post("/airdrop", authorizeRoles("admin"), activityLogger("AIRDROP", "Admin airdropped funds"), airdrop);
 
 module.exports = router;

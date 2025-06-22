@@ -51,9 +51,18 @@ const ACTIVITY_TYPES = {
   },
 
   // Critical Financial Events
-  TRANSACTION_CREATE: {
+
+  DEPOSIT: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    extractUserId: (req) => req.user && req.user.id,
+  },
+  WITHDRAW: {
+    severity: "HIGH",
+    extractUserId: (req) => req.user && req.user.id,
+  },
+  AIRDROP: {
+    severity: "HIGH",
+    extractUserId: (req) => req.user && req.user.id,
   },
   TRANSACTION_COMPLETE: {
     severity: "HIGH",
@@ -76,24 +85,24 @@ const ACTIVITY_TYPES = {
 
   // V2 Onboarding Flow
   APPROVE_APPLICATION: {
-    severity: 'HIGH',
+    severity: "HIGH",
     getUserId: (req) => req.user?.id,
   },
   VERIFY_CUSTOMER: {
-    severity: 'HIGH',
-    getUserId: (req) => req.user.id
+    severity: "HIGH",
+    getUserId: (req) => req.user.id,
   },
-  
+
   // User completes their profile
   PROFILE_COMPLETED: {
-    severity: 'HIGH',
-    getUserId: (req) => req.user?.id || req.body.userId
+    severity: "HIGH",
+    getUserId: (req) => req.user?.id || req.body.userId,
   },
-  
+
   // Admin Actions
   VIEW_APPLICATIONS: {
-    severity: 'LOW',
-    getUserId: (req) => req.user?.id
+    severity: "LOW",
+    getUserId: (req) => req.user?.id,
   },
 };
 
@@ -110,7 +119,7 @@ const logActivity = async (req, res, action, details = "") => {
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
     // For some activities like CUSTOMER_APPLICATION, userId might be null
-    if (!userId && action !== 'CUSTOMER_APPLICATION') {
+    if (!userId && action !== "CUSTOMER_APPLICATION") {
       console.error(`Could not determine user ID for activity: ${action}`);
       return;
     }

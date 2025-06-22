@@ -20,7 +20,9 @@ const ActivityLogSchema = new mongoose.Schema(
         "LOGIN_FAILED",
 
         // Critical Financial Events
-        "TRANSACTION_CREATE",
+        "DEPOSIT",
+        "WITHDRAW",
+        "AIRDROP",
         "TRANSACTION_COMPLETE",
         "TRANSFER_INITIATED",
         "TRANSFER_COMPLETED",
