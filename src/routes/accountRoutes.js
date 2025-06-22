@@ -14,6 +14,7 @@ const {
   authorizeRoles,
 } = require("../middleware/authMiddleware");
 const { validateAccountCreation } = require("../middleware/accountMiddleware");
+const { activityLogger } = require("../services/activityService");
 const router = express.Router();
 
 /**
@@ -96,7 +97,12 @@ router.post(
  *       404:
  *         description: Account not found.
  */
-router.delete("/:accountNumber", authorizeRoles("banker"), activityLogger("ACCOUNT_CLOSURE", "Banker deleted an account"), deleteAccount);
+router.delete(
+  "/:accountNumber",
+  authorizeRoles("banker"),
+  activityLogger("ACCOUNT_CLOSURE", "Banker deleted an account"),
+  deleteAccount
+);
 
 /**
  * @swagger
@@ -189,7 +195,12 @@ router.get("/balance/:accountNumber", authorizeRoles("customer"), getBalance);
  *       404:
  *         description: Account not found.
  */
-router.post("/deposit", authorizeRoles("customer", "banker"), activityLogger("DEPOSIT", "Deposit made to account"), deposit);
+router.post(
+  "/deposit",
+  authorizeRoles("customer", "banker"),
+  activityLogger("DEPOSIT", "Deposit made to account"),
+  deposit
+);
 
 /**
  * @swagger
@@ -225,7 +236,12 @@ router.post("/deposit", authorizeRoles("customer", "banker"), activityLogger("DE
  *       404:
  *         description: Account not found.
  */
-router.post("/withdraw", authorizeRoles("customer", "banker"), activityLogger("WITHDRAW", "Withdrawal from account"), withdraw);
+router.post(
+  "/withdraw",
+  authorizeRoles("customer", "banker"),
+  activityLogger("WITHDRAW", "Withdrawal from account"),
+  withdraw
+);
 
 /**
  * @swagger
@@ -258,6 +274,11 @@ router.post("/withdraw", authorizeRoles("customer", "banker"), activityLogger("W
  *       404:
  *         description: User not found.
  */
-router.post("/airdrop", authorizeRoles("admin"), activityLogger("AIRDROP", "Admin airdropped funds"), airdrop);
+router.post(
+  "/airdrop",
+  authorizeRoles("admin"),
+  activityLogger("AIRDROP", "Admin airdropped funds"),
+  airdrop
+);
 
 module.exports = router;

@@ -22,6 +22,7 @@ const {
   validatePreferencesUpdate,
 } = require("../middleware/userMiddleware");
 const User = require("../models/User");
+const { activityLogger } = require("../services/activityService");
 
 /**
  * @swagger

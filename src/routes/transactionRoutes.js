@@ -10,6 +10,7 @@ const {
   getAllTransactions,
   getTransactionDetails,
 } = require("../controllers/transactionController");
+const { activityLogger } = require("../services/activityService");
 
 /**
  * @swagger
@@ -56,7 +57,12 @@ router.use(authMiddleware);
  *       404:
  *         description: Account not found.
  */
-router.post("/transfer", authorizeRoles("customer", "banker"), activityLogger("TRANSFER_INITIATED", "Funds transfer initiated"), transferFunds);
+router.post(
+  "/transfer",
+  authorizeRoles("customer", "banker"),
+  activityLogger("TRANSFER_INITIATED", "Funds transfer initiated"),
+  transferFunds
+);
 
 /**
  * @swagger

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const { completeProfile } = require('../../controllers/v2/userControllerV2');
+const { activityLogger } = require('../../services/activityService');
 const { verifyProfileCompletionToken } = require('../../middleware/tokenMiddleware');
 const { validateFullRegistration } = require('../../middleware/validationMiddleware');
 
@@ -70,6 +71,7 @@ router.put(
   '/complete-profile',
   verifyProfileCompletionToken, // Verifies the special JWT from the email
   validateFullRegistration,   // Validates the comprehensive profile data
+  activityLogger('PROFILE_COMPLETED', 'User completed full profile'),
   completeProfile
 );
 
