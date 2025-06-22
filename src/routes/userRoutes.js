@@ -74,7 +74,7 @@ router.use(authMiddleware);
  *         description: Account deleted successfully.
  */
 router.get("/me", getProfile);
-router.put("/me", validateProfileUpdate, updateProfile);
+router.put("/me", validateProfileUpdate, activityLogger("PROFILE_UPDATED", "User updated their profile"), updateProfile);
 router.delete("/me", deleteAccount);
 
 /**
@@ -107,7 +107,7 @@ router.delete("/me", deleteAccount);
  *       400:
  *         description: Bad request (e.g., incorrect current password).
  */
-router.put("/me/password", validatePasswordChange, changePassword);
+router.put("/me/password", validatePasswordChange, activityLogger("PASSWORD_CHANGED", "User changed their password"), changePassword);
 
 /**
  * @swagger
@@ -176,7 +176,7 @@ router.get(
  *       200:
  *         description: Preferences updated successfully.
  */
-router.put("/me/preferences", validatePreferencesUpdate, updatePreferences);
+router.put("/me/preferences", validatePreferencesUpdate, activityLogger("PREFERENCES_UPDATED", "User updated preferences"), updatePreferences);
 
 /**
  * @swagger

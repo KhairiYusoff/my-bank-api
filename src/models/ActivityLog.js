@@ -32,6 +32,11 @@ const ActivityLogSchema = new mongoose.Schema(
         "ACCOUNT_CREATION",
         "ACCOUNT_CLOSURE",
 
+        // User Profile and Preferences
+        "PROFILE_UPDATED",
+        "PASSWORD_CHANGED",
+        "PREFERENCES_UPDATED",
+
         // V2 Onboarding Flow
         "APPROVE_APPLICATION",
         "VERIFY_CUSTOMER",

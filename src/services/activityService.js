@@ -82,6 +82,18 @@ const ACTIVITY_TYPES = {
     severity: "CRITICAL",
     getUserId: (req) => req.user.id,
   },
+  PROFILE_UPDATED: {
+    severity: "MEDIUM",
+    getUserId: (req) => req.user.id,
+  },
+  PASSWORD_CHANGED: {
+    severity: "HIGH",
+    getUserId: (req) => req.user.id,
+  },
+  PREFERENCES_UPDATED: {
+    severity: "LOW",
+    getUserId: (req) => req.user.id,
+  },
 
   // V2 Onboarding Flow
   APPROVE_APPLICATION: {
