@@ -25,7 +25,23 @@ exports.verifyCustomer = async (req, res) => {
 
     await user.save();
 
-    // Optionally send a "Welcome" email
+    // Send a congratulatory email with login link
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5190';
+    const loginUrl = `${frontendUrl}/login`;
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Congratulations! Your Bank Account is Now Active',
+      text: `Dear ${user.name},\n\nCongratulations! Your bank account has been successfully verified and is now active.\n\nYou can now log in and start using your account by clicking the link below:\n\n${loginUrl}\n\nIf you did not request this, please contact us immediately.\n\nThank you for choosing My Bank.\n\nBest regards,\nMy Bank Team`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;border:1px solid #e5e5e5;background:#fafbfc;">
+        <h2 style="color:#0a3d62;">Congratulations, ${user.name}!</h2>
+        <p>Your bank account has been <b>successfully verified</b> and is now active.</p>
+        <p style="margin:18px 0;">You can now log in and start using your account by clicking the button below:</p>
+        <p><a href="${loginUrl}" style="display:inline-block;padding:12px 24px;background:#0a3d62;color:#fff;text-decoration:none;border-radius:4px;font-weight:bold;">Log In to My Bank</a></p>
+        <p>If you did not request this, please contact us immediately.</p>
+        <p style="margin-top:32px;">Thank you for choosing <b>My Bank</b>.<br/>Best regards,<br/>My Bank Team</p>
+      </div>`,
+    });
 
     res.json({ msg: 'Customer has been successfully verified and their account is now active.' });
 
