@@ -59,8 +59,9 @@ exports.approveApplication = async (req, res) => {
       { expiresIn: '24h' } // Link expires in 24 hours
     );
 
-    // In a real app, the frontend URL would come from a config file
-    const completeProfileUrl = `http://localhost:3000/complete-profile?token=${profileCompletionToken}`;
+    // Get frontend URL from environment variable or use default
+    const frontendUrl = process.env.FRONTEND_URL || 'http://127.0.0.1:5190';
+    const completeProfileUrl = `${frontendUrl}/complete-profile?token=${profileCompletionToken}`;
 
     // Send an email to the user with the link to complete their profile
     await sendEmail({
