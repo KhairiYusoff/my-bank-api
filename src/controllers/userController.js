@@ -387,9 +387,37 @@ exports.getAllStaff = async (req, res) => {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
+    // Build dynamic filter
+    const filter = { role: "banker" };
+    const {
+      name,
+      email,
+      status,
+      isVerified,
+      isProfileComplete,
+      applicationStatus,
+      search,
+    } = req.query;
+
+    if (name) filter.name = new RegExp(name, "i");
+    if (email) filter.email = new RegExp(email, "i");
+    if (status) filter.status = status;
+    if (typeof isVerified !== "undefined")
+      filter.isVerified = isVerified === "true";
+    if (typeof isProfileComplete !== "undefined")
+      filter.isProfileComplete = isProfileComplete === "true";
+    if (applicationStatus) filter.applicationStatus = applicationStatus;
+    // General search across name, email
+    if (search) {
+      filter.$or = [
+        { name: new RegExp(search, "i") },
+        { email: new RegExp(search, "i") },
+      ];
+    }
+
     const [total, staff] = await Promise.all([
-      User.countDocuments({ role: "banker" }),
-      User.find({ role: "banker" })
+      User.countDocuments(filter),
+      User.find(filter)
         .select("-password -refreshToken")
         .sort({ createdAt: sort === "asc" ? 1 : -1 })
         .skip(skip)
