@@ -11,6 +11,7 @@ const {
   deleteStaff,
   deleteCustomer,
   updateStaff,
+  updateCustomer,
 } = require("../../controllers/v2/adminControllerV2");
 const { activityLogger } = require("../../services/activityService");
 
