@@ -138,25 +138,89 @@ exports.getAccountTransactions = async (req, res) => {
 
 // Get all transactions (admin only)
 exports.getAllTransactions = async (req, res) => {
-  const { page = 1, limit = 10, type, startDate, endDate } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    sort = "desc",
+    accountNumber,
+    type,
+    status,
+    performedBy,
+    minAmount,
+    maxAmount,
+    dateFrom,
+    dateTo,
+    search,
+  } = req.query;
 
   try {
     // 1. Build query
     const query = {};
     if (type) query.type = type;
-    if (startDate || endDate) {
-      query.createdAt = {};
-      if (startDate) query.createdAt.$gte = new Date(startDate);
-      if (endDate) query.createdAt.$lte = new Date(endDate);
+    if (status) query.status = status;
+    if (performedBy) query.performedBy = performedBy;
+    if (minAmount || maxAmount) {
+      query.amount = {};
+      if (minAmount) query.amount.$gte = Number(minAmount);
+      if (maxAmount) query.amount.$lte = Number(maxAmount);
+    }
+    if (dateFrom || dateTo) {
+      query.date = {};
+      if (dateFrom) query.date.$gte = new Date(dateFrom);
+      if (dateTo) query.date.$lte = new Date(dateTo);
+    }
+
+    // General search: accountNumber, performedBy name/email
+    let transactionsQuery = Transaction.find(query)
+      .sort({ date: sort === "asc" ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate({
+        path: "account",
+        select: "accountNumber"
+      })
+      .populate({
+        path: "performedBy",
+        select: "name role"
+      });
+
+    if (search) {
+      // Find account IDs matching accountNumber
+      const Account = require("../models/Account");
+      const User = require("../models/User");
+      const accounts = accountNumber || search
+        ? await Account.find({ accountNumber: new RegExp(search, "i") }).select("_id")
+        : [];
+      const users = await User.find({
+        $or: [
+          { name: new RegExp(search, "i") },
+          { email: new RegExp(search, "i") },
+        ]
+      }).select("_id");
+      const accountIds = accounts.map(a => a._id);
+      const userIds = users.map(u => u._id);
+      transactionsQuery = Transaction.find({
+        ...query,
+        $or: [
+          ...(accountIds.length ? [{ account: { $in: accountIds } }] : []),
+          ...(userIds.length ? [{ performedBy: { $in: userIds } }] : [])
+        ]
+      })
+        .sort({ date: sort === "asc" ? 1 : -1 })
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit))
+        .populate({
+          path: "account",
+          select: "accountNumber"
+        })
+        .populate({
+          path: "performedBy",
+          select: "name role"
+        });
     }
 
     // 2. Get transactions with pagination
-    const transactions = await Transaction.find(query)
-      .sort({ date: -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .populate("account", "accountNumber")
-      .populate("performedBy", "name role");
+    const transactions = await transactionsQuery;
 
     // 3. Get total count for pagination
     const total = await Transaction.countDocuments(query);
