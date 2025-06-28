@@ -41,9 +41,10 @@ const ActivityLogSchema = new mongoose.Schema(
         "APPROVE_APPLICATION",
         "VERIFY_CUSTOMER",
         "PROFILE_COMPLETED",
-        
+
         // Admin Actions
         "VIEW_APPLICATIONS",
+        "DELETE_STAFF",
       ],
     },
     details: {

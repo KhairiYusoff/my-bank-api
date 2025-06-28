@@ -116,6 +116,10 @@ const ACTIVITY_TYPES = {
     severity: "LOW",
     getUserId: (req) => req.user?.id,
   },
+  DELETE_STAFF: {
+    severity: "CRITICAL",
+    getUserId: (req) => req.user?.id,
+  },
 };
 
 // Main logging function
