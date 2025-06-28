@@ -59,6 +59,11 @@ const UserSchema = new mongoose.Schema(
       enum: ["customer", "banker", "admin"],
       default: "customer"
     },
+    status: {
+      type: String,
+      enum: ["active", "suspended", "terminated"],
+      default: "active"
+    },
     address: {
       street: { 
         type: String,

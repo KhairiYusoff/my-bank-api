@@ -2,6 +2,55 @@ const User = require('../../models/User');
 const { sendEmail } = require('../../utils/email');
 const jwt = require('jsonwebtoken');
 
+// Admin updates a staff's role or status
+exports.updateStaff = async (req, res) => {
+  try {
+    const staffId = req.params.staffId;
+    const adminId = req.user.id;
+    const { role, status } = req.body;
+
+    // Prevent self-update
+    if (staffId === adminId) {
+      return res.status(400).json({ msg: 'You cannot update your own role or status.' });
+    }
+
+    const staff = await User.findById(staffId);
+    if (!staff) {
+      return res.status(404).json({ msg: 'Staff not found.' });
+    }
+    if (staff.role !== 'banker' && staff.role !== 'admin') {
+      return res.status(400).json({ msg: 'Only staff (banker/admin) can be updated via this endpoint.' });
+    }
+
+    // Only allow allowed values
+    const allowedRoles = ['banker', 'admin'];
+    const allowedStatus = ['active', 'suspended', 'terminated'];
+    let updated = false;
+    if (role) {
+      if (!allowedRoles.includes(role)) {
+        return res.status(400).json({ msg: 'Invalid role.' });
+      }
+      staff.role = role;
+      updated = true;
+    }
+    if (status) {
+      if (!allowedStatus.includes(status)) {
+        return res.status(400).json({ msg: 'Invalid status.' });
+      }
+      staff.status = status;
+      updated = true;
+    }
+    if (!updated) {
+      return res.status(400).json({ msg: 'No valid fields to update.' });
+    }
+    await staff.save();
+    return res.json({ msg: 'Staff updated successfully.', staff });
+  } catch (err) {
+    console.error('Error updating staff:', err);
+    res.status(500).json({ msg: 'Server error. Please try again later.' });
+  }
+};
+
 // Admin deletes a staff (banker) account
 exports.deleteStaff = async (req, res) => {
   try {

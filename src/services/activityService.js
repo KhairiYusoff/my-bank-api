@@ -124,6 +124,10 @@ const ACTIVITY_TYPES = {
     severity: "CRITICAL",
     getUserId: (req) => req.user?.id,
   },
+  UPDATE_STAFF: {
+    severity: "MEDIUM",
+    getUserId: (req) => req.user?.id,
+  }
 };
 
 // Main logging function

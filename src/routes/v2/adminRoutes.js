@@ -10,6 +10,7 @@ const {
   verifyCustomer,
   deleteStaff,
   deleteCustomer,
+  updateStaff,
 } = require("../../controllers/v2/adminControllerV2");
 const { activityLogger } = require("../../services/activityService");
 
@@ -196,6 +197,67 @@ router.delete(
   authorizeRoles("admin"),
   activityLogger("DELETE_CUSTOMER", "Admin deleted a customer"),
   deleteCustomer
+);
+
+/**
+ * @swagger
+ * /admin/staff/{staffId}:
+ *   put:
+ *     summary: Admin update staff role or status
+ *     tags: [V2 - Admin]
+ *     description: Admin can update a staff's role (banker/admin) or status (active/suspended/terminated). Cannot update other fields.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the staff (banker) to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [banker, admin]
+ *               status:
+ *                 type: string
+ *                 enum: [active, suspended, terminated]
+ *     responses:
+ *       200:
+ *         description: Staff updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Staff updated successfully."
+ *                 staff:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request (invalid fields or values).
+ *       401:
+ *         description: Unauthorized (invalid or missing token).
+ *       403:
+ *         description: Forbidden (user is not an admin).
+ *       404:
+ *         description: Staff not found.
+ *       500:
+ *         description: Server error.
+ */
+
+router.put(
+  "/staff/:staffId",
+  authorizeRoles("admin"),
+  activityLogger("UPDATE_STAFF", "Admin updated a staff (banker)"),
+  updateStaff
 );
 
 module.exports = router;
