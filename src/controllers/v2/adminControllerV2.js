@@ -33,6 +33,33 @@ exports.deleteStaff = async (req, res) => {
   }
 };
 
+// Admin deletes a customer account
+exports.deleteCustomer = async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const adminId = req.user.id;
+
+    // Prevent self-deletion (should not be possible, but for safety)
+    if (customerId === adminId) {
+      return res.status(400).json({ msg: 'You cannot delete your own account.' });
+    }
+
+    const customer = await User.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({ msg: 'Customer not found.' });
+    }
+    if (customer.role !== 'customer') {
+      return res.status(400).json({ msg: 'Only customer accounts can be deleted via this endpoint.' });
+    }
+
+    await User.deleteOne({ _id: customerId });
+    return res.json({ msg: 'Customer deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting customer:', err);
+    res.status(500).json({ msg: 'Server error. Please try again later.' });
+  }
+};
+
 // Banker/Admin gives final verification after customer completes their profile
 exports.verifyCustomer = async (req, res) => {
   try {

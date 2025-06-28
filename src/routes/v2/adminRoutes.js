@@ -9,6 +9,7 @@ const {
   approveApplication,
   verifyCustomer,
   deleteStaff,
+  deleteCustomer,
 } = require("../../controllers/v2/adminControllerV2");
 const { activityLogger } = require("../../services/activityService");
 
@@ -150,6 +151,51 @@ router.delete(
   authorizeRoles("admin"),
   activityLogger("DELETE_STAFF", "Admin deleted a staff (banker)"),
   deleteStaff
+);
+
+/**
+ * @swagger
+ * /admin/customer/{customerId}:
+ *   delete:
+ *     summary: Delete a customer account
+ *     tags: [V2 - Admin]
+ *     description: Admin can delete a customer account. Cannot delete staff or admin via this endpoint.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: customerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the customer to delete.
+ *     responses:
+ *       200:
+ *         description: Customer deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Customer deleted successfully."
+ *       400:
+ *         description: Bad request (cannot delete staff or admin).
+ *       401:
+ *         description: Unauthorized (invalid or missing token).
+ *       403:
+ *         description: Forbidden (user is not an admin).
+ *       404:
+ *         description: Customer not found.
+ *       500:
+ *         description: Server error.
+ */
+router.delete(
+  "/customer/:customerId",
+  authorizeRoles("admin"),
+  activityLogger("DELETE_CUSTOMER", "Admin deleted a customer"),
+  deleteCustomer
 );
 
 module.exports = router;

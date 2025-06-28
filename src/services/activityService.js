@@ -120,6 +120,10 @@ const ACTIVITY_TYPES = {
     severity: "CRITICAL",
     getUserId: (req) => req.user?.id,
   },
+  DELETE_CUSTOMER: {
+    severity: "CRITICAL",
+    getUserId: (req) => req.user?.id,
+  },
 };
 
 // Main logging function

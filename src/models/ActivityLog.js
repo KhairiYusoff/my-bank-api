@@ -45,6 +45,7 @@ const ActivityLogSchema = new mongoose.Schema(
         // Admin Actions
         "VIEW_APPLICATIONS",
         "DELETE_STAFF",
+        "DELETE_CUSTOMER",
       ],
     },
     details: {
