@@ -24,7 +24,10 @@ exports.createAccount = async (req, res) => {
     });
 
     if (!customer) {
-      return error(res, { message: "Customer not found or is not a customer", statusCode: 404 });
+      return error(res, {
+        message: "Customer not found or is not a customer",
+        statusCode: 404,
+      });
     }
 
     // 2. Create the account
@@ -44,7 +47,11 @@ exports.createAccount = async (req, res) => {
     });
 
     const account = await newAccount.save();
-    return success(res, { message: "Account created", data: account, statusCode: 201 });
+    return success(res, {
+      message: "Account created",
+      data: account,
+      statusCode: 201,
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
@@ -86,7 +93,10 @@ exports.getAccounts = async (req, res) => {
     ]);
 
     if (!accounts || accounts.length === 0) {
-      return error(res, { message: "No accounts found for this user", statusCode: 404 });
+      return error(res, {
+        message: "No accounts found for this user",
+        statusCode: 404,
+      });
     }
 
     const totalPages = Math.ceil(total / numericLimit);
@@ -115,11 +125,18 @@ exports.getAllAccounts = async (req, res) => {
       page = 1,
       limit = 20,
       sort = "desc",
+      accountNumber,
       accountType,
       branch,
       status,
-      currency,
       userId,
+      minBalance,
+      maxBalance,
+      overdraftLimit,
+      minimumBalance,
+      openedDateFrom,
+      openedDateTo,
+      search,
     } = req.query;
 
     const numericPage = Math.max(parseInt(page, 10), 1);
@@ -131,16 +148,51 @@ exports.getAllAccounts = async (req, res) => {
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
-    if (currency) filter.currency = currency;
-    if (userId) filter.user = userId; // allow admin to filter by customer id
+    if (userId) filter.user = userId;
+    if (accountNumber) filter.accountNumber = new RegExp(accountNumber, "i");
+    if (overdraftLimit) filter.overdraftLimit = Number(overdraftLimit);
+    if (minimumBalance) filter.minimumBalance = Number(minimumBalance);
+    if (minBalance || maxBalance) {
+      filter.balance = {};
+      if (minBalance) filter.balance.$gte = Number(minBalance);
+      if (maxBalance) filter.balance.$lte = Number(maxBalance);
+    }
+    if (openedDateFrom || openedDateTo) {
+      filter.dateOpened = {};
+      if (openedDateFrom) filter.dateOpened.$gte = new Date(openedDateFrom);
+      if (openedDateTo) filter.dateOpened.$lte = new Date(openedDateTo);
+    }
+
+    // General search: accountNumber, user name/email
+    let accountsQuery = Account.find(filter)
+      .populate("user", "name email role")
+      .sort({ dateOpened: sort === "asc" ? 1 : -1 })
+      .skip(skip)
+      .limit(numericLimit);
+    if (search) {
+      // Search by accountNumber or user name/email
+      accountsQuery = Account.find({
+        ...filter,
+        $or: [{ accountNumber: new RegExp(search, "i") }],
+      })
+        .populate({
+          path: "user",
+          match: {
+            $or: [
+              { name: new RegExp(search, "i") },
+              { email: new RegExp(search, "i") },
+            ],
+          },
+          select: "name email role",
+        })
+        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit);
+    }
 
     const [total, accounts] = await Promise.all([
       Account.countDocuments(filter),
-      Account.find(filter)
-        .populate("user", "name email role")
-        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
-        .skip(skip)
-        .limit(numericLimit),
+      accountsQuery,
     ]);
 
     const totalPages = Math.ceil(total / numericLimit);
@@ -189,7 +241,10 @@ exports.deleteAccount = async (req, res) => {
     }
 
     if (account.balance !== 0) {
-      return error(res, { message: "Account balance must be 0 to delete", statusCode: 400 });
+      return error(res, {
+        message: "Account balance must be 0 to delete",
+        statusCode: 400,
+      });
     }
 
     await Account.deleteOne({ accountNumber });
@@ -245,7 +300,10 @@ exports.deposit = async (req, res) => {
       session.endSession();
     }
 
-    return success(res, { message: "Deposit successful", data: { account, transaction } });
+    return success(res, {
+      message: "Deposit successful",
+      data: { account, transaction },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
@@ -305,7 +363,10 @@ exports.withdraw = async (req, res) => {
       session.endSession();
     }
 
-    return success(res, { message: "Withdrawal successful", data: { account, transaction } });
+    return success(res, {
+      message: "Withdrawal successful",
+      data: { account, transaction },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
@@ -355,7 +416,10 @@ exports.airdrop = async (req, res) => {
       session.endSession();
     }
 
-    return success(res, { message: "Airdrop successful", data: { account, transaction } });
+    return success(res, {
+      message: "Airdrop successful",
+      data: { account, transaction },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
