@@ -2,6 +2,37 @@ const User = require('../../models/User');
 const { sendEmail } = require('../../utils/email');
 const jwt = require('jsonwebtoken');
 
+// Admin deletes a staff (banker) account
+exports.deleteStaff = async (req, res) => {
+  try {
+    const staffId = req.params.staffId;
+    const adminId = req.user.id;
+
+    // Prevent self-deletion
+    if (staffId === adminId) {
+      return res.status(400).json({ msg: 'You cannot delete your own account.' });
+    }
+
+    const staff = await User.findById(staffId);
+    if (!staff) {
+      return res.status(404).json({ msg: 'Staff not found.' });
+    }
+    if (staff.role !== 'banker') {
+      return res.status(400).json({ msg: 'Only banker accounts can be deleted via this endpoint.' });
+    }
+    // Prevent deleting another admin
+    if (staff.role === 'admin') {
+      return res.status(400).json({ msg: 'Cannot delete another admin.' });
+    }
+
+    await User.deleteOne({ _id: staffId });
+    return res.json({ msg: 'Staff (banker) deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting staff:', err);
+    res.status(500).json({ msg: 'Server error. Please try again later.' });
+  }
+};
+
 // Banker/Admin gives final verification after customer completes their profile
 exports.verifyCustomer = async (req, res) => {
   try {

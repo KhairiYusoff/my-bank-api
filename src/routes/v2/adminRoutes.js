@@ -1,9 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const { authMiddleware, authorizeRoles } = require('../../middleware/authMiddleware');
-const { approveApplication, verifyCustomer } = require('../../controllers/v2/adminControllerV2');
-const { activityLogger } = require('../../services/activityService');
+const {
+  authMiddleware,
+  authorizeRoles,
+} = require("../../middleware/authMiddleware");
+const {
+  approveApplication,
+  verifyCustomer,
+  deleteStaff,
+} = require("../../controllers/v2/adminControllerV2");
+const { activityLogger } = require("../../services/activityService");
 
 // All routes in this file are protected and require staff access
 router.use(authMiddleware);
@@ -49,9 +56,9 @@ router.use(authMiddleware);
  *         description: Server error.
  */
 router.post(
-  '/approve-application/:userId',
-  authorizeRoles('admin', 'banker'),
-  activityLogger('APPROVE_APPLICATION', 'Staff approved initial application'),
+  "/approve-application/:userId",
+  authorizeRoles("admin", "banker"),
+  activityLogger("APPROVE_APPLICATION", "Staff approved initial application"),
   approveApplication
 );
 
@@ -94,10 +101,55 @@ router.post(
  *         description: Server error.
  */
 router.post(
-  '/verify-customer/:userId',
-  authorizeRoles('admin', 'banker'),
-  activityLogger('VERIFY_CUSTOMER', 'Staff verified customer account'),
+  "/verify-customer/:userId",
+  authorizeRoles("admin", "banker"),
+  activityLogger("VERIFY_CUSTOMER", "Staff verified customer account"),
   verifyCustomer
+);
+
+/**
+ * @swagger
+ * /admin/staff/{staffId}:
+ *   delete:
+ *     summary: Delete a staff (banker) account
+ *     tags: [V2 - Admin]
+ *     description: Admin can delete a banker/staff account. Cannot delete another admin or self.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the staff (banker) to delete.
+ *     responses:
+ *       200:
+ *         description: Staff deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Staff (banker) deleted successfully."
+ *       400:
+ *         description: Bad request (cannot delete admin or self).
+ *       401:
+ *         description: Unauthorized (invalid or missing token).
+ *       403:
+ *         description: Forbidden (user is not an admin).
+ *       404:
+ *         description: Staff not found.
+ *       500:
+ *         description: Server error.
+ */
+router.delete(
+  "/staff/:staffId",
+  authorizeRoles("admin"),
+  activityLogger("DELETE_STAFF", "Admin deleted a staff (banker)"),
+  deleteStaff
 );
 
 module.exports = router;
