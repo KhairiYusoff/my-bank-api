@@ -51,6 +51,40 @@ exports.updateStaff = async (req, res) => {
   }
 };
 
+// Admin updates a customer's status
+exports.updateCustomer = async (req, res) => {
+  try {
+    const customerId = req.params.customerId;
+    const adminId = req.user.id;
+    const { status } = req.body;
+
+    // Prevent self-update
+    if (customerId === adminId) {
+      return res.status(400).json({ msg: 'You cannot update your own status.' });
+    }
+
+    const customer = await User.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({ msg: 'Customer not found.' });
+    }
+    if (customer.role !== 'customer') {
+      return res.status(400).json({ msg: 'Only customers can be updated via this endpoint.' });
+    }
+
+    // Only allow allowed status values
+    const allowedStatus = ['active', 'suspended', 'terminated'];
+    if (!status || !allowedStatus.includes(status)) {
+      return res.status(400).json({ msg: 'Invalid or missing status.' });
+    }
+    customer.status = status;
+    await customer.save();
+    return res.json({ msg: 'Customer updated successfully.', customer });
+  } catch (err) {
+    console.error('Error updating customer:', err);
+    res.status(500).json({ msg: 'Server error. Please try again later.' });
+  }
+};
+
 // Admin deletes a staff (banker) account
 exports.deleteStaff = async (req, res) => {
   try {

@@ -260,4 +260,61 @@ router.put(
   updateStaff
 );
 
+/**
+ * @swagger
+ * /admin/customer/{customerId}:
+ *   put:
+ *     summary: Admin update customer status
+ *     tags: [V2 - Admin]
+ *     description: Admin can update a customer's status (active/suspended/terminated). Cannot update other fields.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: customerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the customer to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [active, suspended, terminated]
+ *     responses:
+ *       200:
+ *         description: Customer updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Customer updated successfully."
+ *                 customer:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request (invalid fields or values).
+ *       401:
+ *         description: Unauthorized (invalid or missing token).
+ *       403:
+ *         description: Forbidden (user is not an admin).
+ *       404:
+ *         description: Customer not found.
+ *       500:
+ *         description: Server error.
+ */
+router.put(
+  "/customer/:customerId",
+  authorizeRoles("admin"),
+  activityLogger("UPDATE_CUSTOMER", "Admin updated a customer status"),
+  updateCustomer
+);
+
 module.exports = router;

@@ -127,6 +127,10 @@ const ACTIVITY_TYPES = {
   UPDATE_STAFF: {
     severity: "MEDIUM",
     getUserId: (req) => req.user?.id,
+  },
+  UPDATE_CUSTOMER: {
+    severity: "MEDIUM",
+    getUserId: (req) => req.user?.id,
   }
 };
 
