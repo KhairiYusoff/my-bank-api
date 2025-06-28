@@ -295,14 +295,67 @@ exports.updatePreferences = async (req, res) => {
 
 exports.getAllCustomers = async (req, res) => {
   try {
+    // Extract pagination & sorting
     const { page = 1, limit = 20, sort = "desc" } = req.query;
     const numericPage = Math.max(parseInt(page, 10), 1);
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
+    // Build dynamic filter
+    const filter = { role: "customer" };
+    const {
+      name,
+      email,
+      phoneNumber,
+      job,
+      age,
+      status,
+      salary,
+      applicationStatus,
+      isVerified,
+      isProfileComplete,
+      minAge,
+      maxAge,
+      minSalary,
+      maxSalary,
+      search,
+    } = req.query;
+
+    if (name) filter.name = new RegExp(name, "i");
+    if (email) filter.email = new RegExp(email, "i");
+    if (phoneNumber) filter.phoneNumber = new RegExp(phoneNumber, "i");
+    if (job) filter.job = new RegExp(job, "i");
+    if (status) filter.status = status;
+    if (salary) filter.salary = salary;
+    if (applicationStatus) filter.applicationStatus = applicationStatus;
+    if (typeof isVerified !== "undefined")
+      filter.isVerified = isVerified === "true";
+    if (typeof isProfileComplete !== "undefined")
+      filter.isProfileComplete = isProfileComplete === "true";
+    if (age) filter.age = Number(age);
+    if (minAge || maxAge) {
+      filter.age = {};
+      if (minAge) filter.age.$gte = Number(minAge);
+      if (maxAge) filter.age.$lte = Number(maxAge);
+    }
+    if (minSalary || maxSalary) {
+      // Only works if salary is stored as a number; if string, skip this block or enhance for range strings
+      filter.salary = {};
+      if (minSalary) filter.salary.$gte = minSalary;
+      if (maxSalary) filter.salary.$lte = maxSalary;
+    }
+    // General search across name, email, phoneNumber
+    if (search) {
+      filter.$or = [
+        { name: new RegExp(search, "i") },
+        { email: new RegExp(search, "i") },
+        { phoneNumber: new RegExp(search, "i") },
+      ];
+    }
+
     const [total, customers] = await Promise.all([
-      User.countDocuments({ role: "customer" }),
-      User.find({ role: "customer" })
+      User.countDocuments(filter),
+      User.find(filter)
         .select("-password -refreshToken")
         .sort({ createdAt: sort === "asc" ? 1 : -1 })
         .skip(skip)
