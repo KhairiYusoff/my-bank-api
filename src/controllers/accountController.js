@@ -3,6 +3,7 @@ const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../utils/response");
+const { sendNotification } = require("../services/notificationService");
 
 exports.createAccount = async (req, res) => {
   const {
@@ -298,6 +299,30 @@ exports.deposit = async (req, res) => {
       throw err;
     } finally {
       session.endSession();
+    }
+
+    // Send notification after successful deposit (non-blocking, log errors only)
+    try {
+      await sendNotification({
+        type: "deposit",
+        title: "Deposit Received",
+        message: `Your account ${account.accountNumber} has received a deposit of RM${amount}.`,
+        link: `/accounts/${account.accountNumber}`,
+        recipient: {
+          role: "customer",
+          userId: account.user.toString(),
+        },
+        source: {
+          type: "system",
+        },
+        data: {
+          amount,
+          accountNumber: account.accountNumber,
+          transactionId: transaction._id.toString(),
+        },
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send deposit notification:", notifyErr.message);
     }
 
     return success(res, {
