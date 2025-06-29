@@ -313,13 +313,16 @@ exports.deposit = async (req, res) => {
           userId: account.user.toString(),
         },
         source: {
-          type: "system",
+          service: "my-bank-api",
+          id: transaction._id.toString(),
         },
         data: {
           amount,
           accountNumber: account.accountNumber,
           transactionId: transaction._id.toString(),
         },
+        read: false,
+        delivered: false,
       });
     } catch (notifyErr) {
       console.error("Failed to send deposit notification:", notifyErr.message);

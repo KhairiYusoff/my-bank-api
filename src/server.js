@@ -1,9 +1,41 @@
+// 1. Load environment variables first
+require("dotenv").config();
+
+// 2. Core dependencies
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const { initializeSocket } = require("./services/websocketService");
+const swaggerUi = require("swagger-ui-express");
+
+// 3. Initialize Express app
+const app = express();
+
+// 4. Connect to Database
 const connectDB = require("./config/db");
+connectDB();
+
+// 5. Middleware
+const corsOptions = {
+  origin: "http://127.0.0.1:5180",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // Enable pre-flight for all routes
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// 6. API Documentation
+if (process.env.NODE_ENV !== "production") {
+  const swaggerSpec = require("./config/swaggerConfig");
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
+
+// 7. Routes
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const accountRoutes = require("./routes/accountRoutes");
@@ -15,32 +47,8 @@ const authRoutesV2 = require("./routes/v2/authRoutes");
 const adminRoutesV2 = require("./routes/v2/adminRoutes");
 const userRoutesV2 = require("./routes/v2/userRoutes");
 
-// Swagger for API Documentation
-const swaggerUi = require("swagger-ui-express");
-const swaggerSpec = require("./config/swaggerConfig");
-
-require("dotenv").config();
-
-const app = express();
-
-// Connect Database
-connectDB();
-
-// Init Middleware
-// Simple CORS setup for development
-app.use(
-  cors({
-    origin: "http://127.0.0.1:5180", // Match your frontend URL exactly
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// Handle preflight requests
-app.options("*", cors());
-app.use(cookieParser());
-app.use(express.json({ extended: false }));
+// WebSocket
+const { initializeSocket } = require("./services/websocketService");
 
 // Define Routes
 app.use("/api/auth", authRoutes);
@@ -54,8 +62,7 @@ app.use("/api/v2/auth", authRoutesV2);
 app.use("/api/v2/admin", adminRoutesV2);
 app.use("/api/v2/users", userRoutesV2);
 
-// API Documentation Route
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// API Documentation Route - Already handled in the NODE_ENV check above
 
 const PORT = process.env.PORT || 5001;
 

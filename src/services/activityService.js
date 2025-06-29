@@ -54,15 +54,15 @@ const ACTIVITY_TYPES = {
 
   DEPOSIT: {
     severity: "HIGH",
-    extractUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user && req.user.id,
   },
   WITHDRAW: {
     severity: "HIGH",
-    extractUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user && req.user.id,
   },
   AIRDROP: {
     severity: "HIGH",
-    extractUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user && req.user.id,
   },
   TRANSACTION_COMPLETE: {
     severity: "HIGH",
@@ -131,7 +131,7 @@ const ACTIVITY_TYPES = {
   UPDATE_CUSTOMER: {
     severity: "MEDIUM",
     getUserId: (req) => req.user?.id,
-  }
+  },
 };
 
 // Main logging function
