@@ -54,6 +54,93 @@ Follow these instructions to get the project up and running on your local machin
 
 ---
 
+## Development Setup
+
+### Running with PM2 (Persistent)
+
+1. Install PM2 globally:
+
+```bash
+npm install -g pm2
+```
+
+2. Start dev server:
+
+```bash
+pm2 start npm --name "mybank-backend" -- run dev
+```
+
+3. Make it survive reboots:
+
+```bash
+pm2 save
+pm2 startup
+```
+
+### Key Notes:
+
+- Server keeps running even if you close your IDE
+- To view logs: `pm2 logs mybank-backend`
+- To restart after code changes: `pm2 restart mybank-backend`
+- To stop: `pm2 stop mybank-backend`
+
+### Advanced PM2 Management
+
+#### Monitoring
+
+```bash
+pm2 monit               # Dashboard interface
+pm2 logs --lines 200    # Show last 200 lines
+pm2 flush               # Clear all logs
+```
+
+#### Process Management
+
+```bash
+pm2 stop mybank-backend  # Stops the process
+pm2 restart all         # Restart all apps
+pm2 reload mybank-backend # Zero-downtime reload
+pm2 delete mybank-backend # Remove from PM2
+```
+
+#### Maintenance
+
+```bash
+pm2 update              # Update PM2
+pm2 resurrect           # Restore saved processes
+pm2 kill                # Shutdown PM2 daemon
+```
+
+#### Startup Management
+
+```bash
+pm2 unstartup           # Remove auto-start
+pm2 save --force        # Force save current state
+```
+
+### Verifying PM2 Status
+
+```bash
+pm2 list               # Show all processes (should be empty)
+ps aux | grep node     # Check for running Node processes
+lsof -i :5000         # Check port usage (replace with your port)
+```
+
+### Switching Between PM2 and NPM
+1. **From PM2 to NPM**:
+```bash
+pm2 stop mybank-backend && pm2 delete mybank-backend
+npm run dev
+```
+
+2. **From NPM to PM2**:
+```bash
+# First stop npm dev server (Ctrl+C in terminal)
+pm2 start npm --name "mybank-backend" -- run dev
+```
+
+---
+
 ## Core Application Flows
 
 This section documents the key business logic sequences implemented in the API.
