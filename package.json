@@ -5,7 +5,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon --inspect src/server.js"
+    "dev": "nodemon --inspect src/server.js",
+    "pm2:start": "pm2 start npm --name 'mybank-backend' -- run dev",
+    "pm2:stop": "pm2 stop mybank-backend && pm2 delete mybank-backend",
+    "pm2:logs": "pm2 logs mybank-backend",
+    "pm2:monit": "pm2 monit"
   },
   "dependencies": {
     "axios": "^1.10.0",

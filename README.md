@@ -139,6 +139,13 @@ npm run dev
 pm2 start npm --name "mybank-backend" -- run dev
 ```
 
+### Process Control Differences
+
+| Command       | Ctrl+C Behavior       | Proper Shutdown Method          |
+|--------------|----------------------|----------------------------------|
+| `npm run dev`| Stops server          | Already handled by Ctrl+C        |
+| PM2          | **Won't** stop server | `npm run pm2:stop` or PM2 commands |
+
 ---
 
 ## Core Application Flows
