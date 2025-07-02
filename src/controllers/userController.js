@@ -103,6 +103,25 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+// Reset password for all roles
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return error(res, { message: 'Email and new password are required', statusCode: 400 });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return error(res, { message: 'User not found', statusCode: 404 });
+    }
+    user.password = newPassword;
+    await user.save();
+    return success(res, { message: 'Password reset successfully' });
+  } catch (err) {
+    return error(res, { message: 'Server error', statusCode: 500 });
+  }
+};
+
 // Delete account
 exports.deleteAccount = async (req, res) => {
   try {

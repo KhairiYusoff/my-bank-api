@@ -15,6 +15,7 @@ const {
   updatePreferences,
   getAllCustomers,
   getAllStaff,
+  resetPassword,
 } = require("../controllers/userController");
 const {
   validateProfileUpdate,
@@ -30,6 +31,40 @@ const { activityLogger } = require("../services/activityService");
  *   name: V1 - Users
  *   description: User profile and management operations (V1)
  */
+
+/**
+ * @swagger
+ * /users/reset-password:
+ *   post:
+ *     summary: Reset password for any user (public, no login required)
+ *     tags: [V1 - Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - newPassword
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User's email address
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: The new password to set
+ *     responses:
+ *       200:
+ *         description: Password reset successfully.
+ *       400:
+ *         description: Missing or invalid input.
+ *       404:
+ *         description: User not found.
+ */
+router.post("/me/reset-password", resetPassword);
 
 router.use(authMiddleware);
 
@@ -75,7 +110,13 @@ router.use(authMiddleware);
  *         description: Account deleted successfully.
  */
 router.get("/me", getProfile);
-router.put("/me", validateProfileUpdate, activityLogger("PROFILE_UPDATED", "User updated their profile"), updateProfile);
+
+router.put(
+  "/me",
+  validateProfileUpdate,
+  activityLogger("PROFILE_UPDATED", "User updated their profile"),
+  updateProfile
+);
 router.delete("/me", deleteAccount);
 
 /**
@@ -108,7 +149,12 @@ router.delete("/me", deleteAccount);
  *       400:
  *         description: Bad request (e.g., incorrect current password).
  */
-router.put("/me/password", validatePasswordChange, activityLogger("PASSWORD_CHANGED", "User changed their password"), changePassword);
+router.put(
+  "/me/password",
+  validatePasswordChange,
+  activityLogger("PASSWORD_CHANGED", "User changed their password"),
+  changePassword
+);
 
 /**
  * @swagger
@@ -177,7 +223,12 @@ router.get(
  *       200:
  *         description: Preferences updated successfully.
  */
-router.put("/me/preferences", validatePreferencesUpdate, activityLogger("PREFERENCES_UPDATED", "User updated preferences"), updatePreferences);
+router.put(
+  "/me/preferences",
+  validatePreferencesUpdate,
+  activityLogger("PREFERENCES_UPDATED", "User updated preferences"),
+  updatePreferences
+);
 
 /**
  * @swagger
