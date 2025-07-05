@@ -93,10 +93,16 @@ exports.changePassword = async (req, res) => {
       });
     }
 
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return error(res, {
+        message: "New password must be different from the current password.",
+        statusCode: 400,
+      });
+    }
+
     user.password = newPassword;
-
     await user.save();
-
     return success(res, { message: "Password changed successfully" });
   } catch (err) {
     return error(res, { message: "Server error", statusCode: 500 });
@@ -108,17 +114,20 @@ exports.resetPassword = async (req, res) => {
   try {
     const { email, newPassword } = req.body;
     if (!email || !newPassword) {
-      return error(res, { message: 'Email and new password are required', statusCode: 400 });
+      return error(res, {
+        message: "Email and new password are required",
+        statusCode: 400,
+      });
     }
     const user = await User.findOne({ email });
     if (!user) {
-      return error(res, { message: 'User not found', statusCode: 404 });
+      return error(res, { message: "User not found", statusCode: 404 });
     }
     user.password = newPassword;
     await user.save();
-    return success(res, { message: 'Password reset successfully' });
+    return success(res, { message: "Password reset successfully" });
   } catch (err) {
-    return error(res, { message: 'Server error', statusCode: 500 });
+    return error(res, { message: "Server error", statusCode: 500 });
   }
 };
 
