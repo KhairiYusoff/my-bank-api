@@ -102,6 +102,7 @@ exports.changePassword = async (req, res) => {
     }
 
     user.password = newPassword;
+    user.passwordChangedAt = new Date();
     await user.save();
     return success(res, { message: "Password changed successfully" });
   } catch (err) {
@@ -124,6 +125,7 @@ exports.resetPassword = async (req, res) => {
       return error(res, { message: "User not found", statusCode: 404 });
     }
     user.password = newPassword;
+    user.passwordChangedAt = new Date();
     await user.save();
     return success(res, { message: "Password reset successfully" });
   } catch (err) {
