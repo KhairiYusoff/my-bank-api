@@ -391,6 +391,33 @@ exports.withdraw = async (req, res) => {
       session.endSession();
     }
 
+    // Send notification after successful withdrawal (non-blocking, log errors only)
+    try {
+      await sendNotification({
+        type: "withdrawal",
+        title: "Withdrawal Processed",
+        message: `A withdrawal of RM${amount} has been made from your account ${account.accountNumber}.`,
+        link: `/accounts/${account.accountNumber}`,
+        recipient: {
+          role: "customer",
+          userId: account.user.toString(),
+        },
+        source: {
+          service: "my-bank-api",
+          id: transaction._id.toString(),
+        },
+        data: {
+          amount,
+          accountNumber: account.accountNumber,
+          transactionId: transaction._id.toString(),
+        },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send withdrawal notification:", notifyErr.message);
+    }
+
     return success(res, {
       message: "Withdrawal successful",
       data: { account, transaction },
