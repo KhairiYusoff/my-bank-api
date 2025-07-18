@@ -66,6 +66,60 @@ exports.transferFunds = async (req, res) => {
       session.endSession();
     }
 
+    // Send notifications after successful transfer (non-blocking, log errors only)
+    try {
+
+      // Notify sender (fromAccount)
+      await sendNotification({
+        type: "transfer",
+        title: "Funds Transferred",
+        message: `You have transferred RM${amount} to account ${toAccountNumber}. Description: ${description || ''}`,
+        link: `/accounts/${fromAccount.accountNumber}`,
+        recipient: {
+          role: "customer",
+          userId: fromAccount.user.toString(),
+        },
+        source: {
+          service: "my-bank-api",
+          id: fromTransaction._id.toString(),
+        },
+        data: {
+          amount,
+          fromAccountNumber: fromAccount.accountNumber,
+          toAccountNumber: toAccount.accountNumber,
+          transactionId: fromTransaction._id.toString(),
+        },
+        read: false,
+        delivered: false,
+      });
+      
+      // Notify recipient (toAccount)
+      await sendNotification({
+        type: "transfer",
+        title: "Funds Received",
+        message: `You have received RM${amount} from account ${fromAccountNumber}. Description: ${description || ''}`,
+        link: `/accounts/${toAccount.accountNumber}`,
+        recipient: {
+          role: "customer",
+          userId: toAccount.user.toString(),
+        },
+        source: {
+          service: "my-bank-api",
+          id: toTransaction._id.toString(),
+        },
+        data: {
+          amount,
+          fromAccountNumber: fromAccount.accountNumber,
+          toAccountNumber: toAccount.accountNumber,
+          transactionId: toTransaction._id.toString(),
+        },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send transfer notification:", notifyErr.message);
+    }
+
     return success(res, {
       message: "Transfer successful",
       data: {
