@@ -137,42 +137,35 @@ exports.transferFunds = async (req, res) => {
 // Get transaction history for an account
 exports.getAccountTransactions = async (req, res) => {
   const { accountNumber } = req.params;
-  const { page = 1, limit = 10, type, startDate, endDate } = req.query;
+  const { page = 1, limit = 10, sort = "desc" } = req.query;
 
   try {
-    // 1. Find the account
+    // 1. Find the account first
     const account = await Account.findOne({ accountNumber });
+
+    // 2. If account doesn't exist, return 404
     if (!account) {
       return error(res, { message: "Account not found", statusCode: 404 });
     }
 
-    // 2. Check permissions
-    if (
-      req.user.role === "customer" &&
-      account.user.toString() !== req.user.id
-    ) {
-      return error(res, { message: "Access denied", statusCode: 403 });
+    // 3. For customers, verify they own the account
+    if (req.user.role === "customer" && account.user.toString() !== req.user.id) {
+      // Return 404 instead of 403 to not leak information about account existence
+      return error(res, { message: "Account not found", statusCode: 404 });
     }
 
-    // 3. Build query
+    // 4. Build query for transactions
     const query = { account: account._id };
 
-    if (type) query.type = type;
-    if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
-    }
-
-    // 4. Get transactions with pagination
+    // 5. Get transactions with pagination
     const transactions = await Transaction.find(query)
-      .sort({ date: -1 })
+      .sort({ date: sort === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .populate("account", "accountNumber")
-      .populate("performedBy", "name role");
+      .populate({ path: "account", select: "accountNumber" })
+      .populate({ path: "performedBy", select: "name role" });
 
-    // 5. Get total count for pagination
+    // 6. Get total count for pagination
     const total = await Transaction.countDocuments(query);
 
     return success(res, {
@@ -299,26 +292,25 @@ exports.getTransactionDetails = async (req, res) => {
   const { transactionId } = req.params;
 
   try {
-    // First get the transaction without populating (faster for permission check)
     const transaction = await Transaction.findById(transactionId);
-    
+
     if (!transaction) {
       return error(res, { message: "Transaction not found", statusCode: 404 });
     }
 
-    // For customers, verify ownership first
+    // For customers, verify they own the account associated with the transaction
     if (req.user.role === "customer") {
       const account = await Account.findOne({
         _id: transaction.account,
-        user: req.user.id
+        user: req.user.id,
       });
-      
+
       if (!account) {
-        return error(res, { message: "Access denied", statusCode: 403 });
+        return error(res, { message: "Transaction not found", statusCode: 404 });
       }
     }
 
-    // If we get here, user has permission - now get full details
+    // If permission is granted, fetch the fully populated transaction
     const populatedTransaction = await Transaction.findById(transactionId)
       .populate("account", "accountNumber user")
       .populate("performedBy", "name role");
