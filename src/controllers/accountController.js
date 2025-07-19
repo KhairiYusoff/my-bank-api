@@ -218,13 +218,22 @@ exports.getBalance = async (req, res) => {
   const { accountNumber } = req.params;
 
   try {
-    const account = await Account.findOne({ accountNumber, user: req.user.id });
-
-    if (!account) {
-      return error(res, { message: "Account not found", statusCode: 404 });
+    const query = { accountNumber };
+    // If the user is a customer, they can only see their own account balance
+    if (req.user.role === "customer") {
+      query.user = req.user.id;
     }
 
-    return success(res, { data: { balance: account.balance } });
+    const account = await Account.findOne(query);
+
+    if (!account) {
+      return error(res, { message: "Account not found or access denied", statusCode: 404 });
+    }
+
+    return success(res, {
+      message: "Balance fetched",
+      data: { balance: account.balance, currency: account.currency },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, { message: "Server error", statusCode: 500 });
@@ -266,11 +275,16 @@ exports.deposit = async (req, res) => {
   }
 
   try {
-    // 1. Find account without user restriction
-    const account = await Account.findOne({ accountNumber });
+    const query = { accountNumber };
+    // If the user is a customer, they can only deposit into their own account
+    if (req.user.role === "customer") {
+      query.user = req.user.id;
+    }
+
+    const account = await Account.findOne(query);
 
     if (!account) {
-      return error(res, { message: "Account not found", statusCode: 404 });
+      return error(res, { message: "Account not found or access denied", statusCode: 404 });
     }
 
     // 2. Create transaction record
@@ -347,10 +361,11 @@ exports.withdraw = async (req, res) => {
   }
 
   try {
-    const query = { accountNumber };
-    // 1. Only allow customer and banker to withdraw from their OWN account
-    // 2. No one shall be able to withdraw from other account
-    query.user = req.user.id;
+        const query = { accountNumber };
+    // If the user is a customer, they can only withdraw from their own account
+    if (req.user.role === "customer") {
+      query.user = req.user.id;
+    }
 
     const account = await Account.findOne(query);
 
