@@ -2,6 +2,7 @@ const Account = require("../models/Account");
 const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../utils/response");
+const { sendNotification } = require("../services/notificationService");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
