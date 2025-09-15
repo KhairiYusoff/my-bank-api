@@ -486,6 +486,34 @@ exports.airdrop = async (req, res) => {
       session.endSession();
     }
 
+    // Send notification after successful airdrop (non-blocking, log errors only)
+    try {
+      await sendNotification({
+        type: "airdrop",
+        title: "Airdrop Received",
+        message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}. ${description ? `Description: ${description}` : ''}`,
+        link: `/accounts/${account.accountNumber}`,
+        recipient: {
+          role: "customer",
+          userId: account.user.toString(),
+        },
+        source: {
+          service: "my-bank-api",
+          id: transaction._id.toString(),
+        },
+        data: {
+          amount,
+          accountNumber: account.accountNumber,
+          transactionId: transaction._id.toString(),
+          description: description || "Airdrop",
+        },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send airdrop notification:", notifyErr.message);
+    }
+
     return success(res, {
       message: "Airdrop successful",
       data: { account, transaction },
