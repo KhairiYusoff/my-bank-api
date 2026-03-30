@@ -11,7 +11,9 @@ const STAFF_ROLES = ["admin", "banker"];
 const initializeSocket = (server) => {
   io = socketIo(server, {
     cors: {
-      origin: '*',
+      origin: process.env.NODE_ENV === 'production' 
+        ? [process.env.ADMIN_FRONTEND_URL, process.env.CUSTOMER_FRONTEND_URL] // Production: both URLs
+        : [process.env.ADMIN_FRONTEND_URL, process.env.CUSTOMER_FRONTEND_URL], // Development: both frontend URLs only
       methods: ['GET', 'POST']
     }
   });

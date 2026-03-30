@@ -17,7 +17,10 @@ connectDB();
 
 // 5. Middleware
 const corsOptions = {
-  origin: "http://127.0.0.1:5180",
+  origin: [
+    process.env.ADMIN_FRONTEND_URL,
+    process.env.CUSTOMER_FRONTEND_URL
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
