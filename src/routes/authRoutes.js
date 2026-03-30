@@ -11,6 +11,7 @@ const {
   validateInitialApplication,
 } = require("../middleware/validationMiddleware");
 const { activityLogger } = require("../services/activityService");
+const { authRateLimit } = require("../middleware/rateLimitMiddleware");
 const router = express.Router();
 
 /**
@@ -61,6 +62,7 @@ const router = express.Router();
  *         description: Server error.
  */
 router.post("/apply", [
+  authRateLimit, // Stricter rate limiting for applications
   validateInitialApplication,
   activityLogger("CUSTOMER_APPLICATION", "New customer application"),
   apply,
@@ -107,7 +109,11 @@ router.post("/apply", [
  *       500:
  *         description: Server error.
  */
-router.post("/login", [activityLogger("LOGIN", "User login attempt"), login]);
+router.post("/login", [
+  authRateLimit, // Stricter rate limiting for login attempts
+  activityLogger("LOGIN", "User login attempt"), 
+  login
+]);
 
 // Logout
 router.post("/logout", [

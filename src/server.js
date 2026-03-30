@@ -29,7 +29,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 6. API Documentation
+// 6. Rate Limiting
+const { rateLimitMiddleware } = require("./middleware/rateLimitMiddleware");
+app.use(rateLimitMiddleware);
+
+// 7. API Documentation
 if (process.env.NODE_ENV !== "production") {
   const swaggerSpec = require("./config/swaggerConfig");
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
