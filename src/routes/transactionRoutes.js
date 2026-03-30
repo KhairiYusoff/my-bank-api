@@ -11,6 +11,7 @@ const {
   getTransactionDetails,
 } = require("../controllers/transactionController");
 const { activityLogger } = require("../services/activityService");
+const { validateTransfer, validateTransaction } = require("../middleware/validationMiddleware");
 
 /**
  * @swagger
@@ -60,6 +61,7 @@ router.use(authMiddleware);
 router.post(
   "/transfer",
   authorizeRoles("customer", "banker"),
+  validateTransfer, // CRITICAL: Financial input validation
   activityLogger("TRANSFER_INITIATED", "Funds transfer initiated"),
   transferFunds
 );

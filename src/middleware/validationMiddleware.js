@@ -21,6 +21,66 @@ const validateInitialApplication = [
     .withMessage("Please enter a valid phone number")
 ];
 
+// CRITICAL: Login validation - prevents brute force & injection attacks
+const validateLogin = [
+  check("email", "Valid email is required")
+    .isEmail()
+    .normalizeEmail()
+    .escape(), // Prevents XSS
+  check("password", "Password is required")
+    .not()
+    .isEmpty()
+    .isLength({ min: 1, max: 128 }) // Prevents DoS with huge passwords
+    .withMessage("Password must be between 1 and 128 characters")
+];
+
+// CRITICAL: Financial transaction validation - prevents financial attacks
+const validateTransfer = [
+  check("fromAccountNumber", "From account number is required")
+    .not()
+    .isEmpty()
+    .isNumeric() // Must be numbers only
+    .isLength({ min: 8, max: 20 }) // Account number length validation
+    .withMessage("Invalid account number format"),
+  check("toAccountNumber", "To account number is required")
+    .not()
+    .isEmpty()
+    .isNumeric()
+    .isLength({ min: 8, max: 20 })
+    .withMessage("Invalid account number format"),
+  check("amount", "Amount is required")
+    .not()
+    .isEmpty()
+    .isFloat({ min: 0.01, max: 1000000 }) // Prevents negative amounts & huge transfers
+    .withMessage("Amount must be between $0.01 and $1,000,000"),
+  check("description", "Description is required")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 255 })
+    .withMessage("Description must not exceed 255 characters")
+];
+
+// CRITICAL: Deposit/Withdrawal validation
+const validateTransaction = [
+  check("accountNumber", "Account number is required")
+    .not()
+    .isEmpty()
+    .isNumeric()
+    .isLength({ min: 8, max: 20 })
+    .withMessage("Invalid account number format"),
+  check("amount", "Amount is required")
+    .not()
+    .isEmpty()
+    .isFloat({ min: 0.01, max: 1000000 })
+    .withMessage("Amount must be between $0.01 and $1,000,000"),
+  check("description", "Description is required")
+    .optional()
+    .trim()
+    .escape()
+    .isLength({ max: 255 })
+];
+
 // Full validation for banker registering a customer
 const validateFullRegistration = [
   ...validateInitialApplication,
@@ -137,6 +197,9 @@ const validateStaffRegistration = [
 
 module.exports = {
   validateInitialApplication,
+  validateLogin,
+  validateTransfer,
+  validateTransaction,
   validateFullRegistration,
   validateStaffRegistration,
 };

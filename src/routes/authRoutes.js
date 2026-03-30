@@ -9,6 +9,7 @@ const {
 const { authMiddleware } = require("../middleware/authMiddleware");
 const {
   validateInitialApplication,
+  validateLogin,
 } = require("../middleware/validationMiddleware");
 const { activityLogger } = require("../services/activityService");
 const { authRateLimit } = require("../middleware/rateLimitMiddleware");
@@ -111,6 +112,7 @@ router.post("/apply", [
  */
 router.post("/login", [
   authRateLimit, // Stricter rate limiting for login attempts
+  validateLogin, // Input validation
   activityLogger("LOGIN", "User login attempt"), 
   login
 ]);
