@@ -8,6 +8,9 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 
+// Error handling
+const errorHandler = require("./utils/errorHandler");
+
 // 3. Initialize Express app
 const app = express();
 
@@ -68,6 +71,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/v2/auth", authRoutesV2);
 app.use("/api/v2/admin", adminRoutesV2);
 app.use("/api/v2/users", userRoutesV2);
+
+// Error handling middleware (must be after all routes)
+app.use(errorHandler);
 
 // API Documentation Route - Already handled in the NODE_ENV check above
 
