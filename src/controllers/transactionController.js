@@ -131,7 +131,10 @@ exports.transferFunds = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -180,7 +183,10 @@ exports.getAccountTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -284,7 +290,10 @@ exports.getAllTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -319,6 +328,9 @@ exports.getTransactionDetails = async (req, res) => {
     return success(res, { data: populatedTransaction });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
