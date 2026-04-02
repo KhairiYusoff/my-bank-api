@@ -1,9 +1,10 @@
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const { notifyNewApplication } = require("../services/websocketService");
 const { success, error } = require("../utils/response");
+const { checkUserExists, checkToken } = require("../utils/validationHelpers");
+const { notifyNewApplication } = require("../services/websocketService");
 
 // Public application for new customers
 exports.apply = async (req, res) => {
@@ -79,9 +80,10 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     let user = await User.findOne({ email });
-    if (!user) {
-      return error(res, { message: "Invalid credentials", statusCode: 400 });
-    }
+    
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
 
     if (!user.isVerified) {
       return error(res, { message: "User is not verified. Please complete verification.", statusCode: 403 });
@@ -147,18 +149,19 @@ exports.login = async (req, res) => {
 // Refresh token
 exports.refreshToken = async (req, res) => {
   const { refreshToken } = req.cookies;
-  if (!refreshToken) {
-    return error(res, { message: "No refresh token provided", statusCode: 401 });
-  }
+  
+  // Validate token exists
+  const tokenError = checkToken(res, refreshToken, 'refresh token');
+  if (tokenError) return tokenError;
 
   try {
     // Verify the refresh token
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.user.id);
 
-    if (!user) {
-      return error(res, { message: "User not found", statusCode: 404 });
-    }
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
 
     // Generate a new access token (JWT)
     const payload = { user: { id: user.id } };
