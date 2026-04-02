@@ -55,7 +55,10 @@ exports.createAccount = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -114,7 +117,10 @@ exports.getAccounts = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -210,7 +216,10 @@ exports.getAllAccounts = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -236,7 +245,10 @@ exports.getBalance = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -262,7 +274,10 @@ exports.deleteAccount = async (req, res) => {
     return success(res, { message: "Account closed successfully." });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -348,7 +363,10 @@ exports.deposit = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -439,7 +457,10 @@ exports.withdraw = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -520,6 +541,9 @@ exports.airdrop = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
