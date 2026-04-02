@@ -11,7 +11,11 @@ exports.getProfile = async (req, res) => {
     }
     return success(res, { data: user });
   } catch (err) {
-    return error(res, { message: "Server error", statusCode: 500 });
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -75,7 +79,11 @@ exports.updateProfile = async (req, res) => {
 
     return success(res, { message: "Profile updated", data: userResponse });
   } catch (err) {
-    return error(res, { message: "Server error", statusCode: 500 });
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -106,7 +114,11 @@ exports.changePassword = async (req, res) => {
     await user.save();
     return success(res, { message: "Password changed successfully" });
   } catch (err) {
-    return error(res, { message: "Server error", statusCode: 500 });
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -129,7 +141,11 @@ exports.resetPassword = async (req, res) => {
     await user.save();
     return success(res, { message: "Password reset successfully" });
   } catch (err) {
-    return error(res, { message: "Server error", statusCode: 500 });
+    console.error(err.message);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -145,7 +161,10 @@ exports.deleteAccount = async (req, res) => {
     return success(res, { message: "User account deleted successfully" });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -216,7 +235,7 @@ exports.getOwnActivity = async (req, res) => {
       });
     }
     return error(res, {
-      message: "Server error",
+      message: "Internal server error",
       statusCode: 500,
       errors: err.message,
     });
@@ -292,7 +311,7 @@ exports.getUserActivity = async (req, res) => {
       });
     }
     return error(res, {
-      message: "Server error",
+      message: "Internal server error",
       statusCode: 500,
       errors: err.message,
     });
@@ -318,7 +337,10 @@ exports.updatePreferences = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -405,7 +427,10 @@ exports.getAllCustomers = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -467,6 +492,9 @@ exports.getAllStaff = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: "Server error", statusCode: 500 });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
