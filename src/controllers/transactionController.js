@@ -38,48 +38,25 @@ exports.getAccountTransactions = async (req, res) => {
   const { page = 1, limit = 10, sort = "desc" } = req.query;
 
   try {
-    // 1. Find the account first
-    const account = await Account.findOne({ accountNumber });
-
-    // 2. If account doesn't exist, return 404
-    if (!account) {
-      return error(res, { message: "Account not found", statusCode: 404 });
-    }
-
-    // 3. For customers, verify they own the account
-    if (req.user.role === "customer" && account.user.toString() !== req.user.id) {
-      // Return 404 instead of 403 to not leak information about account existence
-      return error(res, { message: "Account not found", statusCode: 404 });
-    }
-
-    // 4. Build query for transactions
-    const query = { account: account._id };
-
-    // 5. Get transactions with pagination
-    const transactions = await Transaction.find(query)
-      .sort({ date: sort === "asc" ? 1 : -1 })
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .populate({ path: "account", select: "accountNumber" })
-      .populate({ path: "performedBy", select: "name role" });
-
-    // 6. Get total count for pagination
-    const total = await Transaction.countDocuments(query);
+    // Delegate to service layer
+    const result = await transactionService.getAccountTransactions(
+      accountNumber, 
+      req.user, 
+      page, 
+      limit, 
+      sort
+    );
 
     return success(res, {
-      data: transactions,
-      meta: {
-        total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit),
-      },
+      message: "Transactions fetched successfully",
+      data: result.transactions,
+      meta: result.meta
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: err.message || "Internal server error"
     });
   }
 };
@@ -196,35 +173,18 @@ exports.getTransactionDetails = async (req, res) => {
   const { transactionId } = req.params;
 
   try {
-    const transaction = await Transaction.findById(transactionId);
+    // Delegate to service layer
+    const transaction = await transactionService.getTransactionDetails(
+      transactionId, 
+      req.user
+    );
 
-    if (!transaction) {
-      return error(res, { message: "Transaction not found", statusCode: 404 });
-    }
-
-    // For customers, verify they own the account associated with the transaction
-    if (req.user.role === "customer") {
-      const account = await Account.findOne({
-        _id: transaction.account,
-        user: req.user.id,
-      });
-
-      if (!account) {
-        return error(res, { message: "Transaction not found", statusCode: 404 });
-      }
-    }
-
-    // If permission is granted, fetch the fully populated transaction
-    const populatedTransaction = await Transaction.findById(transactionId)
-      .populate("account", "accountNumber user")
-      .populate("performedBy", "name role");
-
-    return success(res, { data: populatedTransaction });
+    return success(res, { data: transaction });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: err.message || "Internal server error"
     });
   }
 };
