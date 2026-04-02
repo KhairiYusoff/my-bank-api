@@ -54,7 +54,10 @@ exports.updateStaff = async (req, res) => {
     return res.json({ msg: "Staff updated successfully.", staff });
   } catch (err) {
     console.error("Error updating staff:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -92,7 +95,10 @@ exports.updateCustomer = async (req, res) => {
     return res.json({ msg: "Customer updated successfully.", customer });
   } catch (err) {
     console.error("Error updating customer:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -129,7 +135,10 @@ exports.deleteStaff = async (req, res) => {
     return res.json({ msg: "Staff (banker) deleted successfully." });
   } catch (err) {
     console.error("Error deleting staff:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -162,7 +171,10 @@ exports.deleteCustomer = async (req, res) => {
     return res.json({ msg: "Customer deleted successfully." });
   } catch (err) {
     console.error("Error deleting customer:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -216,7 +228,10 @@ exports.verifyCustomer = async (req, res) => {
     });
   } catch (err) {
     console.error("Error verifying customer:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -274,6 +289,9 @@ exports.approveApplication = async (req, res) => {
     });
   } catch (err) {
     console.error("Error approving application:", err);
-    res.status(500).json({ msg: "Server error. Please try again later." });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
