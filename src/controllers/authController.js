@@ -137,7 +137,10 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
@@ -199,7 +202,10 @@ exports.logout = async (req, res) => {
     return success(res, { message: "Logged out successfully." });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
