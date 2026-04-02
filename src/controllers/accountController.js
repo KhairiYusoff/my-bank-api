@@ -4,6 +4,7 @@ const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../utils/response");
 const { sendNotification } = require("../services/notificationService");
+const { checkAmount, checkAccountExists } = require("../utils/validationHelpers");
 
 exports.createAccount = async (req, res) => {
   const {
@@ -285,9 +286,9 @@ exports.deleteAccount = async (req, res) => {
 exports.deposit = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  if (!amount || amount <= 0) {
-    return error(res, { message: "Invalid deposit amount", statusCode: 400 });
-  }
+  // Validate amount
+  const amountError = checkAmount(res, amount, 'deposit');
+  if (amountError) return amountError;
 
   try {
     const query = { accountNumber };
@@ -298,9 +299,9 @@ exports.deposit = async (req, res) => {
 
     const account = await Account.findOne(query);
 
-    if (!account) {
-      return error(res, { message: "Account not found or access denied", statusCode: 404 });
-    }
+    // Validate account exists
+    const accountError = checkAccountExists(res, account, "Account not found or access denied");
+    if (accountError) return accountError;
 
     // 2. Create transaction record
     const transaction = new Transaction({
@@ -374,9 +375,9 @@ exports.deposit = async (req, res) => {
 exports.withdraw = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  if (!amount || amount <= 0) {
-    return error(res, { message: "Invalid withdraw amount", statusCode: 400 });
-  }
+  // Validate amount
+  const amountError = checkAmount(res, amount, 'withdraw');
+  if (amountError) return amountError;
 
   try {
         const query = { accountNumber };
@@ -387,9 +388,9 @@ exports.withdraw = async (req, res) => {
 
     const account = await Account.findOne(query);
 
-    if (!account) {
-      return error(res, { message: "Account not found", statusCode: 404 });
-    }
+    // Validate account exists
+    const accountError = checkAccountExists(res, account, "Account not found");
+    if (accountError) return accountError;
 
     // 3. Check sufficient balance
     if (account.balance < amount) {
@@ -468,16 +469,17 @@ exports.withdraw = async (req, res) => {
 exports.airdrop = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  if (!amount || amount <= 0) {
-    return error(res, { message: "Invalid airdrop amount", statusCode: 400 });
-  }
+  // Validate amount
+  const amountError = checkAmount(res, amount, 'airdrop');
+  if (amountError) return amountError;
 
   try {
     // 1. Find account
     const account = await Account.findOne({ accountNumber });
-    if (!account) {
-      return error(res, { message: "Account not found", statusCode: 404 });
-    }
+    
+    // Validate account exists
+    const accountError = checkAccountExists(res, account, "Account not found");
+    if (accountError) return accountError;
 
     // 2. Create transaction record
     const transaction = new Transaction({
