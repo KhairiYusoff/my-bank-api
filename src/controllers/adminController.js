@@ -38,9 +38,9 @@ exports.createStaff = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, {
-      message: "Server error. Please try again later.",
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
     });
   }
 };
@@ -123,9 +123,9 @@ exports.getPendingApplications = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching pending applications:", err.message);
-    return error(res, {
-      message: "Server error. Please try again later.",
-      statusCode: 500,
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
     });
   }
 };
