@@ -1,9 +1,6 @@
-const Account = require("../models/Account");
-const Transaction = require("../models/Transaction");
-const mongoose = require("mongoose");
 const { success, error } = require("../utils/response");
-const { sendNotification } = require("../services/notificationService");
-const { checkAmount, checkAccountExists } = require("../utils/validationHelpers");
+const { checkAmount } = require("../utils/validationHelpers");
+const transactionService = require("../services/transactionService");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
@@ -13,131 +10,24 @@ exports.transferFunds = async (req, res) => {
   if (amountError) return amountError;
 
   try {
-    // 1. Find accounts
-    const fromAccount = await Account.findOne({
-      accountNumber: fromAccountNumber,
-      user: req.user.id, // Only allow transfers from own accounts
-    });
-    const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
-
-    // Validate accounts exist
-    const fromAccountError = checkAccountExists(res, fromAccount, "Account not found");
-    if (fromAccountError) return fromAccountError;
-    
-    const toAccountError = checkAccountExists(res, toAccount, "Account not found");
-    if (toAccountError) return toAccountError;
-
-    if (fromAccount.balance < amount) {
-      return error(res, { message: "Insufficient funds", statusCode: 400 });
-    }
-
-    // 2. Create transaction records (one for each account)
-    const fromTransaction = new Transaction({
-      account: fromAccount._id,
-      amount: -amount,
-      type: "transfer",
-      description: `Transfer to ${toAccountNumber}`,
-      performedBy: req.user.id,
-      status: "completed"
-    });
-
-    const toTransaction = new Transaction({
-      account: toAccount._id,
-      amount: amount,
-      type: "transfer",
-      description: `Transfer from ${fromAccountNumber}`,
-      performedBy: req.user.id,
-      status: "completed"
-    });
-
-    // 3. Update account balances
-    fromAccount.balance -= amount;
-    toAccount.balance += amount;
-
-    // 4. Save everything in a session
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
-    try {
-      await fromTransaction.save({ session });
-      await toTransaction.save({ session });
-      await fromAccount.save({ session });
-      await toAccount.save({ session });
-      await session.commitTransaction();
-    } catch (err) {
-      await session.abortTransaction();
-      throw err;
-    } finally {
-      session.endSession();
-    }
-
-    // Send notifications after successful transfer (non-blocking, log errors only)
-    try {
-
-      // Notify sender (fromAccount)
-      await sendNotification({
-        type: "transfer",
-        title: "Funds Transferred",
-        message: `You have transferred RM${amount} to account ${toAccountNumber}. Description: ${description || ''}`,
-        link: `/accounts/${fromAccount.accountNumber}`,
-        recipient: {
-          role: "customer",
-          userId: fromAccount.user.toString(),
-        },
-        source: {
-          service: "my-bank-api",
-          id: fromTransaction._id.toString(),
-        },
-        data: {
-          amount,
-          fromAccountNumber: fromAccount.accountNumber,
-          toAccountNumber: toAccount.accountNumber,
-          transactionId: fromTransaction._id.toString(),
-        },
-        read: false,
-        delivered: false,
-      });
-      
-      // Notify recipient (toAccount)
-      await sendNotification({
-        type: "transfer",
-        title: "Funds Received",
-        message: `You have received RM${amount} from account ${fromAccountNumber}. Description: ${description || ''}`,
-        link: `/accounts/${toAccount.accountNumber}`,
-        recipient: {
-          role: "customer",
-          userId: toAccount.user.toString(),
-        },
-        source: {
-          service: "my-bank-api",
-          id: toTransaction._id.toString(),
-        },
-        data: {
-          amount,
-          fromAccountNumber: fromAccount.accountNumber,
-          toAccountNumber: toAccount.accountNumber,
-          transactionId: toTransaction._id.toString(),
-        },
-        read: false,
-        delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send transfer notification:", notifyErr.message);
-    }
+    // Delegate business logic to service layer
+    const result = await transactionService.transferFunds(
+      fromAccountNumber, 
+      toAccountNumber, 
+      amount, 
+      description, 
+      req.user.id
+    );
 
     return success(res, {
       message: "Transfer successful",
-      data: {
-        transactions: [fromTransaction, toTransaction],
-        fromAccount,
-        toAccount
-      }
+      data: result
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: err.message || "Internal server error"
     });
   }
 };
