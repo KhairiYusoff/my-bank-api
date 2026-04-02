@@ -38,13 +38,12 @@ function success(res, { message = "Success", data = null, meta = null, statusCod
  * @param {object} res Express response object
  * @param {object} opts { message, errors, meta, statusCode }
  */
-function error(res, { message = "Error", errors = null, meta = null, statusCode = 500 } = {}) {
-  return send(res, {
-    status: statusCode,
+function error(res, { message, statusCode = 500, errors = null, meta = null }) {
+  return res.status(statusCode).json({
     success: false,
     message,
-    errors,
-    meta,
+    ...(errors && { errors }),
+    ...(meta && { meta })
   });
 }
 
