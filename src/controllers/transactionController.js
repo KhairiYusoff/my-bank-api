@@ -3,13 +3,14 @@ const Transaction = require("../models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../utils/response");
 const { sendNotification } = require("../services/notificationService");
+const { checkAmount, checkAccountExists } = require("../utils/validationHelpers");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
 
-  if (!amount || amount <= 0) {
-    return error(res, { message: "Invalid transfer amount", statusCode: 400 });
-  }
+  // Validate amount
+  const amountError = checkAmount(res, amount, 'transfer');
+  if (amountError) return amountError;
 
   try {
     // 1. Find accounts
@@ -19,9 +20,12 @@ exports.transferFunds = async (req, res) => {
     });
     const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
 
-    if (!fromAccount || !toAccount) {
-      return error(res, { message: "Account not found", statusCode: 404 });
-    }
+    // Validate accounts exist
+    const fromAccountError = checkAccountExists(res, fromAccount, "Account not found");
+    if (fromAccountError) return fromAccountError;
+    
+    const toAccountError = checkAccountExists(res, toAccount, "Account not found");
+    if (toAccountError) return toAccountError;
 
     if (fromAccount.balance < amount) {
       return error(res, { message: "Insufficient funds", statusCode: 400 });
