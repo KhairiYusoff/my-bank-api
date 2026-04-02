@@ -2,13 +2,16 @@ const User = require("../models/User");
 const ActivityLog = require("../models/ActivityLog");
 const bcrypt = require("bcryptjs");
 const { success, error } = require("../utils/response");
+const { checkUserExists } = require("../utils/validationHelpers");
 
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    if (!user) {
-      return error(res, { message: "User not found", statusCode: 404 });
-    }
+    
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
+    
     return success(res, { data: user });
   } catch (err) {
     console.error(err.message);
@@ -133,9 +136,11 @@ exports.resetPassword = async (req, res) => {
       });
     }
     const user = await User.findOne({ email });
-    if (!user) {
-      return error(res, { message: "User not found", statusCode: 404 });
-    }
+    
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
+    
     user.password = newPassword;
     user.passwordChangedAt = new Date();
     await user.save();
@@ -153,9 +158,10 @@ exports.resetPassword = async (req, res) => {
 exports.deleteAccount = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    if (!user) {
-      return error(res, { message: "User not found", statusCode: 404 });
-    }
+    
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
 
     await User.findByIdAndDelete(req.user.id);
     return success(res, { message: "User account deleted successfully" });
@@ -324,9 +330,10 @@ exports.updatePreferences = async (req, res) => {
 
   try {
     const user = await User.findById(req.user.id);
-    if (!user) {
-      return error(res, { message: "User not found", statusCode: 404 });
-    }
+    
+    // Validate user exists
+    const userError = checkUserExists(res, user);
+    if (userError) return userError;
 
     user.preferences = { ...user.preferences, theme, language, notifications };
     await user.save();
