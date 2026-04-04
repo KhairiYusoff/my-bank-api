@@ -52,4 +52,13 @@ const AccountSchema = new mongoose.Schema({
   },
 });
 
+// Indexes for faster queries
+AccountSchema.index({ accountNumber: 1 }); // Unique account numbers
+AccountSchema.index({ user: 1 }); // User's accounts lookup
+AccountSchema.index({ status: 1 }); // Filter by status
+AccountSchema.index({ accountType: 1 }); // Filter by account type
+AccountSchema.index({ branch: 1 }); // Filter by branch
+AccountSchema.index({ dateOpened: -1 }); // Recent accounts
+AccountSchema.index({ balance: 1 }); // Balance queries
+
 module.exports = mongoose.model("Account", AccountSchema);

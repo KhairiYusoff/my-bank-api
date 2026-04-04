@@ -252,4 +252,14 @@ UserSchema.pre("save", async function (next) {
   next();
 });
 
+// Indexes for faster queries
+UserSchema.index({ email: 1 }); // Login queries
+UserSchema.index({ phoneNumber: 1 }); // Phone lookups
+UserSchema.index({ role: 1 }); // Role-based queries
+UserSchema.index({ applicationStatus: 1 }); // Application filters
+UserSchema.index({ isVerified: 1 }); // Verified users
+UserSchema.index({ isProfileComplete: 1 }); // Profile completion
+UserSchema.index({ createdAt: -1 }); // Recent users
+UserSchema.index({ name: "text" }); // Name search
+
 module.exports = mongoose.model("User", UserSchema);
