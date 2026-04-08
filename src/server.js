@@ -51,6 +51,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const accountRoutes = require("./routes/accountRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const userRoutes = require("./routes/userRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
 // V2 Routes
 const authRoutesV2 = require("./routes/v2/authRoutes");
@@ -66,6 +67,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/expenses", expenseRoutes);
 
 // Define V2 Routes
 app.use("/api/v2/auth", authRoutesV2);
