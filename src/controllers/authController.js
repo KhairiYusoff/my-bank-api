@@ -107,11 +107,12 @@ exports.login = async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
-    // Development cookie settings - HTTP only, no secure flag
+    // Cookie settings - Different for development vs production
+    const isProduction = process.env.NODE_ENV === 'production';
     const cookieOptions = {
       httpOnly: true,
-      secure: false, // Allow HTTP in development
-      sameSite: 'lax', // More permissive than 'strict' but still secure
+      secure: isProduction, // HTTPS required in production
+      sameSite: isProduction ? 'none' : 'lax', // 'none' for cross-domain
       maxAge: 3600000, // 1 hour
       path: '/'
       // No domain - let browser handle it
