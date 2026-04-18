@@ -286,6 +286,7 @@ exports.approveApplication = async (req, res) => {
     res.json({
       msg: "Application approved. An email has been sent to the user to complete their profile.",
       userId: user._id,
+      completeProfileUrl,
     });
   } catch (err) {
     console.error("Error approving application:", err);
