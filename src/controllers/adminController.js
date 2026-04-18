@@ -86,7 +86,7 @@ exports.getPendingApplications = async (req, res) => {
     }
 
     let applications = await User.find(filter)
-      .select("name email phoneNumber identityNumber createdAt")
+      .select("name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete")
       .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(numericLimit)
