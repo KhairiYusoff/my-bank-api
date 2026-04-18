@@ -1,4 +1,5 @@
 const User = require("../../models/User");
+const Account = require("../../models/Account");
 const { sendEmail } = require("../../utils/email");
 const jwt = require("jsonwebtoken");
 const { sendNotification } = require("../../services/notificationService");
@@ -204,6 +205,19 @@ exports.verifyCustomer = async (req, res) => {
     user.applicationStatus = "completed";
 
     await user.save();
+
+    // Create the bank account using the type chosen during profile completion
+    const accountTypeMap = { savings: "Savings", checking: "Checking", business: "Business" };
+    const mappedAccountType = accountTypeMap[user.accountType] || "Savings";
+    await Account.create({
+      user: user._id,
+      accountNumber: `MYB${Date.now()}`,
+      accountType: mappedAccountType,
+      balance: 0,
+      currency: "MYR",
+      status: "Active",
+      dateOpened: new Date(),
+    });
 
     // Send a congratulatory email with login link
     const frontendUrl = process.env.FRONTEND_URL || "http://127.0.0.1:5190";
