@@ -1,5 +1,5 @@
-const { success, error } = require("../../utils/response");
-const expenseService = require("../../services/expenseService");
+const { success, error } = require("../../shared/utils/response");
+const expenseService = require("../../shared/services/expenseService");
 const {
   checkAmount,
   checkExpenseCategory,
@@ -7,7 +7,7 @@ const {
   checkPaymentMethod,
   checkExpenseDate,
   checkExpenseDescription
-} = require("../../utils/validationHelpers");
+} = require("../../shared/utils/validationHelpers");
 
 /**
  * Create a new expense

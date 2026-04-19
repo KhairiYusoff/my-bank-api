@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
+} = require("../../shared/middleware/authMiddleware");
 const {
   createExpense,
   getExpenses,
