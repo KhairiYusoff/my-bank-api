@@ -1,8 +1,5 @@
 const express = require("express");
-const {
-  createStaff,
-  getPendingApplications,
-} = require("../controllers/adminController");
+const { createStaff } = require("../controllers/adminController");
 const {
   authMiddleware,
   authorizeRoles,
@@ -74,47 +71,6 @@ router.post(
   validateStaffRegistration,
   activityLogger("CREATE_STAFF", "Admin creating new staff"),
   createStaff
-);
-
-/**
- * @swagger
- * /admin/pending-applications:
- *   get:
- *     summary: Get a list of pending customer applications
- *     tags: [V1 - Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: A list of pending applications.
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   name:
- *                     type: string
- *                   email:
- *                     type: string
- *                   phoneNumber:
- *                     type: string
- *                   applicationStatus:
- *                     type: string
- *                     example: "pending"
- *       403:
- *         description: Forbidden (user is not an admin or banker).
- *       500:
- *         description: Server error.
- */
-router.get(
-  "/pending-applications",
-  authorizeRoles("admin", "banker"),
-  activityLogger("VIEW_APPLICATIONS", "Staff viewing pending applications"),
-  getPendingApplications
 );
 
 module.exports = router;
