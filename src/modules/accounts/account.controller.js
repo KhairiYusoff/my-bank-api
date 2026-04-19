@@ -1,10 +1,10 @@
-const Account = require("../../models/Account");
-const User = require("../../models/User");
-const Transaction = require("../../models/Transaction");
+const Account = require("../../shared/models/Account");
+const User = require("../../shared/models/User");
+const Transaction = require("../../shared/models/Transaction");
 const mongoose = require("mongoose");
-const { success, error } = require("../../utils/response");
-const { sendNotification } = require("../../services/notificationService");
-const { checkAmount, checkAccountExists } = require("../../utils/validationHelpers");
+const { success, error } = require("../../shared/utils/response");
+const { sendNotification } = require("../../shared/services/notificationService");
+const { checkAmount, checkAccountExists } = require("../../shared/utils/validationHelpers");
 
 exports.createAccount = async (req, res) => {
   const {

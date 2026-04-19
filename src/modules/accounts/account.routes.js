@@ -12,9 +12,9 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
+} = require("../../shared/middleware/authMiddleware");
 const { validateAccountCreation } = require("./account.middleware");
-const { activityLogger } = require("../../services/activityService");
+const { activityLogger } = require("../../shared/services/activityService");
 const router = express.Router();
 
 /**
