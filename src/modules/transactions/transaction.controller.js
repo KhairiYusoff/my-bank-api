@@ -1,6 +1,6 @@
-const { success, error } = require("../../utils/response");
-const { checkAmount } = require("../../utils/validationHelpers");
-const transactionService = require("../../services/transactionService");
+const { success, error } = require("../../shared/utils/response");
+const { checkAmount } = require("../../shared/utils/validationHelpers");
+const transactionService = require("../../shared/services/transactionService");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
@@ -111,8 +111,8 @@ exports.getAllTransactions = async (req, res) => {
 
     if (search) {
       // Find account IDs matching accountNumber
-      const Account = require("../../models/Account");
-      const User = require("../../models/User");
+      const Account = require("../../shared/models/Account");
+      const User = require("../../shared/models/User");
       const accounts = accountNumber || search
         ? await Account.find({ accountNumber: new RegExp(search, "i") }).select("_id")
         : [];

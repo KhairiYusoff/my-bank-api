@@ -1,5 +1,5 @@
-const Account = require("../../models/Account");
-const Transaction = require("../../models/Transaction");
+const Account = require("../../shared/models/Account");
+const Transaction = require("../../shared/models/Transaction");
 const mongoose = require("mongoose");
 const { sendNotification } = require("./notificationService");
 

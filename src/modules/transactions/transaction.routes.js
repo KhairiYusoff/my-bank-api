@@ -3,15 +3,15 @@ const router = express.Router();
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
+} = require("../../shared/middleware/authMiddleware");
 const {
   transferFunds,
   getAccountTransactions,
   getAllTransactions,
   getTransactionDetails,
 } = require("./transaction.controller");
-const { activityLogger } = require("../../services/activityService");
-const { validateTransfer, validateTransaction } = require("../../middleware/validationMiddleware");
+const { activityLogger } = require("../../shared/services/activityService");
+const { validateTransfer, validateTransaction } = require("../../shared/middleware/validationMiddleware");
 
 /**
  * @swagger
