@@ -57,10 +57,10 @@ app.get('/health', (req, res) => {
 // 7. Routes
 const authRoutes = require("./modules/auth/auth.routes");
 const adminRoutes = require("./modules/admin/admin.routes");
-const accountRoutes = require("./routes/accountRoutes");
-const transactionRoutes = require("./routes/transactionRoutes");
-const userRoutes = require("./routes/userRoutes");
-const expenseRoutes = require("./routes/expenseRoutes");
+const accountRoutes = require("./modules/accounts/account.routes");
+const transactionRoutes = require("./modules/transactions/transaction.routes");
+const userRoutes = require("./modules/users/user.routes");
+const expenseRoutes = require("./modules/expenses/expense.routes");
 
 // V2 Routes
 const onboardingRoutesV2 = require("./modules/onboarding/onboarding.routes");
