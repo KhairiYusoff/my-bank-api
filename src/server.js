@@ -63,9 +63,8 @@ const userRoutes = require("./routes/userRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 
 // V2 Routes
-const authRoutesV2 = require("./routes/v2/authRoutes");
 const adminRoutesV2 = require("./routes/v2/adminRoutes");
-const userRoutesV2 = require("./routes/v2/userRoutes");
+const onboardingRoutesV2 = require("./routes/v2/onboardingRoutes");
 
 // WebSocket
 const { initializeSocket } = require("./services/websocketService");
@@ -79,9 +78,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
 
 // Define V2 Routes
-app.use("/api/v2/auth", authRoutesV2);
 app.use("/api/v2/admin", adminRoutesV2);
-app.use("/api/v2/users", userRoutesV2);
+app.use("/api/v2/onboarding", onboardingRoutesV2);
 
 // Error handling middleware (must be after all routes)
 app.use(errorHandler);

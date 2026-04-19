@@ -1,6 +1,5 @@
 const express = require("express");
 const {
-  apply,
   login,
   refreshToken,
   logout,
@@ -8,112 +7,16 @@ const {
 } = require("../controllers/authController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const {
-  validateInitialApplication,
   validateLogin,
 } = require("../middleware/validationMiddleware");
 const { activityLogger } = require("../services/activityService");
 const { authRateLimit } = require("../middleware/rateLimitMiddleware");
 const router = express.Router();
 
-/**
- * @swagger
- * /auth/apply:
- *   post:
- *     summary: Apply for a new bank account
- *     tags: [V1 - Authentication]
- *     description: Starts the customer onboarding process by submitting an initial application with basic user information. This is the first step in the v2 onboarding flow, but uses a v1 endpoint for initial contact.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - name
- *               - email
- *               - phoneNumber
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Sarah Tan"
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "sarah.tan@example.com"
- *               phoneNumber:
- *                 type: string
- *                 example: "60123456781"
- *     responses:
- *       200:
- *         description: Application submitted successfully. Returns the new user's ID.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 msg:
- *                   type: string
- *                   example: "Application submitted successfully. Please await approval."
- *                 userId:
- *                   type: string
- *                   example: "60c72b2f9b1d8c001f8e4d1e"
- *       400:
- *         description: Bad request, likely due to validation errors (e.g., email already exists, invalid data).
- *       500:
- *         description: Server error.
- */
-router.post("/apply", [
-  authRateLimit, // Stricter rate limiting for applications
-  validateInitialApplication,
-  activityLogger("CUSTOMER_APPLICATION", "New customer application"),
-  apply,
-]);
-
-/**
- * @swagger
- * /auth/login:
- *   post:
- *     summary: Log in a user
- *     tags: [V1 - Authentication]
- *     description: Authenticates a user with their email and password, returning a JWT for session management.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "banker@mybank.com"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "password123"
- *     responses:
- *       200:
- *         description: Login successful. Returns JWT token.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *       400:
- *         description: Invalid credentials.
- *       500:
- *         description: Server error.
- */
 router.post("/login", [
-  authRateLimit, // Stricter rate limiting for login attempts
-  validateLogin, // Input validation
-  activityLogger("LOGIN", "User login attempt"), 
+  authRateLimit,
+  validateLogin,
+  activityLogger("LOGIN", "User login attempt"),
   login
 ]);
 

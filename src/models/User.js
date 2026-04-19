@@ -54,6 +54,10 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    isFirstTime: {
+      type: Boolean,
+      default: true
+    },
     role: {
       type: String,
       enum: ["customer", "banker", "admin"],

@@ -6,75 +6,6 @@ const { success, error } = require("../utils/response");
 const { checkUserExists, checkToken } = require("../utils/validationHelpers");
 const { notifyNewApplication } = require("../services/websocketService");
 
-// Public application for new customers
-exports.apply = async (req, res) => {
-  // Validate input
-  const errorsResult = validationResult(req);
-  if (!errorsResult.isEmpty()) {
-    return error(res, {
-      message: "Validation failed",
-      errors: errorsResult.array(),
-      statusCode: 400,
-    });
-  }
-
-  const { name, email, phoneNumber } = req.body;
-
-  try {
-    // Check if user already exists
-    let user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
-    if (user) {
-      const duplicateMsg =
-        user.email === email
-          ? "An application with this email already exists"
-          : "An application with this phone number already exists";
-      return error(res, { message: duplicateMsg, statusCode: 400 });
-    }
-
-    // Create initial application with basic info
-    user = new User({
-      name,
-      email,
-      phoneNumber,
-      role: "customer",
-      isVerified: false,
-      isProfileComplete: false,
-      applicationStatus: "pending", // Track application status
-    });
-    // Save user to database (Password hashing handled by pre-save hook in User model)
-    await user.save();
-
-    // Notify staff about new application
-    notifyNewApplication(user);
-
-    return success(res, {
-      message: "Application submitted successfully. A bank representative will contact you.",
-      data: { userId: user._id.toString() },
-      statusCode: 201,
-    });
-  } catch (err) {
-    console.error("Registration error:", err.message);
-
-    if (err.name === "ValidationError") {
-      // Handle Mongoose validation errors
-      const validationErrors = Object.values(err.errors).map(
-        (error) => error.message
-      );
-      return error(res, {
-        message: "Invalid user data",
-        errors: validationErrors,
-        statusCode: 400,
-      });
-    } else if (err.code === 11000) {
-      // Handle duplicate key error (likely email)
-      return error(res, { message: "Email already in use", statusCode: 400 });
-    } else {
-      // Handle other types of errors
-      return error(res, { message: "Server error. Please try again later.", statusCode: 500 });
-    }
-  }
-};
-
 //login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -105,6 +36,10 @@ exports.login = async (req, res) => {
 
     // Store refresh token in the user document
     user.refreshToken = refreshToken;
+    const isFirstTime = user.isFirstTime;
+    if (user.isFirstTime) {
+      user.isFirstTime = false;
+    }
     await user.save();
 
     // Cookie settings - Different for development vs production
@@ -135,6 +70,7 @@ exports.login = async (req, res) => {
           email: user.email,
           role: user.role,
           isVerified: user.isVerified,
+          isFirstTime,
         },
       },
     });
