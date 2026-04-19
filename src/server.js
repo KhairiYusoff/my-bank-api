@@ -8,17 +8,27 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 
-// Error handling
+// 3. Internal dependencies
 const errorHandler = require("./shared/utils/errorHandler");
+const connectDB = require("./config/db");
+const swaggerSpec = require("./config/swaggerConfig");
+const { rateLimitMiddleware } = require("./shared/middleware/rateLimitMiddleware");
+const { initializeSocket } = require("./shared/services/websocketService");
+const authRoutes = require("./modules/auth/auth.routes");
+const adminRoutes = require("./modules/admin/admin.routes");
+const accountRoutes = require("./modules/accounts/account.routes");
+const transactionRoutes = require("./modules/transactions/transaction.routes");
+const userRoutes = require("./modules/users/user.routes");
+const expenseRoutes = require("./modules/expenses/expense.routes");
+const onboardingRoutes = require("./modules/onboarding/onboarding.routes");
 
-// 3. Initialize Express app
+// 4. Initialize Express app
 const app = express();
 
-// 4. Connect to Database
-const connectDB = require("./config/db");
+// 5. Connect to Database
 connectDB();
 
-// 5. Middleware
+// 6. Middleware
 const corsOptions = {
   origin: [
     process.env.ADMIN_FRONTEND_URL,
@@ -35,13 +45,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 6. Rate Limiting
-const { rateLimitMiddleware } = require("./shared/middleware/rateLimitMiddleware");
+// 7. Rate Limiting
 app.use(rateLimitMiddleware);
 
-// 7. API Documentation
+// 8. API Documentation
 if (process.env.NODE_ENV !== "production") {
-  const swaggerSpec = require("./config/swaggerConfig");
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.get("/api-docs.json", (req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -49,7 +57,6 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-// Health Check Endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
@@ -58,41 +65,19 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 7. Routes
-const authRoutes = require("./modules/auth/auth.routes");
-const adminRoutes = require("./modules/admin/admin.routes");
-const accountRoutes = require("./modules/accounts/account.routes");
-const transactionRoutes = require("./modules/transactions/transaction.routes");
-const userRoutes = require("./modules/users/user.routes");
-const expenseRoutes = require("./modules/expenses/expense.routes");
-
-const onboardingRoutes = require("./modules/onboarding/onboarding.routes");
-
-// WebSocket
-const { initializeSocket } = require("./shared/services/websocketService");
-
-// Define Routes
+// 9. Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/accounts", accountRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
-
 app.use("/api/onboarding", onboardingRoutes);
 
 // Error handling middleware (must be after all routes)
 app.use(errorHandler);
 
-// API Documentation Route - Already handled in the NODE_ENV check above
-
 const PORT = process.env.PORT || 5001;
-
-// Create HTTP server
 const server = http.createServer(app);
-
-// Initialize WebSocket
 initializeSocket(server);
-
-// Start server
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));
