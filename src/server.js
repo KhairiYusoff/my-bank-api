@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 
 // Error handling
-const errorHandler = require("./utils/errorHandler");
+const errorHandler = require("./shared/utils/errorHandler");
 
 // 3. Initialize Express app
 const app = express();
@@ -36,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // 6. Rate Limiting
-const { rateLimitMiddleware } = require("./middleware/rateLimitMiddleware");
+const { rateLimitMiddleware } = require("./shared/middleware/rateLimitMiddleware");
 app.use(rateLimitMiddleware);
 
 // 7. API Documentation
@@ -66,7 +66,7 @@ const expenseRoutes = require("./modules/expenses/expense.routes");
 const onboardingRoutesV2 = require("./modules/onboarding/onboarding.routes");
 
 // WebSocket
-const { initializeSocket } = require("./services/websocketService");
+const { initializeSocket } = require("./shared/services/websocketService");
 
 // Define Routes
 app.use("/api/auth", authRoutes);
