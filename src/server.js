@@ -56,14 +56,13 @@ app.get('/health', (req, res) => {
 
 // 7. Routes
 const authRoutes = require("./modules/auth/auth.routes");
-const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./modules/admin/admin.routes");
 const accountRoutes = require("./routes/accountRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const userRoutes = require("./routes/userRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 
 // V2 Routes
-const adminRoutesV2 = require("./routes/v2/adminRoutes");
 const onboardingRoutesV2 = require("./modules/onboarding/onboarding.routes");
 
 // WebSocket
@@ -78,7 +77,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
 
 // Define V2 Routes
-app.use("/api/v2/admin", adminRoutesV2);
 app.use("/api/v2/onboarding", onboardingRoutesV2);
 
 // Error handling middleware (must be after all routes)
