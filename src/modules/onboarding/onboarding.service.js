@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { sendEmail } = require("../../utils/email");
+const { sendEmail } = require("../../shared/utils/email");
 
 const generateProfileCompletionToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "24h" });

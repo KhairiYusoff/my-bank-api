@@ -12,14 +12,14 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
-const { verifyProfileCompletionToken } = require("../../middleware/tokenMiddleware");
+} = require("../../shared/middleware/authMiddleware");
+const { verifyProfileCompletionToken } = require("../../shared/middleware/tokenMiddleware");
 const {
   validateInitialApplication,
   validateFullRegistration,
 } = require("./onboarding.validation");
-const { activityLogger } = require("../../services/activityService");
-const { authRateLimit } = require("../../middleware/rateLimitMiddleware");
+const { activityLogger } = require("../../shared/services/activityService");
+const { authRateLimit } = require("../../shared/middleware/rateLimitMiddleware");
 
 /**
  * @swagger

@@ -1,8 +1,8 @@
 const { validationResult } = require("express-validator");
-const User = require("../../models/User");
-const Account = require("../../models/Account");
-const { success, error } = require("../../utils/response");
-const { notifyNewApplication } = require("../../services/websocketService");
+const User = require("../../shared/models/User");
+const Account = require("../../shared/models/Account");
+const { success, error } = require("../../shared/utils/response");
+const { notifyNewApplication } = require("../../shared/services/websocketService");
 const {
   buildProfileCompletionUrl,
   sendApprovalEmail,
