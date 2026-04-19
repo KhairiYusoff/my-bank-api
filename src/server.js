@@ -64,7 +64,7 @@ const expenseRoutes = require("./routes/expenseRoutes");
 
 // V2 Routes
 const adminRoutesV2 = require("./routes/v2/adminRoutes");
-const onboardingRoutesV2 = require("./routes/v2/onboardingRoutes");
+const onboardingRoutesV2 = require("./modules/onboarding/onboarding.routes");
 
 // WebSocket
 const { initializeSocket } = require("./services/websocketService");
