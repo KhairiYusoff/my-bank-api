@@ -11,9 +11,9 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
+} = require("../../shared/middleware/authMiddleware");
 const { validateStaffRegistration } = require("./admin.validation");
-const { activityLogger } = require("../../services/activityService");
+const { activityLogger } = require("../../shared/services/activityService");
 
 /**
  * @swagger
