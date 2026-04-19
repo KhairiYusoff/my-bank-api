@@ -1,10 +1,10 @@
-const User = require("../../models/User");
+const User = require("../../shared/models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const { success, error } = require("../../utils/response");
-const { checkUserExists, checkToken } = require("../../utils/validationHelpers");
-const { notifyNewApplication } = require("../../services/websocketService");
+const { success, error } = require("../../shared/utils/response");
+const { checkUserExists, checkToken } = require("../../shared/utils/validationHelpers");
+const { notifyNewApplication } = require("../../shared/services/websocketService");
 
 //login
 exports.login = async (req, res) => {

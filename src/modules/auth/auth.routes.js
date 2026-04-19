@@ -5,10 +5,10 @@ const {
   logout,
   checkToken,
 } = require("./auth.controller");
-const { authMiddleware } = require("../../middleware/authMiddleware");
+const { authMiddleware } = require("../../shared/middleware/authMiddleware");
 const { validateLogin } = require("./auth.validation");
-const { activityLogger } = require("../../services/activityService");
-const { authRateLimit } = require("../../middleware/rateLimitMiddleware");
+const { activityLogger } = require("../../shared/services/activityService");
+const { authRateLimit } = require("../../shared/middleware/rateLimitMiddleware");
 const router = express.Router();
 
 router.post("/login", [
