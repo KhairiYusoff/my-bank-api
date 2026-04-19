@@ -3,8 +3,8 @@ const router = express.Router();
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../middleware/authMiddleware");
-const { checkActivityAccess } = require("../../middleware/activityMiddleware");
+} = require("../../shared/middleware/authMiddleware");
+const { checkActivityAccess } = require("../../shared/middleware/activityMiddleware");
 const {
   getProfile,
   updateProfile,
@@ -22,8 +22,8 @@ const {
   validatePasswordChange,
   validatePreferencesUpdate,
 } = require("./user.middleware");
-const User = require("../../models/User");
-const { activityLogger } = require("../../services/activityService");
+const User = require("../../shared/models/User");
+const { activityLogger } = require("../../shared/services/activityService");
 
 /**
  * @swagger

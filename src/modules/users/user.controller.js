@@ -1,8 +1,8 @@
-const User = require("../../models/User");
-const ActivityLog = require("../../models/ActivityLog");
+const User = require("../../shared/models/User");
+const ActivityLog = require("../../shared/models/ActivityLog");
 const bcrypt = require("bcryptjs");
-const { success, error } = require("../../utils/response");
-const { checkUserExists } = require("../../utils/validationHelpers");
+const { success, error } = require("../../shared/utils/response");
+const { checkUserExists } = require("../../shared/utils/validationHelpers");
 
 exports.getProfile = async (req, res) => {
   try {
