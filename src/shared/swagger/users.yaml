@@ -1,0 +1,195 @@
+tags:
+  - name: Users
+    description: User profile, password, preferences, and management
+
+paths:
+  /users/me/reset-password:
+    post:
+      summary: Reset password (public — no login required)
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, newPassword]
+              properties:
+                email:
+                  type: string
+                  format: email
+                newPassword:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Password reset successfully.
+        "400":
+          description: Missing or invalid input.
+        "404":
+          description: User not found.
+
+  /users/me:
+    get:
+      summary: Get the profile of the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiSuccess'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/UserProfile'
+        "401":
+          description: Unauthorized.
+    put:
+      summary: Update the profile of the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phoneNumber:
+                  type: string
+      responses:
+        "200":
+          description: Profile updated successfully.
+        "401":
+          description: Unauthorized.
+    delete:
+      summary: Delete the account of the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account deleted successfully.
+        "401":
+          description: Unauthorized.
+
+  /users/me/password:
+    put:
+      summary: Change password for the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+      responses:
+        "200":
+          description: Password changed successfully.
+        "400":
+          description: Incorrect current password.
+        "401":
+          description: Unauthorized.
+
+  /users/me/activity:
+    get:
+      summary: Get activity log for the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of user activities.
+        "401":
+          description: Unauthorized.
+
+  /users/me/preferences:
+    put:
+      summary: Update preferences for the currently logged-in user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                theme:
+                  type: string
+                  enum: [light, dark]
+                language:
+                  type: string
+                  example: en-US
+      responses:
+        "200":
+          description: Preferences updated successfully.
+        "401":
+          description: Unauthorized.
+
+  /users/activity/{userId}:
+    get:
+      summary: Get activity log for a specific user (banker/admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of user activities.
+        "403":
+          description: Forbidden.
+        "404":
+          description: User not found.
+
+  /users/customers:
+    get:
+      summary: Get all customers (banker/admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all customers.
+        "403":
+          description: Forbidden.
+
+  /users/staff:
+    get:
+      summary: Get all staff (admin only)
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all staff.
+        "403":
+          description: Forbidden.

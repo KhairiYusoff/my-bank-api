@@ -1,0 +1,201 @@
+tags:
+  - name: Accounts
+    description: Bank account management — create, deposit, withdraw, balance
+
+paths:
+  /accounts:
+    get:
+      summary: Get all accounts for the logged-in customer
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of customer's accounts.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccess"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/AccountSummary"
+        "403":
+          description: Forbidden.
+
+  /accounts/all:
+    get:
+      summary: Get all accounts in the bank (admin only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all accounts.
+        "403":
+          description: Forbidden.
+
+  /accounts/create:
+    post:
+      summary: Create a new bank account for a user (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, accountType, currency]
+              properties:
+                userId:
+                  type: string
+                  example: 60c72b2f9b1d8c001f8e4d1e
+                accountType:
+                  type: string
+                  enum: [savings, checking]
+                currency:
+                  type: string
+                  example: MYR
+      responses:
+        "201":
+          description: Account created successfully.
+        "400":
+          description: Validation error.
+        "403":
+          description: Forbidden.
+        "404":
+          description: User not found.
+
+  /accounts/deposit:
+    post:
+      summary: Deposit funds into an account
+      tags: [Accounts]
+      description: Customer deposits into own account. Banker can deposit into any account.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountNumber, amount]
+              properties:
+                accountNumber:
+                  type: string
+                amount:
+                  type: number
+                  format: double
+                  example: 500.00
+      responses:
+        "200":
+          description: Deposit successful.
+        "400":
+          description: Invalid amount.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/withdraw:
+    post:
+      summary: Withdraw funds from an account
+      tags: [Accounts]
+      description: Customer withdraws from own account. Banker can withdraw from any account.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountNumber, amount]
+              properties:
+                accountNumber:
+                  type: string
+                amount:
+                  type: number
+                  format: double
+                  example: 200.00
+      responses:
+        "200":
+          description: Withdrawal successful.
+        "400":
+          description: Insufficient funds or invalid amount.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/airdrop:
+    post:
+      summary: Airdrop funds to a user (admin only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, amount]
+              properties:
+                userId:
+                  type: string
+                amount:
+                  type: number
+                  format: double
+      responses:
+        "200":
+          description: Airdrop successful.
+        "403":
+          description: Forbidden.
+        "404":
+          description: User not found.
+
+  /accounts/balance/{accountNumber}:
+    get:
+      summary: Get the balance of a specific account (customer only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account balance.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}:
+    delete:
+      summary: Delete a bank account (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account deleted successfully.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.

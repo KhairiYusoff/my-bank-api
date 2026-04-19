@@ -1,0 +1,92 @@
+tags:
+  - name: Transactions
+    description: Fund transfers and transaction history
+
+paths:
+  /transactions/transfer:
+    post:
+      summary: Transfer funds between two accounts
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fromAccountNumber, toAccountNumber, amount]
+              properties:
+                fromAccountNumber:
+                  type: string
+                toAccountNumber:
+                  type: string
+                amount:
+                  type: number
+                  format: double
+                  example: 100.00
+      responses:
+        "200":
+          description: Transfer successful.
+        "400":
+          description: Insufficient funds or invalid input.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /transactions/all:
+    get:
+      summary: Get all transactions in the system (admin only)
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of all transactions.
+        "403":
+          description: Forbidden.
+
+  /transactions/account/{accountNumber}:
+    get:
+      summary: Get all transactions for a specific account
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of transactions.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /transactions/{transactionId}:
+    get:
+      summary: Get details for a specific transaction
+      tags: [Transactions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction details.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Transaction not found.

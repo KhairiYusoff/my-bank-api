@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: My Bank API
+  version: 1.0.0
+  description: API documentation for the My Bank application, covering authentication, onboarding, accounts, transactions, expenses, and user management.
+
+servers:
+  - url: ${API_BASE_URL}
+    description: Active server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ApiError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: An error occurred
+
+    ApiSuccess:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation successful
+        data:
+          type: object
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 60c72b2f9b1d8c001f8e4d1e
+        name:
+          type: string
+          example: Ahmad Khairil
+        email:
+          type: string
+          format: email
+          example: khairil@example.com
+        role:
+          type: string
+          enum: [customer, banker, admin]
+        isVerified:
+          type: boolean
+        isFirstTime:
+          type: boolean
+
+    AccountSummary:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          example: ACC-001234
+        accountType:
+          type: string
+          enum: [savings, checking]
+        balance:
+          type: number
+          format: double
+          example: 1500.00
+        currency:
+          type: string
+          example: MYR
+
+    ExpenseInput:
+      type: object
+      required: [amount, category, description, date, paymentMethod, account]
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 25.50
+        category:
+          type: string
+          example: food
+        subCategory:
+          type: string
+          example: restaurant
+        description:
+          type: string
+          example: Lunch at mamak stall
+        date:
+          type: string
+          format: date
+          example: "2024-01-15"
+        paymentMethod:
+          type: string
+          example: cash
+        account:
+          type: string
+          example: 60c72b2f9b1d8c001f8e4d1e
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        location:
+          type: string
+        merchant:
+          type: object
+          properties:
+            name:
+              type: string
+            category:
+              type: string

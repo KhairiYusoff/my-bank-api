@@ -1,33 +1,29 @@
-const swaggerJsdoc = require('swagger-jsdoc');
+const YAML = require('yamljs');
+const path = require('path');
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'My Bank API',
-      version: '1.0.0',
-      description: 'API documentation for the My Bank application, covering customer onboarding, accounts, and transactions.',
+const swaggerDir = path.join(__dirname, '../shared/swagger');
+
+const base = YAML.load(path.join(swaggerDir, 'openapi.yaml'));
+
+const features = ['auth', 'admin', 'onboarding', 'accounts', 'transactions', 'expenses', 'users'];
+
+const spec = {
+  ...base,
+  servers: [
+    {
+      url: process.env.API_BASE_URL || 'http://localhost:5001/api',
+      description: 'Active server',
     },
-    servers: [
-      {
-        url: process.env.API_BASE_URL || 'http://localhost:5001/api',
-        description: 'Development server',
-      },
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-  },
-  // Scan all module route files and dedicated swagger spec files
-  apis: ['./src/modules/**/*.routes.js', './src/modules/**/*.swagger.js'],
+  ],
+  tags: [],
+  paths: {},
 };
 
-const swaggerSpec = swaggerJsdoc(options);
+for (const feature of features) {
+  const featureSpec = YAML.load(path.join(swaggerDir, `${feature}.yaml`));
+  if (featureSpec.tags) spec.tags.push(...featureSpec.tags);
+  if (featureSpec.paths) Object.assign(spec.paths, featureSpec.paths);
+}
 
-module.exports = swaggerSpec;
+module.exports = spec;
+

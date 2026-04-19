@@ -1,0 +1,133 @@
+tags:
+  - name: Onboarding
+    description: Customer onboarding flow — application, approval, and verification
+
+paths:
+  /onboarding/apply:
+    post:
+      summary: Submit a new customer application
+      tags: [Onboarding]
+      description: Public endpoint. Submit initial details to apply for a bank account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, phoneNumber]
+              properties:
+                name:
+                  type: string
+                  example: Ahmad Khairil
+                email:
+                  type: string
+                  format: email
+                  example: khairil@example.com
+                phoneNumber:
+                  type: string
+                  example: "+60123456789"
+      responses:
+        "201":
+          description: Application submitted successfully.
+        "400":
+          description: Validation error or duplicate application.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "429":
+          description: Too many requests.
+
+  /onboarding/complete-profile:
+    put:
+      summary: Complete customer profile after approval
+      tags: [Onboarding]
+      description: Called by the customer using the one-time token from their approval email.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password, address, dateOfBirth, idNumber]
+              properties:
+                password:
+                  type: string
+                  format: password
+                address:
+                  type: string
+                dateOfBirth:
+                  type: string
+                  format: date
+                idNumber:
+                  type: string
+      responses:
+        "200":
+          description: Profile completed successfully.
+        "400":
+          description: Validation error.
+        "401":
+          description: Invalid or expired token.
+
+  /onboarding/pending:
+    get:
+      summary: Get all pending applications
+      tags: [Onboarding]
+      description: Returns customers with pending application status. Requires banker or admin role.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of pending applications.
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+
+  /onboarding/approve/{userId}:
+    post:
+      summary: Approve a customer's initial application
+      tags: [Onboarding]
+      description: Sends the customer a profile completion email with a one-time token link.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Application approved and email sent.
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+        "404":
+          description: User not found.
+
+  /onboarding/verify/{userId}:
+    post:
+      summary: Verify a customer and activate their account
+      tags: [Onboarding]
+      description: Final step — marks customer as verified, activates account, and auto-creates bank account.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer verified and account activated.
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+        "404":
+          description: User not found.
