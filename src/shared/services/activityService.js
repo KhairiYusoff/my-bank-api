@@ -134,7 +134,6 @@ const ACTIVITY_TYPES = {
   },
 };
 
-// Main logging function
 const logActivity = async (req, res, action, details = "") => {
   try {
     const activityConfig = ACTIVITY_TYPES[action];
@@ -143,7 +142,6 @@ const logActivity = async (req, res, action, details = "") => {
       return;
     }
 
-    // Get user ID based on activity type
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
     // For some activities like CUSTOMER_APPLICATION, userId might be null
@@ -152,7 +150,6 @@ const logActivity = async (req, res, action, details = "") => {
       return;
     }
 
-    // Create activity log
     const activityLog = new ActivityLog({
       user: userId,
       action,
@@ -176,7 +173,14 @@ const logActivity = async (req, res, action, details = "") => {
   }
 };
 
-// Middleware factory
+/**
+ * Express middleware factory for recording audit log entries.
+ * Intercepts res.json to capture the response payload before async logging.
+ * Logging failures are swallowed so they never break the primary request.
+ * @param {string} action - Activity type key from ACTIVITY_TYPES
+ * @param {string} [details] - Optional human-readable detail string
+ * @returns {Function} Express middleware
+ */
 const activityLogger = (action, details = "") => {
   return async (req, res, next) => {
     try {

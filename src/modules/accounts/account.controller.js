@@ -19,7 +19,6 @@ exports.createAccount = async (req, res) => {
   } = req.body;
 
   try {
-    // 1. Verify the customer exists
     const customer = await User.findOne({
       _id: userId,
       role: "customer", // Ensure it's a customer
@@ -32,7 +31,6 @@ exports.createAccount = async (req, res) => {
       });
     }
 
-    // 2. Create the account
     const accountNumber = `MYB${Date.now()}`;
     const newAccount = new Account({
       user: userId, // Link to the customer
@@ -63,10 +61,8 @@ exports.createAccount = async (req, res) => {
   }
 };
 
-// Get accounts for the authenticated user with pagination, filtering & sorting
 exports.getAccounts = async (req, res) => {
   try {
-    // Parse query params
     const {
       page = 1,
       limit = 20,
@@ -81,14 +77,12 @@ exports.getAccounts = async (req, res) => {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    // Build filter
     const filter = { user: req.user.id };
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
     if (currency) filter.currency = currency;
 
-    // Query DB
     const [total, accounts] = await Promise.all([
       Account.countDocuments(filter),
       Account.find(filter)
@@ -125,8 +119,6 @@ exports.getAccounts = async (req, res) => {
   }
 };
 
-// Get all accounts (admin only)
-// Get all accounts (admin only) with pagination, filtering & sorting
 exports.getAllAccounts = async (req, res) => {
   try {
     const {
@@ -151,7 +143,6 @@ exports.getAllAccounts = async (req, res) => {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    // Build dynamic filter for admin
     const filter = {};
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
@@ -178,7 +169,6 @@ exports.getAllAccounts = async (req, res) => {
       .skip(skip)
       .limit(numericLimit);
     if (search) {
-      // Search by accountNumber or user name/email
       accountsQuery = Account.find({
         ...filter,
         $or: [{ accountNumber: new RegExp(search, "i") }],
@@ -286,7 +276,6 @@ exports.deleteAccount = async (req, res) => {
 exports.deposit = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  // Validate amount
   const amountError = checkAmount(res, amount, 'deposit');
   if (amountError) return amountError;
 
@@ -299,11 +288,9 @@ exports.deposit = async (req, res) => {
 
     const account = await Account.findOne(query);
 
-    // Validate account exists
     const accountError = checkAccountExists(res, account, "Account not found or access denied");
     if (accountError) return accountError;
 
-    // 2. Create transaction record
     const transaction = new Transaction({
       account: account._id,
       amount,
@@ -313,10 +300,9 @@ exports.deposit = async (req, res) => {
       status: "completed",
     });
 
-    // 3. Update account balance
     account.balance += amount;
 
-    // 4. Save both transaction and account in a session
+    // Atomic save — both records must succeed or neither persists
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -375,7 +361,6 @@ exports.deposit = async (req, res) => {
 exports.withdraw = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  // Validate amount
   const amountError = checkAmount(res, amount, 'withdraw');
   if (amountError) return amountError;
 
@@ -388,16 +373,13 @@ exports.withdraw = async (req, res) => {
 
     const account = await Account.findOne(query);
 
-    // Validate account exists
     const accountError = checkAccountExists(res, account, "Account not found");
     if (accountError) return accountError;
 
-    // 3. Check sufficient balance
     if (account.balance < amount) {
       return error(res, { message: "Insufficient funds", statusCode: 400 });
     }
 
-    // 4. Create transaction record
     const transaction = new Transaction({
       account: account._id,
       amount,
@@ -407,10 +389,9 @@ exports.withdraw = async (req, res) => {
       status: "completed",
     });
 
-    // 5. Update account balance
     account.balance -= amount;
 
-    // 6. Save both transaction and account in a session
+    // Atomic save — both records must succeed or neither persists
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -469,19 +450,14 @@ exports.withdraw = async (req, res) => {
 exports.airdrop = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  // Validate amount
   const amountError = checkAmount(res, amount, 'airdrop');
   if (amountError) return amountError;
 
   try {
-    // 1. Find account
     const account = await Account.findOne({ accountNumber });
-    
-    // Validate account exists
     const accountError = checkAccountExists(res, account, "Account not found");
     if (accountError) return accountError;
 
-    // 2. Create transaction record
     const transaction = new Transaction({
       account: account._id,
       amount,
@@ -491,10 +467,9 @@ exports.airdrop = async (req, res) => {
       status: "completed",
     });
 
-    // 3. Update account balance
     account.balance += amount;
 
-    // 4. Save both transaction and account in a session
+    // Atomic save — both records must succeed or neither persists
     const session = await mongoose.startSession();
     session.startTransaction();
 

@@ -7,8 +7,6 @@ const { checkUserExists } = require("../../shared/utils/validationHelpers");
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
-    
-    // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
     
@@ -136,8 +134,6 @@ exports.resetPassword = async (req, res) => {
       });
     }
     const user = await User.findOne({ email });
-    
-    // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
     
@@ -154,12 +150,9 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-// Delete account
 exports.deleteAccount = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
-    // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
 
@@ -174,7 +167,6 @@ exports.deleteAccount = async (req, res) => {
   }
 };
 
-// Get activity log for the currently logged-in user
 exports.getOwnActivity = async (req, res) => {
   try {
     const {

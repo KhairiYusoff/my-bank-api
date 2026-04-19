@@ -1,16 +1,15 @@
 const { success, error } = require("../../shared/utils/response");
 const { checkAmount } = require("../../shared/utils/validationHelpers");
 const transactionService = require("../../shared/services/transactionService");
+const Transaction = require("../../shared/models/Transaction");
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
 
-  // Validate amount
   const amountError = checkAmount(res, amount, 'transfer');
   if (amountError) return amountError;
 
   try {
-    // Delegate business logic to service layer
     const result = await transactionService.transferFunds(
       fromAccountNumber, 
       toAccountNumber, 
@@ -32,13 +31,11 @@ exports.transferFunds = async (req, res) => {
   }
 };
 
-// Get transaction history for an account
 exports.getAccountTransactions = async (req, res) => {
   const { accountNumber } = req.params;
   const { page = 1, limit = 10, sort = "desc" } = req.query;
 
   try {
-    // Delegate to service layer
     const result = await transactionService.getAccountTransactions(
       accountNumber, 
       req.user, 
@@ -61,7 +58,6 @@ exports.getAccountTransactions = async (req, res) => {
   }
 };
 
-// Get all transactions (admin only)
 exports.getAllTransactions = async (req, res) => {
   const {
     page = 1,
@@ -79,7 +75,6 @@ exports.getAllTransactions = async (req, res) => {
   } = req.query;
 
   try {
-    // 1. Build query
     const query = {};
     if (type) query.type = type;
     if (status) query.status = status;
@@ -110,7 +105,6 @@ exports.getAllTransactions = async (req, res) => {
       });
 
     if (search) {
-      // Find account IDs matching accountNumber
       const Account = require("../../shared/models/Account");
       const User = require("../../shared/models/User");
       const accounts = accountNumber || search
@@ -144,10 +138,7 @@ exports.getAllTransactions = async (req, res) => {
         });
     }
 
-    // 2. Get transactions with pagination
     const transactions = await transactionsQuery;
-
-    // 3. Get total count for pagination
     const total = await Transaction.countDocuments(query);
 
     return success(res, {
@@ -168,12 +159,10 @@ exports.getAllTransactions = async (req, res) => {
   }
 };
 
-// Get transaction details
 exports.getTransactionDetails = async (req, res) => {
   const { transactionId } = req.params;
 
   try {
-    // Delegate to service layer
     const transaction = await transactionService.getTransactionDetails(
       transactionId, 
       req.user

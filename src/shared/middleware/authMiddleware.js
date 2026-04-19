@@ -16,7 +16,8 @@ const authMiddleware = async function (req, res, next) {
       return res.status(401).json({ msg: "Token invalid or user logged out" });
     }
 
-    // Invalidate token if issued before password change
+    // Rejects tokens issued before a password change — prevents old sessions
+    // from remaining valid after a security-critical credential reset.
     if (user.passwordChangedAt) {
       const issuedAt = decoded.iat * 1000; // iat is in seconds, convert to ms
       const pwdChangedAt = new Date(user.passwordChangedAt).getTime();

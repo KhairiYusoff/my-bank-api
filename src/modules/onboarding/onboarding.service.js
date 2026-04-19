@@ -5,12 +5,22 @@ const generateProfileCompletionToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
 };
 
+/**
+ * Generate a short-lived JWT and build the frontend URL for profile completion.
+ * Token is set to 24h — matches the expiry message in the approval email.
+ * @param {string} userId - MongoDB ObjectId string of the approved user
+ * @returns {{ token: string, url: string }}
+ */
 const buildProfileCompletionUrl = (userId) => {
   const frontendUrl = process.env.FRONTEND_URL || "http://127.0.0.1:5190";
   const token = generateProfileCompletionToken(userId);
   return { token, url: `${frontendUrl}/complete-profile?token=${token}` };
 };
 
+/**
+ * Send the approval notification email with a profile-completion CTA link.
+ * @param {{ email: string, name: string, completeProfileUrl: string }} param0
+ */
 const sendApprovalEmail = async ({ email, name, completeProfileUrl }) => {
   await sendEmail({
     to: email,
@@ -27,6 +37,10 @@ const sendApprovalEmail = async ({ email, name, completeProfileUrl }) => {
   });
 };
 
+/**
+ * Send the welcome email confirming the account is active and ready to use.
+ * @param {{ email: string, name: string }} param0
+ */
 const sendActivationEmail = async ({ email, name }) => {
   const frontendUrl = process.env.FRONTEND_URL || "http://127.0.0.1:5190";
   await sendEmail({

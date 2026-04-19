@@ -6,13 +6,10 @@ const { success, error } = require("../../shared/utils/response");
 const { checkUserExists, checkToken } = require("../../shared/utils/validationHelpers");
 const { notifyNewApplication } = require("../../shared/services/websocketService");
 
-//login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     let user = await User.findOne({ email });
-    
-    // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
 
@@ -34,7 +31,6 @@ exports.login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    // Store refresh token in the user document
     user.refreshToken = refreshToken;
     const isFirstTime = user.isFirstTime;
     if (user.isFirstTime) {
@@ -42,7 +38,7 @@ exports.login = async (req, res) => {
     }
     await user.save();
 
-    // Cookie settings - Different for development vs production
+    // httpOnly + SameSite flags differ in prod vs dev — cross-domain cookies require sameSite:'none' + secure:true
     const isProduction = process.env.NODE_ENV === 'production';
     const cookieOptions = {
       httpOnly: true,
@@ -54,8 +50,6 @@ exports.login = async (req, res) => {
     };
 
     res.cookie('access_token', token, cookieOptions);
-    
-    // Set refresh token with longer expiration
     res.cookie('refresh_token', refreshToken, {
       ...cookieOptions,
       maxAge: 604800000 // 7 days
@@ -83,24 +77,17 @@ exports.login = async (req, res) => {
   }
 };
 
-// Refresh token
 exports.refreshToken = async (req, res) => {
   const { refreshToken } = req.cookies;
-  
-  // Validate token exists
   const tokenError = checkToken(res, refreshToken, 'refresh token');
   if (tokenError) return tokenError;
 
   try {
-    // Verify the refresh token
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.user.id);
-
-    // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
 
-    // Generate a new access token (JWT)
     const payload = { user: { id: user.id } };
     const newToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
@@ -121,7 +108,6 @@ exports.refreshToken = async (req, res) => {
   }
 };
 
-// Logout
 exports.logout = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
@@ -149,7 +135,6 @@ exports.logout = async (req, res) => {
   }
 };
 
-// Check token validity
 exports.checkToken = async (req, res) => {
   return success(res, { message: "Token is valid", data: { user: req.user } });
 };

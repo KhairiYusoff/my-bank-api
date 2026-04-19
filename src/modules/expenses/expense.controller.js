@@ -9,9 +9,6 @@ const {
   checkExpenseDescription
 } = require("../../shared/utils/validationHelpers");
 
-/**
- * Create a new expense
- */
 exports.createExpense = async (req, res) => {
   const {
     amount,
@@ -27,7 +24,6 @@ exports.createExpense = async (req, res) => {
     merchant
   } = req.body;
 
-  // Validate required fields
   const amountError = checkAmount(res, amount, 'expense amount');
   if (amountError) return amountError;
 
@@ -79,9 +75,6 @@ exports.createExpense = async (req, res) => {
   }
 };
 
-/**
- * Get expenses with filtering and pagination
- */
 exports.getExpenses = async (req, res) => {
   const {
     page = 1,
@@ -129,9 +122,6 @@ exports.getExpenses = async (req, res) => {
   }
 };
 
-/**
- * Get expense by ID
- */
 exports.getExpenseById = async (req, res) => {
   const { expenseId } = req.params;
 
@@ -159,15 +149,11 @@ exports.getExpenseById = async (req, res) => {
   }
 };
 
-/**
- * Update expense
- */
 exports.updateExpense = async (req, res) => {
   const { expenseId } = req.params;
   const updateData = req.body;
 
   try {
-    // Validate fields if they are being updated
     if (updateData.amount !== undefined) {
       const amountError = checkAmount(res, updateData.amount, 'expense amount');
       if (amountError) return amountError;
@@ -205,7 +191,6 @@ exports.updateExpense = async (req, res) => {
       if (paymentError) return paymentError;
     }
 
-    // Clean up optional fields
     if (updateData.notes !== undefined) {
       updateData.notes = updateData.notes ? updateData.notes.trim() : undefined;
     }
@@ -237,9 +222,6 @@ exports.updateExpense = async (req, res) => {
   }
 };
 
-/**
- * Delete expense (soft delete)
- */
 exports.deleteExpense = async (req, res) => {
   const { expenseId } = req.params;
 
@@ -266,9 +248,6 @@ exports.deleteExpense = async (req, res) => {
   }
 };
 
-/**
- * Get monthly expense analytics
- */
 exports.getMonthlyAnalytics = async (req, res) => {
   const { year, month } = req.query;
 

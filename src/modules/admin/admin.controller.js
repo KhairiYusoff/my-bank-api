@@ -43,7 +43,6 @@ exports.createStaff = async (req, res) => {
   }
 };
 
-// Admin updates a staff's role or status
 exports.updateStaff = async (req, res) => {
   try {
     const staffId = req.params.staffId;
@@ -84,7 +83,6 @@ exports.updateStaff = async (req, res) => {
   }
 };
 
-// Admin updates a customer's status
 exports.updateCustomer = async (req, res) => {
   try {
     const customerId = req.params.customerId;
@@ -115,7 +113,6 @@ exports.updateCustomer = async (req, res) => {
   }
 };
 
-// Admin deletes a staff (banker) account
 exports.deleteStaff = async (req, res) => {
   try {
     const staffId = req.params.staffId;
@@ -139,7 +136,6 @@ exports.deleteStaff = async (req, res) => {
   }
 };
 
-// Admin deletes a customer account
 exports.deleteCustomer = async (req, res) => {
   try {
     const customerId = req.params.customerId;

@@ -5,7 +5,6 @@ const { EXPENSE_CATEGORIES, PAYMENT_METHODS } = require('../constants/expense');
  * Common validation helpers to reduce code duplication
  */
 
-// Amount validation for transactions
 const validateAmount = (amount, type = 'amount') => {
   if (!amount || amount <= 0) {
     return { isValid: false, message: `Invalid ${type} amount` };
@@ -13,7 +12,6 @@ const validateAmount = (amount, type = 'amount') => {
   return { isValid: true };
 };
 
-// User existence validation
 const validateUserExists = (user, includeType = false) => {
   if (!user) {
     return { isValid: false, message: "User not found" };
@@ -21,7 +19,6 @@ const validateUserExists = (user, includeType = false) => {
   return { isValid: true };
 };
 
-// Account existence validation
 const validateAccountExists = (account, message = "Account not found") => {
   if (!account) {
     return { isValid: false, message };
@@ -29,7 +26,6 @@ const validateAccountExists = (account, message = "Account not found") => {
   return { isValid: true };
 };
 
-// Token validation
 const validateToken = (token, type = 'token') => {
   if (!token) {
     return { isValid: false, message: `No ${type} provided` };
@@ -37,7 +33,6 @@ const validateToken = (token, type = 'token') => {
   return { isValid: true };
 };
 
-// Validation result helper
 const handleValidationError = (res, validationResult) => {
   if (!validationResult.isValid) {
     return error(res, { message: validationResult.message, statusCode: 400 });
