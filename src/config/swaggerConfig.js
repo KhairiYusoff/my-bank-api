@@ -10,12 +10,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5001/api',
-        description: 'Development server (V1)',
-      },
-      {
-        url: 'http://localhost:5001/api/v2',
-        description: 'Development server (V2)',
+        url: process.env.API_BASE_URL || 'http://localhost:5001/api',
+        description: 'Development server',
       },
     ],
     components: {
@@ -28,8 +24,8 @@ const options = {
       },
     },
   },
-  // Paths to files containing OpenAPI definitions
-  apis: ['./src/routes/*.js', './src/routes/v2/*.js'],
+  // Scan all module route files and dedicated swagger spec files
+  apis: ['./src/modules/**/*.routes.js', './src/modules/**/*.swagger.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
