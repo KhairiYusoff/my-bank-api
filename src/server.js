@@ -43,6 +43,10 @@ app.use(rateLimitMiddleware);
 if (process.env.NODE_ENV !== "production") {
   const swaggerSpec = require("./config/swaggerConfig");
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get("/api-docs.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
+  });
 }
 
 // Health Check Endpoint
@@ -62,8 +66,7 @@ const transactionRoutes = require("./modules/transactions/transaction.routes");
 const userRoutes = require("./modules/users/user.routes");
 const expenseRoutes = require("./modules/expenses/expense.routes");
 
-// V2 Routes
-const onboardingRoutesV2 = require("./modules/onboarding/onboarding.routes");
+const onboardingRoutes = require("./modules/onboarding/onboarding.routes");
 
 // WebSocket
 const { initializeSocket } = require("./shared/services/websocketService");
@@ -76,8 +79,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/expenses", expenseRoutes);
 
-// Define V2 Routes
-app.use("/api/v2/onboarding", onboardingRoutesV2);
+app.use("/api/onboarding", onboardingRoutes);
 
 // Error handling middleware (must be after all routes)
 app.use(errorHandler);
