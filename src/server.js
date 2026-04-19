@@ -55,7 +55,7 @@ app.get('/health', (req, res) => {
 });
 
 // 7. Routes
-const authRoutes = require("./routes/authRoutes");
+const authRoutes = require("./modules/auth/auth.routes");
 const adminRoutes = require("./routes/adminRoutes");
 const accountRoutes = require("./routes/accountRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
