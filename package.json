@@ -13,6 +13,8 @@
     "pm2:monit": "pm2 monit"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^3.0.35",
+    "ai": "^6.0.168",
     "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
@@ -27,6 +29,7 @@
     "nodemailer": "^7.0.3",
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
+    "undici": "^5.29.0",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {

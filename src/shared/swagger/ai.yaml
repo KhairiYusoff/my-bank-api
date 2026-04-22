@@ -1,0 +1,90 @@
+tags:
+  - name: AI
+    description: AI-powered banking assistant endpoints
+
+paths:
+  /ai/chat:
+    post:
+      tags:
+        - AI
+      summary: Send a message to the AI banking assistant
+      description: >
+        Streams a response from the AI banking assistant using the Vercel AI SDK
+        data stream protocol. Requires authentication. Rate limited to 20 requests
+        per minute per IP.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - messages
+              properties:
+                messages:
+                  type: array
+                  description: Conversation history in AI SDK message format
+                  items:
+                    type: object
+                    required:
+                      - role
+                      - content
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                        example: user
+                      content:
+                        type: string
+                        example: What are the interest rates for Fixed Deposit?
+            example:
+              messages:
+                - role: user
+                  content: What is the minimum balance for a savings account?
+      responses:
+        '200':
+          description: AI-generated response streamed as data stream (text/plain)
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Vercel AI SDK data stream chunks
+        '400':
+          description: Validation error – messages array is missing or empty
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: messages array is required
+        '401':
+          description: Unauthorized – missing or invalid authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests – rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Too many AI requests, please slow down.
+                  retryAfter:
+                    type: string
+                    example: 1 minute
+        '500':
+          description: Internal server error from AI service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: AI service error

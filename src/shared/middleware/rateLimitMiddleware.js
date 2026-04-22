@@ -41,6 +41,18 @@ const authRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for AI chat endpoint - prevents excessive LLM API usage
+const aiRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // 20 requests per minute per IP
+  message: {
+    error: 'Too many AI requests, please slow down.',
+    retryAfter: '1 minute'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Choose which rate limiter to use based on environment
 const rateLimitMiddleware = process.env.NODE_ENV === 'production' 
   ? prodRateLimit 
@@ -48,5 +60,6 @@ const rateLimitMiddleware = process.env.NODE_ENV === 'production'
 
 module.exports = {
   rateLimitMiddleware,
-  authRateLimit
+  authRateLimit,
+  aiRateLimit
 };

@@ -5,7 +5,7 @@ const swaggerDir = path.join(__dirname, '../shared/swagger');
 
 const base = YAML.load(path.join(swaggerDir, 'openapi.yaml'));
 
-const features = ['auth', 'admin', 'onboarding', 'accounts', 'transactions', 'expenses', 'users'];
+const features = ['auth', 'admin', 'onboarding', 'accounts', 'transactions', 'expenses', 'users', 'ai'];
 
 const spec = {
   ...base,
