@@ -88,3 +88,116 @@ paths:
               example:
                 success: false
                 message: AI service error
+
+  /ai/insights:
+    get:
+      tags:
+        - AI
+      summary: Get AI-generated spending insights
+      description: >
+        Returns an aggregated breakdown of the authenticated user's expenses for
+        a given period, plus an AI-generated narrative summary. Account numbers
+        are never sent to the LLM — only aggregate totals. Rate limited to 20
+        requests per minute per IP.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: period
+          schema:
+            type: string
+            enum: [week, month, quarter, year]
+            default: month
+          description: Time window for the spending analysis
+      responses:
+        '200':
+          description: Spending breakdown with AI narrative
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      period:
+                        type: string
+                        example: month
+                      since:
+                        type: string
+                        format: date
+                        example: '2026-03-24'
+                      totalSpent:
+                        type: number
+                        example: 1243.50
+                      topCategories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            category:
+                              type: string
+                              example: food
+                            total:
+                              type: number
+                              example: 420.00
+                            count:
+                              type: integer
+                              example: 18
+                            pct:
+                              type: number
+                              example: 33.7
+                      accounts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            accountType:
+                              type: string
+                              example: Savings
+                            balance:
+                              type: number
+                              example: 5200.00
+                            currency:
+                              type: string
+                              example: USD
+                      aiNarrative:
+                        type: string
+                        example: >
+                          Your biggest expense this month was Food & Dining at 33.7%
+                          of total spending. Consider meal-prepping on weekends to
+                          reduce food delivery costs.
+        '400':
+          description: Invalid period value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized – missing or invalid authentication token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests – rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Too many AI requests, please slow down.
+        '500':
+          description: Internal server error from AI service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: AI insights error

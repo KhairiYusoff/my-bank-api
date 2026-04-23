@@ -1,5 +1,9 @@
-const { streamChatResponse } = require('./ai.service');
-const { error } = require('../../shared/utils/response');
+const { streamChatResponse, generateInsightsText } = require('./ai.service');
+const { getSpendingBreakdown } = require('./ai.tools');
+const { maskSpendingDataForLLM } = require('./ai.guardrails');
+const { success, error } = require('../../shared/utils/response');
+
+const ALLOWED_PERIODS = ['week', 'month', 'quarter', 'year'];
 
 const chat = async (req, res) => {
   try {
@@ -18,4 +22,31 @@ const chat = async (req, res) => {
   }
 };
 
-module.exports = { chat };
+const getInsights = async (req, res) => {
+  try {
+    const period = req.query.period || 'month';
+
+    if (!ALLOWED_PERIODS.includes(period)) {
+      return error(res, {
+        message: `Invalid period. Allowed values: ${ALLOWED_PERIODS.join(', ')}`,
+        statusCode: 400,
+      });
+    }
+
+    const spendData = await getSpendingBreakdown(req.user._id, period);
+    const maskedData = maskSpendingDataForLLM(spendData);
+    const aiNarrative = await generateInsightsText(maskedData);
+
+    return success(res, {
+      data: {
+        ...spendData,
+        aiNarrative,
+      },
+    });
+  } catch (err) {
+    console.error('[AI] insights error:', err);
+    return error(res, { message: 'AI insights error', statusCode: 500 });
+  }
+};
+
+module.exports = { chat, getInsights };

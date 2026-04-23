@@ -1,15 +1,15 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Polyfill Web Streams API globals for Node 16 (required by ai/eventsource-parser)
-if (typeof TransformStream === 'undefined') {
+if (typeof TransformStream === "undefined") {
   const {
     TransformStream,
     ReadableStream,
     WritableStream,
     TextEncoderStream,
     TextDecoderStream,
-  } = require('stream/web');
+  } = require("stream/web");
   global.TransformStream = TransformStream;
   global.ReadableStream = ReadableStream;
   global.WritableStream = WritableStream;
@@ -18,8 +18,8 @@ if (typeof TransformStream === 'undefined') {
 }
 
 // Polyfill Fetch API globals for Node 16 (required by ai SDK and @ai-sdk/groq)
-if (typeof Headers === 'undefined') {
-  const { Headers, fetch, Request, Response } = require('undici');
+if (typeof Headers === "undefined") {
+  const { Headers, fetch, Request, Response } = require("undici");
   global.Headers = Headers;
   global.fetch = fetch;
   global.Request = Request;
@@ -27,27 +27,32 @@ if (typeof Headers === 'undefined') {
 }
 
 // Load product documentation at startup for system prompt context
-const docsDir = path.join(__dirname, '../../shared/docs');
-const productDocs = ['product-savings.md', 'product-current.md', 'product-fd.md']
+const docsDir = path.join(__dirname, "../../shared/docs");
+const productDocs = [
+  "product-savings.md",
+  "product-current.md",
+  "product-fd.md",
+]
   .map((file) => {
     try {
-      return fs.readFileSync(path.join(docsDir, file), 'utf-8');
+      return fs.readFileSync(path.join(docsDir, file), "utf-8");
     } catch {
-      return '';
+      return "";
     }
   })
   .filter(Boolean)
-  .join('\n\n---\n\n');
+  .join("\n\n---\n\n");
 
-const buildSystemPrompt = (user) => `
+const buildSystemPrompt = (user) =>
+  `
 You are a helpful and professional banking assistant for MyBank.
 You assist customers with questions about their accounts, transactions, and banking products.
 Always be polite, concise, and accurate. Do not make up information.
 If you do not know the answer, advise the customer to contact MyBank support.
 
 The customer you are speaking with:
-- Name: ${user.name || 'Valued Customer'}
-- Email: ${user.email || 'N/A'}
+- Name: ${user.name || "Valued Customer"}
+- Email: ${user.email || "N/A"}
 
 MyBank Product Information:
 ${productDocs}
@@ -60,6 +65,37 @@ Guidelines:
 `.trim();
 
 /**
+ * Generate a one-shot AI narrative for a user's spending data.
+ * Uses generateText() (not streaming) — designed for the insights card.
+ *
+ * @param {object} maskedSpendData - Output of maskSpendingDataForLLM()
+ * @returns {Promise<string>} Plain-text narrative (3-4 sentences)
+ */
+const generateInsightsText = async (maskedSpendData) => {
+  const { createGroq } = await import("@ai-sdk/groq");
+  const { generateText } = await import("ai");
+
+  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
+
+  const prompt = `You are a personal finance analyst for MyBank.
+Analyse the following spending data and write a brief, friendly narrative summary (3-4 sentences).
+Highlight the top spending category, any notable pattern, and one actionable saving tip.
+Respond in plain text only — no markdown, no bullet points, no headers.
+
+Spending data:
+${JSON.stringify(maskedSpendData, null, 2)}`.trim();
+
+  const { text } = await generateText({
+    model: groq("llama-3.1-8b-instant"),
+    prompt,
+    maxTokens: 200,
+    temperature: 0.4,
+  });
+
+  return text;
+};
+
+/**
  * Stream a chat response using the Groq LLM via the AI SDK.
  * Uses dynamic import because the 'ai' and '@ai-sdk/groq' packages are ESM-only.
  *
@@ -68,15 +104,15 @@ Guidelines:
  * @returns {Promise<import('ai').StreamTextResult>}
  */
 const streamChatResponse = async (messages, user) => {
-  const { createGroq } = await import('@ai-sdk/groq');
-  const { streamText, convertToModelMessages } = await import('ai');
+  const { createGroq } = await import("@ai-sdk/groq");
+  const { streamText, convertToModelMessages } = await import("ai");
 
   const groq = createGroq({
     apiKey: process.env.GROQ_API_KEY,
   });
 
   const result = streamText({
-    model: groq('llama-3.1-8b-instant'),
+    model: groq("llama-3.1-8b-instant"),
     system: buildSystemPrompt(user),
     messages: await convertToModelMessages(messages),
     maxTokens: 512,
@@ -86,4 +122,4 @@ const streamChatResponse = async (messages, user) => {
   return result;
 };
 
-module.exports = { streamChatResponse };
+module.exports = { streamChatResponse, generateInsightsText };
