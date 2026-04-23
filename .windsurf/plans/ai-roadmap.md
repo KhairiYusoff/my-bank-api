@@ -1,6 +1,6 @@
 # AI Evolution Roadmap — MyBank Platform
 
-**Last updated:** 2026-04-21
+**Last updated:** 2026-04-23
 **Principle:** ADD intelligence, never migrate. Existing 4 repos untouched at core.
 **AI lives in:** `my-bank-api/src/modules/ai/` (extract to separate service only if pain justifies it)
 
@@ -46,7 +46,7 @@ src/shared/
 ---
 
 ## Phase 1 — Product Q&A
-**Status:** NOT STARTED | Complexity: LOW (~150 lines) | Timeline: ~3-5 days
+**Status:** COMPLETE ✅ | Committed: April 22 2026
 
 ### What changes
 | Repo | Changes |
@@ -72,31 +72,46 @@ Response: streamed text (SSE)
 ---
 
 ## Phase 2 — Personal Spend Insights
-**Status:** NOT STARTED | Complexity: MEDIUM | Timeline: ~1-2 weeks
+**Status:** COMPLETE ✅ | Committed: April 23 2026
 
-### What changes
-| Repo | Changes |
+### Commits (my-bank-api)
+| Hash | Description |
 |---|---|
-| `my-bank-api` | `ai.tools.js`, `ai.guardrails.js`, `POST /api/ai/insights` |
-| `my-bank-customer` | `SpendInsightsCard.tsx` on DashboardPage |
-| `my-bank-admin-portal` | Nothing |
-| `notification-service` | Nothing |
+| `11f8f64` | feat(ai): add PII masking guardrails and spend data tool |
+| `94c4ab5` | feat(ai): add GET /api/ai/insights endpoint |
+| `d51c0f1` | feat(ai): inject spend context into chat system prompt |
 
-### PII Masking (mandatory before Phase 2 ships)
-Fields: `name` → `[USER]`, `identityNumber` → `[IC]`, `accountNumber` → `[ACC]`, `phoneNumber` → `[PHONE]`, `email` → `[EMAIL]`
+### Commits (my-bank-customer)
+| Hash | Description |
+|---|---|
+| `e78a94f` | feat(ai): Phase 2 - SpendInsightsCard component and AI store |
+| `efb026f` | feat(dashboard): wire SpendInsightsCard into dashboard page |
 
-### Atlas Vector Search setup
-- Collection: `ai_embeddings`
-- Index: `embedding` field (1024 dimensions for Cohere)
-- User scoping: `userId` field on every document
+### What changed
+| Repo | Files |
+|---|---|
+| `my-bank-api` | `ai.guardrails.js`, `ai.tools.js`, `ai.service.js`, `ai.controller.js`, `ai.routes.js`, `ai.yaml` |
+| `my-bank-customer` | `features/ai/types/ai.ts`, `features/ai/store/aiApi.ts`, `features/ai/constants/insights.ts`, `features/ai/components/SpendInsightsCard/`, `app/store/baseApi.ts`, `features/dashboard/pages/DashboardPage.tsx` |
 
-### API Contract
+### PII Masking — SHIPPED
+Fields masked before any data reaches Groq:
+- `name` → `[USER]`, `email` → `[EMAIL]`, `identityNumber` → `[IC]`, `accountNumber` → stripped entirely, `phoneNumber` → `[PHONE]`
+- `maskUserForLLM()` — strips user PII for system prompt
+- `maskSpendingDataForLLM()` — removes account numbers, keeps aggregate totals only
+
+### API Contract (actual)
 ```
-POST /api/ai/insights
-Body: { period?: 'month' | 'quarter' }
-Auth: requireAuth
-Response: { summary: string, topCategories: [], aiNarrative: string }
+GET /api/ai/insights?period=week|month|quarter|year
+Auth: cookie JWT (authMiddleware)
+Rate: aiRateLimit (20 req/min)
+Response: { success, data: { period, since, totalSpent, topCategories[], accounts[], aiNarrative } }
 ```
+
+### Key implementation notes
+- `getSpendingBreakdown(userId, period)` — MongoDB aggregation on `Expense` collection, groups by category, returns top 5
+- `generateInsightsText(maskedData)` — uses `generateText()` (one-shot, not streaming)
+- `streamChatResponse` now fetches spend context per request and injects into `buildSystemPrompt()` — chat can answer "how much did I spend on food?" accurately
+- Chat spend context fetch is non-critical — failure is caught + warned, chat continues without it
 
 ---
 

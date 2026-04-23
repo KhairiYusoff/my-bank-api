@@ -1,7 +1,8 @@
 # MyBank AI Feature — System Design
 
-> Last updated: April 2026
-> Scope: Phase 1 (chat assistant) + Phase 2 (RAG + embeddings)
+> Last updated: April 23 2026
+> Phase 1: COMPLETE ✅
+> Phase 2: COMPLETE ✅
 
 ---
 
@@ -32,7 +33,7 @@
 │  │  3. [Phase 2] $vectorSearch filtered by userId  ← Atlas   │  │
 │  │  4. buildSystemPrompt(userId, context)                    │  │
 │  │  5. streamText(groq model, messages)                      │  │
-│  │  6. result.pipeDataStreamToResponse(res)  → stream back   │  │
+│  │  6. result.pipeUIMessageStreamToResponse(res)  → stream   │  │
 │  └───────────────────────────────────────────────────────────┘  │
 │                                                                 │
 │  Shared services:                                               │
@@ -94,10 +95,12 @@ streamText({
 })
   │
   ▼
-result.pipeDataStreamToResponse(res)
+result.pipeUIMessageStreamToResponse(res)   ← v6 API (not pipeDataStreamToResponse)
   │
   ▼
-useChat receives stream → renders tokens in real-time
+useChat receives UIMessageStream → renders tokens in real-time
+
+Note: Node 16 requires stream/web + undici@5 polyfills in ai.service.js
 ```
 
 ---
@@ -173,13 +176,20 @@ my-bank-api/src/modules/ai/
     ├── vectorSearch.js       ← Atlas $vectorSearch aggregation
     └── promptBuilder.js      ← builds system prompt with injected context
 
-my-bank-customer/src/features/ai/
-├── components/
-│   └── ChatWidget/
-│       ├── index.tsx           ← useChat hook, form, message list
-│       └── styles/index.ts     ← styled components
-└── pages/
-    └── ChatPage.tsx            ← slim page, renders ChatWidget
+my-bank-customer/src/components/ChatWidget/    ← global (not feature-scoped)
+├── index.tsx                   ← useChat + DefaultChatTransport, message list
+└── styles/index.ts             ← ChatFab, ChatWindow, ChatHeader, MessageBubble etc
+
+my-bank-customer/src/config/
+└── env.ts                      ← API_URL centralised (DRY)
+
+my-bank-customer/src/features/ai/             ← Phase 2
+├── types/ai.ts                 ← SpendInsightsData, GetInsightsResponse, InsightsPeriod
+├── store/aiApi.ts              ← useGetInsightsQuery (RTK Query, GET /ai/insights)
+├── constants/insights.ts      ← PERIODS, CATEGORY_LABELS
+└── components/SpendInsightsCard/
+    ├── index.tsx               ← period chips, narrative, category % bars
+    └── styles/index.ts        ← InsightsCard, InsightsHeader (gradient), NarrativeBox, CategoryBar
 ```
 
 ---
@@ -227,12 +237,12 @@ COHERE_API_KEY=xxxxxxxxxxxxxxxx
 
 ## Phase Plan
 
-| Phase | What | New Dependencies |
-|---|---|---|
-| 1 | Basic chat (no memory, no RAG) | `ai`, `@ai-sdk/groq`, `@ai-sdk/react` |
-| 2 | RAG — embed + retrieve from knowledge base | + `cohere-ai`, `@langchain/cohere`, `@langchain/mongodb`, `@langchain/textsplitters` |
-| 3 | Agentic RAG — multi-step tool use | + `langchain`, `@langchain/core` (or LangGraph) |
-| 4 | Proactive insights (scheduled analysis) | + `node-cron` |
+| Phase | What | Status | New Dependencies |
+|---|---|---|---|
+| 1 | Basic chat — product Q&A, streaming | ✅ COMPLETE | `ai`, `@ai-sdk/groq`, `@ai-sdk/react` |
+| 2 | Personal spend insights — GET /ai/insights, SpendInsightsCard, chat context injection | ✅ COMPLETE | none (uses existing Expense model) |
+| 3 | Agentic RAG — multi-step tool use | NOT STARTED | + `langchain`, `@langchain/core` (or LangGraph) |
+| 4 | Proactive nudges (scheduled analysis) | NOT STARTED | + `node-cron` |
 
 ---
 
