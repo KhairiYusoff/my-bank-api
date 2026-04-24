@@ -19,6 +19,11 @@ if (typeof TransformStream === "undefined") {
   global.TextDecoderStream = TextDecoderStream;
 }
 
+// Polyfill structuredClone for Node 16 (added in Node 17)
+if (typeof structuredClone === "undefined") {
+  global.structuredClone = (obj) => JSON.parse(JSON.stringify(obj));
+}
+
 // Polyfill Fetch API globals for Node 16 (required by ai SDK and @ai-sdk/groq)
 if (typeof Headers === "undefined") {
   const { Headers, fetch, Request, Response } = require("undici");
@@ -50,8 +55,8 @@ const buildSystemPrompt = (user, spendContext = null) => {
     ? `
 Current month spending summary (pre-anonymised — no account numbers):
 - Total spent: ${spendContext.totalSpent} (period: last ${spendContext.period})
-- Top categories: ${spendContext.topCategories.map((c) => `${c.category} ${c.pct}%`).join(', ')}
-- Accounts on file: ${spendContext.accounts.map((a) => `${a.accountType} (${a.currency} ${a.balance})`).join(', ')}
+- Top categories: ${spendContext.topCategories.map((c) => `${c.category} ${c.pct}%`).join(", ")}
+- Accounts on file: ${spendContext.accounts.map((a) => `${a.accountType} (${a.currency} ${a.balance})`).join(", ")}
 
 Use this data to answer questions like "how much did I spend on food?" accurately.
 `
@@ -125,10 +130,10 @@ const streamChatResponse = async (messages, user) => {
   // Fetch spend context for this user — non-critical, proceed without if it fails
   let spendContext = null;
   try {
-    const rawSpend = await getSpendingBreakdown(user._id, 'month');
+    const rawSpend = await getSpendingBreakdown(user._id, "month");
     spendContext = maskSpendingDataForLLM(rawSpend);
   } catch (err) {
-    console.warn('[AI] Could not load spend context for chat:', err.message);
+    console.warn("[AI] Could not load spend context for chat:", err.message);
   }
 
   const result = streamText({
