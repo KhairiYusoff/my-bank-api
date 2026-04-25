@@ -129,7 +129,16 @@ Response: { success, data: { period, since, totalSpent, topCategories[], account
 
 ## Phase 3 — Agentic Advisor
 
-**Status:** NOT STARTED | Complexity: HIGH | Timeline: ~3-4 weeks
+**Status:** COMPLETE ✅ | Committed: April 25 2026
+
+### Commits (my-bank-api)
+
+| Hash      | Description                                                                |
+| --------- | -------------------------------------------------------------------------- |
+| `9bc4e7f` | feat(ai): add AiAuditLog model for Phase 3 audit trail                     |
+| `ff43405` | feat(ai): Phase 3 - extend tools with full model coverage                  |
+| `9bd0f36` | feat(ai): Phase 3 - add mask functions for transactions, profile, activity |
+| `dca50c4` | feat(ai): Phase 3 - wire 5 tools into streamText with Zod schemas          |
 
 ### Architecture decision
 
