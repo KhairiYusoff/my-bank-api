@@ -169,19 +169,19 @@ const getActivitySummary = async (userId, filters = {}) => {
   const query = { user: userId };
   if (action) query.action = action;
   if (from || to) {
-    query.date = {};
-    if (from) query.date.$gte = new Date(from);
-    if (to) query.date.$lte = new Date(to);
+    query.createdAt = {};
+    if (from) query.createdAt.$gte = new Date(from);
+    if (to) query.createdAt.$lte = new Date(to);
   }
 
-  const logs = await ActivityLog.find(query, "action date")
-    .sort({ date: -1 })
+  const logs = await ActivityLog.find(query, "action createdAt")
+    .sort({ createdAt: -1 })
     .limit(safeLimit)
     .lean();
 
   return logs.map((l) => ({
     action: l.action,
-    date: l.date.toISOString().split("T")[0],
+    date: l.createdAt ? l.createdAt.toISOString().split("T")[0] : null,
   }));
 };
 

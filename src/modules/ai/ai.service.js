@@ -129,59 +129,90 @@ ${JSON.stringify(maskedSpendData, null, 2)}`.trim();
  */
 const streamChatResponse = async (messages, user) => {
   const { createGroq } = await import("@ai-sdk/groq");
-  const { streamText, convertToModelMessages } = await import("ai");
-  const { z } = await import("zod");
+  const { streamText, jsonSchema, stepCountIs, convertToModelMessages } =
+    await import("ai");
 
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
   const userId = user._id;
 
+  // useChat (frontend) sends UIMessages with `parts` array.
+  // curl / direct API calls send plain CoreMessages with `content` string.
+  // convertToModelMessages handles UIMessages; plain messages pass through directly.
+  const isUIMessages =
+    Array.isArray(messages) && messages[0]?.parts !== undefined;
+  const coreMessages = isUIMessages
+    ? convertToModelMessages(messages)
+    : messages;
+
   const result = streamText({
-    model: groq("llama-3.1-8b-instant"),
+    model: groq("llama-3.3-70b-versatile"),
     system: buildSystemPrompt(user),
-    messages: await convertToModelMessages(messages),
+    messages: coreMessages,
     maxTokens: 512,
     temperature: 0.5,
-    maxSteps: 3,
+    stopWhen: stepCountIs(3),
     tools: {
       getSpendingBreakdown: {
         description:
           "Get the user's spending breakdown by category for a given period.",
-        parameters: z.object({
-          period: z.enum(["week", "month", "quarter", "year"]).default("month"),
+        parameters: jsonSchema({
+          type: "object",
+          properties: {
+            period: {
+              type: "string",
+              enum: ["week", "month", "quarter", "year"],
+              description: "Time period for the analysis",
+            },
+          },
         }),
-        execute: async ({ period }) => {
+        execute: async (params) => {
+          const { period = "month" } = params || {};
           const raw = await getSpendingBreakdown(userId, period);
           return maskSpendingDataForLLM(raw);
         },
       },
       getTransactionHistory: {
         description:
-          "Get the user's recent transactions, optionally filtered by type and date.",
-        parameters: z.object({
-          type: z
-            .enum(["deposit", "withdrawal", "transfer", "airdrop"])
-            .optional(),
-          from: z.string().optional().describe("ISO date string YYYY-MM-DD"),
-          to: z.string().optional().describe("ISO date string YYYY-MM-DD"),
-          limit: z.number().int().min(1).max(50).default(10),
+          "Get the user's recent transactions, optionally filtered by transaction type and date.",
+        parameters: jsonSchema({
+          type: "object",
+          properties: {
+            transaction_type: {
+              type: "string",
+              enum: ["deposit", "withdrawal", "transfer", "airdrop"],
+              description: "Filter by transaction type",
+            },
+            from: { type: "string", description: "Start date ISO YYYY-MM-DD" },
+            to: { type: "string", description: "End date ISO YYYY-MM-DD" },
+            limit: {
+              type: "number",
+              description: "Max records to return, default 10, max 50",
+            },
+          },
         }),
-        execute: async (filters) => {
-          const raw = await getTransactionHistory(userId, filters);
+        execute: async (params) => {
+          const { transaction_type, from, to, limit = 10 } = params || {};
+          const raw = await getTransactionHistory(userId, {
+            type: transaction_type,
+            from,
+            to,
+            limit,
+          });
           return maskTransactionsForLLM(raw);
         },
       },
       getAccountSummary: {
         description: "Get the user's account balances, types, and statuses.",
-        parameters: z.object({}),
+        parameters: jsonSchema({ type: "object", properties: {} }),
         execute: async () => {
           return getAccountSummary(userId);
         },
       },
       getUserProfile: {
         description:
-          "Get the user's non-sensitive profile details: location, job, age, nationality, account status.",
-        parameters: z.object({}),
+          "Get the user's non-sensitive profile details: city, job, age, nationality, account status.",
+        parameters: jsonSchema({ type: "object", properties: {} }),
         execute: async () => {
           const raw = await getUserProfile(userId);
           return maskUserProfileForLLM(raw);
@@ -190,17 +221,30 @@ const streamChatResponse = async (messages, user) => {
       getActivitySummary: {
         description:
           "Get the user's recent account activity events such as logins, transfers, deposits.",
-        parameters: z.object({
-          action: z
-            .string()
-            .optional()
-            .describe("Event type e.g. LOGIN, TRANSFER_COMPLETED, DEPOSIT"),
-          from: z.string().optional().describe("ISO date string YYYY-MM-DD"),
-          to: z.string().optional().describe("ISO date string YYYY-MM-DD"),
-          limit: z.number().int().min(1).max(20).default(10),
+        parameters: jsonSchema({
+          type: "object",
+          properties: {
+            action: {
+              type: "string",
+              description:
+                "Event type e.g. LOGIN, TRANSFER_COMPLETED, DEPOSIT, WITHDRAW",
+            },
+            from: { type: "string", description: "Start date ISO YYYY-MM-DD" },
+            to: { type: "string", description: "End date ISO YYYY-MM-DD" },
+            limit: {
+              type: "number",
+              description: "Max records, default 10, max 20",
+            },
+          },
         }),
-        execute: async (filters) => {
-          const raw = await getActivitySummary(userId, filters);
+        execute: async (params) => {
+          const { action, from, to, limit = 10 } = params || {};
+          const raw = await getActivitySummary(userId, {
+            action,
+            from,
+            to,
+            limit,
+          });
           return maskActivityForLLM(raw);
         },
       },
