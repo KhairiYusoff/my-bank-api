@@ -30,7 +30,8 @@
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",
     "undici": "^5.29.0",
-    "yamljs": "^0.3.0"
+    "yamljs": "^0.3.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "nodemon": "^2.0.14",

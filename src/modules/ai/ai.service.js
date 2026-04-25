@@ -1,7 +1,18 @@
 const fs = require("fs");
 const path = require("path");
-const { getSpendingBreakdown } = require("./ai.tools");
-const { maskSpendingDataForLLM } = require("./ai.guardrails");
+const {
+  getSpendingBreakdown,
+  getTransactionHistory,
+  getAccountSummary,
+  getUserProfile,
+  getActivitySummary,
+} = require("./ai.tools");
+const {
+  maskSpendingDataForLLM,
+  maskTransactionsForLLM,
+  maskUserProfileForLLM,
+  maskActivityForLLM,
+} = require("./ai.guardrails");
 
 // Polyfill Web Streams API globals for Node 16 (required by ai/eventsource-parser)
 if (typeof TransformStream === "undefined") {
@@ -50,20 +61,7 @@ const productDocs = [
   .filter(Boolean)
   .join("\n\n---\n\n");
 
-const buildSystemPrompt = (user, spendContext = null) => {
-  const spendSection = spendContext
-    ? `
-Current month spending summary (pre-anonymised — no account numbers):
-- Total spent: ${spendContext.totalSpent} (period: last ${spendContext.period})
-- Top categories: ${spendContext.topCategories.map((c) => `${c.category} ${c.pct}%`).join(", ")}
-- Accounts on file: ${spendContext.accounts.map((a) => `${a.accountType} (${a.currency} ${a.balance})`).join(", ")}
-
-Use this data to answer questions like "how much did I spend on food?" accurately.
-`
-    : `
-For account-specific queries (balances, transactions), remind the customer to check the app dashboard.
-`;
-
+const buildSystemPrompt = (user) => {
   return `
 You are a helpful and professional banking assistant for MyBank.
 You assist customers with questions about their accounts, transactions, and banking products.
@@ -72,7 +70,17 @@ If you do not know the answer, advise the customer to contact MyBank support.
 
 MyBank Product Information:
 ${productDocs}
-${spendSection}
+
+You have access to the following tools to look up real-time data for this customer:
+- getSpendingBreakdown: spending by category for a given period (week/month/quarter/year)
+- getTransactionHistory: recent transactions filtered by type, date range, or limit
+- getAccountSummary: account balances, types, and statuses
+- getUserProfile: customer profile details (no personal identifiers)
+- getActivitySummary: recent account activity events (logins, transfers, deposits, etc.)
+
+Use tools when the customer asks about their finances. Do not guess — call the tool.
+Always end responses that contain financial advice with: "This is not financial advice."
+
 Guidelines:
 - Only discuss banking topics relevant to MyBank products and services.
 - Never ask for or repeat sensitive information such as passwords or full card numbers.
@@ -122,26 +130,81 @@ ${JSON.stringify(maskedSpendData, null, 2)}`.trim();
 const streamChatResponse = async (messages, user) => {
   const { createGroq } = await import("@ai-sdk/groq");
   const { streamText, convertToModelMessages } = await import("ai");
+  const { z } = await import("zod");
 
-  const groq = createGroq({
-    apiKey: process.env.GROQ_API_KEY,
-  });
+  const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
-  // Fetch spend context for this user — non-critical, proceed without if it fails
-  let spendContext = null;
-  try {
-    const rawSpend = await getSpendingBreakdown(user._id, "month");
-    spendContext = maskSpendingDataForLLM(rawSpend);
-  } catch (err) {
-    console.warn("[AI] Could not load spend context for chat:", err.message);
-  }
+  const userId = user._id;
 
   const result = streamText({
     model: groq("llama-3.1-8b-instant"),
-    system: buildSystemPrompt(user, spendContext),
+    system: buildSystemPrompt(user),
     messages: await convertToModelMessages(messages),
     maxTokens: 512,
     temperature: 0.5,
+    maxSteps: 3,
+    tools: {
+      getSpendingBreakdown: {
+        description:
+          "Get the user's spending breakdown by category for a given period.",
+        parameters: z.object({
+          period: z.enum(["week", "month", "quarter", "year"]).default("month"),
+        }),
+        execute: async ({ period }) => {
+          const raw = await getSpendingBreakdown(userId, period);
+          return maskSpendingDataForLLM(raw);
+        },
+      },
+      getTransactionHistory: {
+        description:
+          "Get the user's recent transactions, optionally filtered by type and date.",
+        parameters: z.object({
+          type: z
+            .enum(["deposit", "withdrawal", "transfer", "airdrop"])
+            .optional(),
+          from: z.string().optional().describe("ISO date string YYYY-MM-DD"),
+          to: z.string().optional().describe("ISO date string YYYY-MM-DD"),
+          limit: z.number().int().min(1).max(50).default(10),
+        }),
+        execute: async (filters) => {
+          const raw = await getTransactionHistory(userId, filters);
+          return maskTransactionsForLLM(raw);
+        },
+      },
+      getAccountSummary: {
+        description: "Get the user's account balances, types, and statuses.",
+        parameters: z.object({}),
+        execute: async () => {
+          return getAccountSummary(userId);
+        },
+      },
+      getUserProfile: {
+        description:
+          "Get the user's non-sensitive profile details: location, job, age, nationality, account status.",
+        parameters: z.object({}),
+        execute: async () => {
+          const raw = await getUserProfile(userId);
+          return maskUserProfileForLLM(raw);
+        },
+      },
+      getActivitySummary: {
+        description:
+          "Get the user's recent account activity events such as logins, transfers, deposits.",
+        parameters: z.object({
+          action: z
+            .string()
+            .optional()
+            .describe("Event type e.g. LOGIN, TRANSFER_COMPLETED, DEPOSIT"),
+          from: z.string().optional().describe("ISO date string YYYY-MM-DD"),
+          to: z.string().optional().describe("ISO date string YYYY-MM-DD"),
+          limit: z.number().int().min(1).max(20).default(10),
+        }),
+        execute: async (filters) => {
+          const raw = await getActivitySummary(userId, filters);
+          return maskActivityForLLM(raw);
+        },
+      },
+    },
   });
 
   return result;
