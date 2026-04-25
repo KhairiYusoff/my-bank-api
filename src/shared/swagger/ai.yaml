@@ -10,8 +10,10 @@ paths:
       summary: Send a message to the AI banking assistant
       description: >
         Streams a response from the AI banking assistant using the Vercel AI SDK
-        data stream protocol. Requires authentication. Rate limited to 20 requests
-        per minute per IP.
+        data stream protocol. The assistant is agentic — it can call internal tools
+        to fetch real-time data (transactions, balances, spending, activity) on the
+        user's behalf before composing a response. Requires authentication.
+        Rate limited to 20 requests per minute per IP.
       security:
         - bearerAuth: []
       requestBody:
@@ -44,29 +46,29 @@ paths:
                 - role: user
                   content: What is the minimum balance for a savings account?
       responses:
-        '200':
+        "200":
           description: AI-generated response streamed as data stream (text/plain)
           content:
             text/plain:
               schema:
                 type: string
                 description: Vercel AI SDK data stream chunks
-        '400':
+        "400":
           description: Validation error – messages array is missing or empty
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 message: messages array is required
-        '401':
+        "401":
           description: Unauthorized – missing or invalid authentication token
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '429':
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
           description: Too many requests – rate limit exceeded
           content:
             application/json:
@@ -79,12 +81,12 @@ paths:
                   retryAfter:
                     type: string
                     example: 1 minute
-        '500':
+        "500":
           description: Internal server error from AI service
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 message: AI service error
@@ -110,7 +112,7 @@ paths:
             default: month
           description: Time window for the spending analysis
       responses:
-        '200':
+        "200":
           description: Spending breakdown with AI narrative
           content:
             application/json:
@@ -129,7 +131,7 @@ paths:
                       since:
                         type: string
                         format: date
-                        example: '2026-03-24'
+                        example: "2026-03-24"
                       totalSpent:
                         type: number
                         example: 1243.50
@@ -150,6 +152,10 @@ paths:
                             pct:
                               type: number
                               example: 33.7
+                            topExpenseDescription:
+                              type: string
+                              nullable: true
+                              example: Zakat fitrah 2024
                       accounts:
                         type: array
                         items:
@@ -170,19 +176,19 @@ paths:
                           Your biggest expense this month was Food & Dining at 33.7%
                           of total spending. Consider meal-prepping on weekends to
                           reduce food delivery costs.
-        '400':
+        "400":
           description: Invalid period value
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '401':
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
           description: Unauthorized – missing or invalid authentication token
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '429':
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
           description: Too many requests – rate limit exceeded
           content:
             application/json:
@@ -192,12 +198,12 @@ paths:
                   error:
                     type: string
                     example: Too many AI requests, please slow down.
-        '500':
+        "500":
           description: Internal server error from AI service
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 message: AI insights error
