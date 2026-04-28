@@ -6,27 +6,27 @@ const Transaction = require("../../shared/models/Transaction");
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
 
-  const amountError = checkAmount(res, amount, 'transfer');
+  const amountError = checkAmount(res, amount, "transfer");
   if (amountError) return amountError;
 
   try {
     const result = await transactionService.transferFunds(
-      fromAccountNumber, 
-      toAccountNumber, 
-      amount, 
-      description, 
-      req.user.id
+      fromAccountNumber,
+      toAccountNumber,
+      amount,
+      description,
+      req.user.id,
     );
 
     return success(res, {
       message: "Transfer successful",
-      data: result
+      data: result,
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: err.message || "Internal server error"
+      message: err.message || "Internal server error",
     });
   }
 };
@@ -37,23 +37,23 @@ exports.getAccountTransactions = async (req, res) => {
 
   try {
     const result = await transactionService.getAccountTransactions(
-      accountNumber, 
-      req.user, 
-      page, 
-      limit, 
-      sort
+      accountNumber,
+      req.user,
+      page,
+      limit,
+      sort,
     );
 
     return success(res, {
       message: "Transactions fetched successfully",
       data: result.transactions,
-      meta: result.meta
+      meta: result.meta,
     });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: err.message || "Internal server error"
+      message: err.message || "Internal server error",
     });
   }
 };
@@ -97,44 +97,47 @@ exports.getAllTransactions = async (req, res) => {
       .limit(parseInt(limit))
       .populate({
         path: "account",
-        select: "accountNumber"
+        select: "accountNumber",
       })
       .populate({
         path: "performedBy",
-        select: "name role"
+        select: "name role",
       });
 
     if (search) {
       const Account = require("../../shared/models/Account");
       const User = require("../../shared/models/User");
-      const accounts = accountNumber || search
-        ? await Account.find({ accountNumber: new RegExp(search, "i") }).select("_id")
-        : [];
+      const accounts =
+        accountNumber || search
+          ? await Account.find({
+              accountNumber: new RegExp(search, "i"),
+            }).select("_id")
+          : [];
       const users = await User.find({
         $or: [
           { name: new RegExp(search, "i") },
           { email: new RegExp(search, "i") },
-        ]
+        ],
       }).select("_id");
-      const accountIds = accounts.map(a => a._id);
-      const userIds = users.map(u => u._id);
+      const accountIds = accounts.map((a) => a._id);
+      const userIds = users.map((u) => u._id);
       transactionsQuery = Transaction.find({
         ...query,
         $or: [
           ...(accountIds.length ? [{ account: { $in: accountIds } }] : []),
-          ...(userIds.length ? [{ performedBy: { $in: userIds } }] : [])
-        ]
+          ...(userIds.length ? [{ performedBy: { $in: userIds } }] : []),
+        ],
       })
         .sort({ date: sort === "asc" ? 1 : -1 })
         .skip((page - 1) * limit)
         .limit(parseInt(limit))
         .populate({
           path: "account",
-          select: "accountNumber"
+          select: "accountNumber",
         })
         .populate({
           path: "performedBy",
-          select: "name role"
+          select: "name role",
         });
     }
 
@@ -154,7 +157,7 @@ exports.getAllTransactions = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -164,8 +167,8 @@ exports.getTransactionDetails = async (req, res) => {
 
   try {
     const transaction = await transactionService.getTransactionDetails(
-      transactionId, 
-      req.user
+      transactionId,
+      req.user,
     );
 
     return success(res, { data: transaction });
@@ -173,7 +176,7 @@ exports.getTransactionDetails = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: err.message || "Internal server error"
+      message: err.message || "Internal server error",
     });
   }
 };

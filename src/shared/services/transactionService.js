@@ -11,14 +11,20 @@ const { sendNotification } = require("./notificationService");
 class TransactionService {
   /**
    * Transfer funds between accounts
-   * @param {string} fromAccountNumber 
-   * @param {string} toAccountNumber 
-   * @param {number} amount 
-   * @param {string} description 
-   * @param {string} userId 
+   * @param {string} fromAccountNumber
+   * @param {string} toAccountNumber
+   * @param {number} amount
+   * @param {string} description
+   * @param {string} userId
    * @returns {object} Transaction result
    */
-  async transferFunds(fromAccountNumber, toAccountNumber, amount, description, userId) {
+  async transferFunds(
+    fromAccountNumber,
+    toAccountNumber,
+    amount,
+    description,
+    userId,
+  ) {
     // 1. Find accounts
     const fromAccount = await Account.findOne({
       accountNumber: fromAccountNumber,
@@ -41,7 +47,7 @@ class TransactionService {
       type: "transfer",
       description: `Transfer to ${toAccountNumber}`,
       performedBy: userId,
-      status: "completed"
+      status: "completed",
     });
 
     const toTransaction = new Transaction({
@@ -50,7 +56,7 @@ class TransactionService {
       type: "transfer",
       description: `Transfer from ${fromAccountNumber}`,
       performedBy: userId,
-      status: "completed"
+      status: "completed",
     });
 
     // 3. Update account balances
@@ -75,30 +81,47 @@ class TransactionService {
     }
 
     // 5. Send notifications (non-blocking)
-    this._sendTransferNotification(fromAccount, toAccount, amount, fromTransaction._id);
+    this._sendTransferNotification(
+      fromAccount,
+      toAccount,
+      amount,
+      fromTransaction._id,
+    );
 
     return {
       success: true,
       transactions: [fromTransaction, toTransaction],
       fromAccount,
-      toAccount
+      toAccount,
     };
   }
 
   /**
    * Get account transactions with pagination
    */
-  async getAccountTransactions(accountNumber, user, page = 1, limit = 10, sort = "desc") {
+  async getAccountTransactions(
+    accountNumber,
+    user,
+    page = 1,
+    limit = 10,
+    sort = "desc",
+  ) {
     // Build query
-    const query = { accountNumber };
-    
-    // For customers, only show their own accounts
-    if (user.role === "customer") {
-      const account = await Account.findOne({ accountNumber, user: user.id });
-      if (!account) {
-        throw new Error("Account not found or access denied");
-      }
+    const filter =
+      user.role === "customer"
+        ? { accountNumber, user: user.id }
+        : { accountNumber };
+
+    const account = await Account.findOne(filter);
+    if (!account) {
+      throw new Error(
+        user.role === "customer"
+          ? "Account not found or access denied"
+          : "Account not found",
+      );
     }
+
+    const query = { account: account._id };
 
     // Pagination
     const numericPage = Math.max(parseInt(page, 10), 1);
@@ -160,7 +183,12 @@ class TransactionService {
   /**
    * Private method to send transfer notification
    */
-  async _sendTransferNotification(fromAccount, toAccount, amount, transactionId) {
+  async _sendTransferNotification(
+    fromAccount,
+    toAccount,
+    amount,
+    transactionId,
+  ) {
     try {
       await sendNotification({
         type: "transfer",
