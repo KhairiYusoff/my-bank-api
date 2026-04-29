@@ -1,12 +1,16 @@
 const { success, error } = require("../../shared/utils/response");
 const expenseService = require("../../shared/services/expenseService");
 const {
+  getAllCategories,
+  getPaymentMethodOptions,
+} = require("./expense.constants");
+const {
   checkAmount,
   checkExpenseCategory,
   checkExpenseSubcategory,
   checkPaymentMethod,
   checkExpenseDate,
-  checkExpenseDescription
+  checkExpenseDescription,
 } = require("../../shared/utils/validationHelpers");
 
 exports.createExpense = async (req, res) => {
@@ -21,10 +25,10 @@ exports.createExpense = async (req, res) => {
     tags,
     notes,
     location,
-    merchant
+    merchant,
   } = req.body;
 
-  const amountError = checkAmount(res, amount, 'expense amount');
+  const amountError = checkAmount(res, amount, "expense amount");
   if (amountError) return amountError;
 
   const categoryError = checkExpenseCategory(res, category);
@@ -54,23 +58,28 @@ exports.createExpense = async (req, res) => {
       tags: tags || [],
       notes: notes ? notes.trim() : undefined,
       location: location ? location.trim() : undefined,
-      merchant: merchant ? {
-        name: merchant.name ? merchant.name.trim() : undefined,
-        category: merchant.category ? merchant.category.trim() : undefined
-      } : undefined
+      merchant: merchant
+        ? {
+            name: merchant.name ? merchant.name.trim() : undefined,
+            category: merchant.category ? merchant.category.trim() : undefined,
+          }
+        : undefined,
     };
 
-    const expense = await expenseService.createExpense(req.user.id, expenseData);
+    const expense = await expenseService.createExpense(
+      req.user.id,
+      expenseData,
+    );
 
     return success(res, {
       message: "Expense created successfully",
-      data: expense
+      data: expense,
     });
   } catch (err) {
     console.error("Create expense error:", err.message);
     return error(res, {
       message: err.message || "Failed to create expense",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -85,7 +94,7 @@ exports.getExpenses = async (req, res) => {
     dateFrom,
     dateTo,
     search,
-    sort = 'date_desc'
+    sort = "date_desc",
   } = req.query;
 
   try {
@@ -98,7 +107,7 @@ exports.getExpenses = async (req, res) => {
       dateFrom,
       dateTo,
       search,
-      sort
+      sort,
     };
 
     const result = await expenseService.getExpenses(req.user.id, options);
@@ -110,14 +119,14 @@ exports.getExpenses = async (req, res) => {
         page: result.pagination.page,
         limit: result.pagination.limit,
         total: result.pagination.total,
-        pages: result.pagination.pages
-      }
+        pages: result.pagination.pages,
+      },
     });
   } catch (err) {
     console.error("Get expenses error:", err.message);
     return error(res, {
       message: err.message || "Failed to get expenses",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -130,21 +139,21 @@ exports.getExpenseById = async (req, res) => {
 
     return success(res, {
       message: "Expense retrieved successfully",
-      data: expense
+      data: expense,
     });
   } catch (err) {
     console.error("Get expense error:", err.message);
-    
+
     if (err.message.includes("not found")) {
       return error(res, {
         message: err.message,
-        statusCode: 404
+        statusCode: 404,
       });
     }
 
     return error(res, {
       message: err.message || "Failed to get expense",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -155,7 +164,7 @@ exports.updateExpense = async (req, res) => {
 
   try {
     if (updateData.amount !== undefined) {
-      const amountError = checkAmount(res, updateData.amount, 'expense amount');
+      const amountError = checkAmount(res, updateData.amount, "expense amount");
       if (amountError) return amountError;
       updateData.amount = parseFloat(updateData.amount);
     }
@@ -167,15 +176,18 @@ exports.updateExpense = async (req, res) => {
 
     if (updateData.subCategory !== undefined) {
       const subcategoryError = checkExpenseSubcategory(
-        res, 
-        updateData.category || req.body.category, 
-        updateData.subCategory
+        res,
+        updateData.category || req.body.category,
+        updateData.subCategory,
       );
       if (subcategoryError) return subcategoryError;
     }
 
     if (updateData.description !== undefined) {
-      const descriptionError = checkExpenseDescription(res, updateData.description);
+      const descriptionError = checkExpenseDescription(
+        res,
+        updateData.description,
+      );
       if (descriptionError) return descriptionError;
       updateData.description = updateData.description.trim();
     }
@@ -196,28 +208,37 @@ exports.updateExpense = async (req, res) => {
     }
 
     if (updateData.location !== undefined) {
-      updateData.location = updateData.location ? updateData.location.trim() : undefined;
+      updateData.location = updateData.location
+        ? updateData.location.trim()
+        : undefined;
     }
 
-    const expense = await expenseService.updateExpense(req.user.id, expenseId, updateData);
+    const expense = await expenseService.updateExpense(
+      req.user.id,
+      expenseId,
+      updateData,
+    );
 
     return success(res, {
       message: "Expense updated successfully",
-      data: expense
+      data: expense,
     });
   } catch (err) {
     console.error("Update expense error:", err.message);
-    
-    if (err.message.includes("not found") || err.message.includes("access denied")) {
+
+    if (
+      err.message.includes("not found") ||
+      err.message.includes("access denied")
+    ) {
       return error(res, {
         message: err.message,
-        statusCode: 404
+        statusCode: 404,
       });
     }
 
     return error(res, {
       message: err.message || "Failed to update expense",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -229,21 +250,24 @@ exports.deleteExpense = async (req, res) => {
     await expenseService.deleteExpense(req.user.id, expenseId);
 
     return success(res, {
-      message: "Expense deleted successfully"
+      message: "Expense deleted successfully",
     });
   } catch (err) {
     console.error("Delete expense error:", err.message);
-    
-    if (err.message.includes("not found") || err.message.includes("access denied")) {
+
+    if (
+      err.message.includes("not found") ||
+      err.message.includes("access denied")
+    ) {
       return error(res, {
         message: err.message,
-        statusCode: 404
+        statusCode: 404,
       });
     }
 
     return error(res, {
       message: err.message || "Failed to delete expense",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -254,7 +278,7 @@ exports.getMonthlyAnalytics = async (req, res) => {
   if (!year || !month) {
     return error(res, {
       message: "Year and month are required",
-      statusCode: 400
+      statusCode: 400,
     });
   }
 
@@ -262,18 +286,18 @@ exports.getMonthlyAnalytics = async (req, res) => {
     const analytics = await expenseService.getMonthlyAnalytics(
       req.user.id,
       parseInt(year),
-      parseInt(month)
+      parseInt(month),
     );
 
     return success(res, {
       message: "Monthly analytics retrieved successfully",
-      data: analytics
+      data: analytics,
     });
   } catch (err) {
     console.error("Get monthly analytics error:", err.message);
     return error(res, {
       message: err.message || "Failed to get monthly analytics",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -287,25 +311,25 @@ exports.getYearlyAnalytics = async (req, res) => {
   if (!year) {
     return error(res, {
       message: "Year is required",
-      statusCode: 400
+      statusCode: 400,
     });
   }
 
   try {
     const analytics = await expenseService.getYearlyAnalytics(
       req.user.id,
-      parseInt(year)
+      parseInt(year),
     );
 
     return success(res, {
       message: "Yearly analytics retrieved successfully",
-      data: analytics
+      data: analytics,
     });
   } catch (err) {
     console.error("Get yearly analytics error:", err.message);
     return error(res, {
       message: err.message || "Failed to get yearly analytics",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -319,13 +343,13 @@ exports.getDashboardStats = async (req, res) => {
 
     return success(res, {
       message: "Dashboard stats retrieved successfully",
-      data: stats
+      data: stats,
     });
   } catch (err) {
     console.error("Get dashboard stats error:", err.message);
     return error(res, {
       message: err.message || "Failed to get dashboard stats",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -335,18 +359,17 @@ exports.getDashboardStats = async (req, res) => {
  */
 exports.getExpenseCategories = async (req, res) => {
   try {
-    const { getAllCategories } = require("../../constants/expense");
     const categories = getAllCategories();
 
     return success(res, {
       message: "Expense categories retrieved successfully",
-      data: categories
+      data: categories,
     });
   } catch (err) {
     console.error("Get expense categories error:", err.message);
     return error(res, {
       message: "Failed to get expense categories",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
@@ -356,18 +379,17 @@ exports.getExpenseCategories = async (req, res) => {
  */
 exports.getPaymentMethods = async (req, res) => {
   try {
-    const { getPaymentMethodOptions } = require("../../constants/expense");
     const paymentMethods = getPaymentMethodOptions();
 
     return success(res, {
       message: "Payment methods retrieved successfully",
-      data: paymentMethods
+      data: paymentMethods,
     });
   } catch (err) {
     console.error("Get payment methods error:", err.message);
     return error(res, {
       message: "Failed to get payment methods",
-      statusCode: 500
+      statusCode: 500,
     });
   }
 };
