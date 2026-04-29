@@ -1,7 +1,6 @@
 const Expense = require("../models/Expense");
 const Account = require("../models/Account");
 const mongoose = require("mongoose");
-const { success, error } = require("../utils/response");
 
 /**
  * Expense Service Layer
@@ -18,11 +17,11 @@ class ExpenseService {
   async createExpense(userId, expenseData) {
     try {
       // Validate account ownership
-      const account = await Account.findOne({ 
-        _id: expenseData.account, 
-        user: userId 
+      const account = await Account.findOne({
+        _id: expenseData.account,
+        user: userId,
       });
-      
+
       if (!account) {
         throw new Error("Account not found or doesn't belong to user");
       }
@@ -34,13 +33,13 @@ class ExpenseService {
       const expense = new Expense({
         ...normalizedData,
         user: userId,
-        isManualEntry: true
+        isManualEntry: true,
       });
 
       await expense.save();
 
       // Populate related data for response
-      await expense.populate('account', 'accountNumber accountType');
+      await expense.populate("account", "accountNumber accountType");
 
       return expense;
     } catch (err) {
@@ -65,13 +64,13 @@ class ExpenseService {
         dateFrom,
         dateTo,
         search,
-        sort = 'date_desc'
+        sort = "date_desc",
       } = options;
 
       // Build query
       const query = {
         user: userId,
-        status: 'active'
+        status: "active",
       };
 
       // Add filters
@@ -89,9 +88,9 @@ class ExpenseService {
       // Search in description and notes
       if (search) {
         query.$or = [
-          { description: { $regex: search, $options: 'i' } },
-          { notes: { $regex: search, $options: 'i' } },
-          { 'merchant.name': { $regex: search, $options: 'i' } }
+          { description: { $regex: search, $options: "i" } },
+          { notes: { $regex: search, $options: "i" } },
+          { "merchant.name": { $regex: search, $options: "i" } },
         ];
       }
 
@@ -103,8 +102,8 @@ class ExpenseService {
         .sort(sortOptions)
         .skip((page - 1) * limit)
         .limit(parseInt(limit))
-        .populate('account', 'accountNumber accountType')
-        .populate('transaction', 'type status');
+        .populate("account", "accountNumber accountType")
+        .populate("transaction", "type status");
 
       // Get total count for pagination
       const total = await Expense.countDocuments(query);
@@ -115,8 +114,8 @@ class ExpenseService {
           page: parseInt(page),
           limit: parseInt(limit),
           total,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (err) {
       throw new Error(`Failed to get expenses: ${err.message}`);
@@ -134,10 +133,10 @@ class ExpenseService {
       const expense = await Expense.findOne({
         _id: expenseId,
         user: userId,
-        status: 'active'
+        status: "active",
       })
-        .populate('account', 'accountNumber accountType')
-        .populate('transaction', 'type status date amount');
+        .populate("account", "accountNumber accountType")
+        .populate("transaction", "type status date amount");
 
       if (!expense) {
         throw new Error("Expense not found");
@@ -162,7 +161,7 @@ class ExpenseService {
       const expense = await Expense.findOne({
         _id: expenseId,
         user: userId,
-        status: 'active'
+        status: "active",
       });
 
       if (!expense) {
@@ -173,7 +172,7 @@ class ExpenseService {
       if (updateData.account) {
         const account = await Account.findOne({
           _id: updateData.account,
-          user: userId
+          user: userId,
         });
 
         if (!account) {
@@ -185,7 +184,7 @@ class ExpenseService {
       Object.assign(expense, updateData);
       await expense.save();
 
-      await expense.populate('account', 'accountNumber accountType');
+      await expense.populate("account", "accountNumber accountType");
 
       return expense;
     } catch (err) {
@@ -204,7 +203,7 @@ class ExpenseService {
       const expense = await Expense.findOne({
         _id: expenseId,
         user: userId,
-        status: 'active'
+        status: "active",
       });
 
       if (!expense) {
@@ -212,7 +211,7 @@ class ExpenseService {
       }
 
       // Soft delete
-      expense.status = 'deleted';
+      expense.status = "deleted";
       await expense.save();
 
       return true;
@@ -239,20 +238,20 @@ class ExpenseService {
           $match: {
             user: mongoose.Types.ObjectId(userId),
             date: { $gte: startDate, $lte: endDate },
-            status: 'active'
-          }
+            status: "active",
+          },
         },
         {
           $group: {
-            _id: '$category',
-            total: { $sum: '$amount' },
+            _id: "$category",
+            total: { $sum: "$amount" },
             count: { $sum: 1 },
-            average: { $avg: '$amount' }
-          }
+            average: { $avg: "$amount" },
+          },
         },
         {
-          $sort: { total: -1 }
-        }
+          $sort: { total: -1 },
+        },
       ]);
 
       // Get daily breakdown using aggregation
@@ -261,30 +260,37 @@ class ExpenseService {
           $match: {
             user: mongoose.Types.ObjectId(userId),
             date: { $gte: startDate, $lte: endDate },
-            status: 'active'
-          }
+            status: "active",
+          },
         },
         {
           $group: {
             _id: {
-              year: { $year: '$date' },
-              month: { $month: '$date' },
-              day: { $dayOfMonth: '$date' }
+              year: { $year: "$date" },
+              month: { $month: "$date" },
+              day: { $dayOfMonth: "$date" },
             },
-            total: { $sum: '$amount' },
+            total: { $sum: "$amount" },
             count: { $sum: 1 },
-            transactions: { $push: '$$ROOT' }
-          }
+            transactions: { $push: "$$ROOT" },
+          },
         },
         {
-          $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 }
-        }
+          $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 },
+        },
       ]);
 
       // Calculate total and statistics
-      const totalAmount = categoryTotals.reduce((sum, cat) => sum + cat.total, 0);
-      const totalExpenses = categoryTotals.reduce((sum, cat) => sum + cat.count, 0);
-      const averageExpense = totalExpenses > 0 ? totalAmount / totalExpenses : 0;
+      const totalAmount = categoryTotals.reduce(
+        (sum, cat) => sum + cat.total,
+        0,
+      );
+      const totalExpenses = categoryTotals.reduce(
+        (sum, cat) => sum + cat.count,
+        0,
+      );
+      const averageExpense =
+        totalExpenses > 0 ? totalAmount / totalExpenses : 0;
 
       // Get top spending categories
       const topCategories = categoryTotals.slice(0, 5);
@@ -294,17 +300,17 @@ class ExpenseService {
           year,
           month,
           startDate,
-          endDate
+          endDate,
         },
         summary: {
           totalAmount,
           totalExpenses,
           averageExpense,
-          dailyAverage: totalAmount / new Date(year, month, 0).getDate()
+          dailyAverage: totalAmount / new Date(year, month, 0).getDate(),
         },
         categoryBreakdown: categoryTotals,
         dailyBreakdown,
-        topCategories
+        topCategories,
       };
     } catch (err) {
       throw new Error(`Failed to get monthly analytics: ${err.message}`);
@@ -326,57 +332,63 @@ class ExpenseService {
       const monthlyTotals = await Expense.aggregate([
         {
           $match: {
-            user: require('mongoose').Types.ObjectId(userId),
+            user: require("mongoose").Types.ObjectId(userId),
             date: { $gte: startDate, $lte: endDate },
-            status: 'active'
-          }
+            status: "active",
+          },
         },
         {
           $group: {
-            _id: { month: { $month: '$date' } },
-            total: { $sum: '$amount' },
-            count: { $sum: 1 }
-          }
+            _id: { month: { $month: "$date" } },
+            total: { $sum: "$amount" },
+            count: { $sum: 1 },
+          },
         },
         {
-          $sort: { '_id.month': 1 }
-        }
+          $sort: { "_id.month": 1 },
+        },
       ]);
 
       // Get yearly category totals
       const categoryTotals = await Expense.aggregate([
         {
           $match: {
-            user: require('mongoose').Types.ObjectId(userId),
+            user: require("mongoose").Types.ObjectId(userId),
             date: { $gte: startDate, $lte: endDate },
-            status: 'active'
-          }
+            status: "active",
+          },
         },
         {
           $group: {
-            _id: '$category',
-            total: { $sum: '$amount' },
-            count: { $sum: 1 }
-          }
+            _id: "$category",
+            total: { $sum: "$amount" },
+            count: { $sum: 1 },
+          },
         },
         {
-          $sort: { total: -1 }
-        }
+          $sort: { total: -1 },
+        },
       ]);
 
       // Calculate yearly summary
-      const totalAmount = monthlyTotals.reduce((sum, month) => sum + month.total, 0);
-      const totalExpenses = monthlyTotals.reduce((sum, month) => sum + month.count, 0);
+      const totalAmount = monthlyTotals.reduce(
+        (sum, month) => sum + month.total,
+        0,
+      );
+      const totalExpenses = monthlyTotals.reduce(
+        (sum, month) => sum + month.count,
+        0,
+      );
 
       return {
         year,
         summary: {
           totalAmount,
           totalExpenses,
-          monthlyAverage: totalAmount / 12
+          monthlyAverage: totalAmount / 12,
         },
         monthlyBreakdown: monthlyTotals,
-        categoryBreakdown: categoryTotals
+        categoryBreakdown: categoryTotals,
       };
     } catch (err) {
       throw new Error(`Failed to get yearly analytics: ${err.message}`);
@@ -396,46 +408,49 @@ class ExpenseService {
 
       // Current month analytics
       const currentMonthAnalytics = await this.getMonthlyAnalytics(
-        userId, 
-        currentYear, 
-        currentMonth
+        userId,
+        currentYear,
+        currentMonth,
       );
 
       // Previous month for comparison
       const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
       const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-      
+
       const previousMonthAnalytics = await this.getMonthlyAnalytics(
         userId,
         previousYear,
-        previousMonth
+        previousMonth,
       );
 
       // Calculate month-over-month change
-      const monthOverMonthChange = previousMonthAnalytics.summary.totalAmount > 0
-        ? ((currentMonthAnalytics.summary.totalAmount - previousMonthAnalytics.summary.totalAmount) / 
-           previousMonthAnalytics.summary.totalAmount) * 100
-        : 0;
+      const monthOverMonthChange =
+        previousMonthAnalytics.summary.totalAmount > 0
+          ? ((currentMonthAnalytics.summary.totalAmount -
+              previousMonthAnalytics.summary.totalAmount) /
+              previousMonthAnalytics.summary.totalAmount) *
+            100
+          : 0;
 
       // Recent expenses
       const recentExpenses = await Expense.find({
         user: userId,
-        status: 'active'
+        status: "active",
       })
         .sort({ date: -1 })
         .limit(5)
-        .populate('account', 'accountNumber')
-        .select('amount category description date');
+        .populate("account", "accountNumber")
+        .select("amount category description date");
 
       return {
         currentMonth: {
           total: currentMonthAnalytics.summary.totalAmount,
           count: currentMonthAnalytics.summary.totalExpenses,
-          topCategories: currentMonthAnalytics.topCategories
+          topCategories: currentMonthAnalytics.topCategories,
         },
         monthOverMonthChange: Math.round(monthOverMonthChange * 100) / 100,
         recentExpenses,
-        yearlyTotal: currentMonthAnalytics.summary.totalAmount // Will be updated when yearly data is available
+        yearlyTotal: currentMonthAnalytics.summary.totalAmount, // Will be updated when yearly data is available
       };
     } catch (err) {
       throw new Error(`Failed to get dashboard stats: ${err.message}`);
@@ -449,29 +464,30 @@ class ExpenseService {
    */
   _validateAndNormalizeExpenseData(expenseData) {
     const { EXPENSE_CATEGORIES } = require("../constants/expense");
-    
+
     // Ensure date is not in future (unless it's a planned expense)
     const expenseDate = new Date(expenseData.date);
     const now = new Date();
-    
+
     if (expenseDate > now) {
       expenseData.date = now;
     }
-    
+
     // Normalize amount to 2 decimal places
     expenseData.amount = Math.round(parseFloat(expenseData.amount) * 100) / 100;
-    
+
     // Validate subcategory against category
     if (expenseData.subCategory) {
-      const validSubcategories = Object.values(EXPENSE_CATEGORIES)
-        .find(cat => cat.value === expenseData.category)?.subcategories
-        .map(sub => sub.value) || [];
-        
+      const validSubcategories =
+        Object.values(EXPENSE_CATEGORIES)
+          .find((cat) => cat.value === expenseData.category)
+          ?.subcategories.map((sub) => sub.value) || [];
+
       if (!validSubcategories.includes(expenseData.subCategory)) {
         expenseData.subCategory = null; // Clear invalid subcategory
       }
     }
-    
+
     return expenseData;
   }
 
@@ -482,12 +498,12 @@ class ExpenseService {
    */
   _buildSortOptions(sort) {
     const sortMap = {
-      'date_desc': { date: -1 },
-      'date_asc': { date: 1 },
-      'amount_desc': { amount: -1 },
-      'amount_asc': { amount: 1 },
-      'category_asc': { category: 1, date: -1 },
-      'description_asc': { description: 1, date: -1 }
+      date_desc: { date: -1 },
+      date_asc: { date: 1 },
+      amount_desc: { amount: -1 },
+      amount_asc: { amount: 1 },
+      category_asc: { category: 1, date: -1 },
+      description_asc: { description: 1, date: -1 },
     };
 
     return sortMap[sort] || { date: -1 };
