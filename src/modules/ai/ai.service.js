@@ -78,7 +78,7 @@ You have access to the following tools to look up real-time data for this custom
 - getUserProfile: customer profile details (no personal identifiers)
 - getActivitySummary: recent account activity events (logins, transfers, deposits, etc.)
 
-Use tools when the customer asks about their finances. Do not guess — call the tool.
+Use tools when the customer asks about their finances, transactions, spending, account balances, or activity. Do not say you cannot access information — use the appropriate tool instead. Do not guess — call the tool.
 Always end responses that contain financial advice with: "This is not financial advice."
 
 Guidelines:
@@ -129,24 +129,32 @@ ${JSON.stringify(maskedSpendData, null, 2)}`.trim();
  */
 const streamChatResponse = async (messages, user) => {
   const { createGroq } = await import("@ai-sdk/groq");
-  const { streamText, jsonSchema, stepCountIs, convertToModelMessages } =
-    await import("ai");
+  const { streamText, stepCountIs } = await import("ai");
+  const { z } = await import("zod");
 
   const groq = createGroq({ apiKey: process.env.GROQ_API_KEY });
 
   const userId = user._id;
 
-  // useChat (frontend) sends UIMessages with `parts` array.
-  // curl / direct API calls send plain CoreMessages with `content` string.
-  // convertToModelMessages handles UIMessages; plain messages pass through directly.
-  const isUIMessages =
-    Array.isArray(messages) && messages[0]?.parts !== undefined;
-  const coreMessages = isUIMessages
-    ? convertToModelMessages(messages)
-    : messages;
+  // Convert UIMessages (from useChat) or CoreMessages (from curl) to plain text messages.
+  // We strip tool-call/result parts — only pass user/assistant text to the LLM.
+  const coreMessages = messages
+    .filter((m) => m.role === "user" || m.role === "assistant")
+    .map((m) => ({
+      role: m.role,
+      content: Array.isArray(m.parts)
+        ? m.parts
+            .filter((p) => p.type === "text")
+            .map((p) => p.text)
+            .join("")
+        : typeof m.content === "string"
+          ? m.content
+          : "",
+    }))
+    .filter((m) => m.content.trim().length > 0);
 
   const result = streamText({
-    model: groq("llama-3.3-70b-versatile"),
+    model: groq("llama-3.3-70b-versatile", { structuredOutputs: false }),
     system: buildSystemPrompt(user),
     messages: coreMessages,
     maxTokens: 512,
@@ -156,15 +164,11 @@ const streamChatResponse = async (messages, user) => {
       getSpendingBreakdown: {
         description:
           "Get the user's spending breakdown by category for a given period.",
-        parameters: jsonSchema({
-          type: "object",
-          properties: {
-            period: {
-              type: "string",
-              enum: ["week", "month", "quarter", "year"],
-              description: "Time period for the analysis",
-            },
-          },
+        parameters: z.object({
+          period: z
+            .enum(["week", "month", "quarter", "year"])
+            .optional()
+            .describe("Time period for the analysis"),
         }),
         execute: async (params) => {
           const { period = "month" } = params || {};
@@ -174,22 +178,18 @@ const streamChatResponse = async (messages, user) => {
       },
       getTransactionHistory: {
         description:
-          "Get the user's recent transactions, optionally filtered by transaction type and date.",
-        parameters: jsonSchema({
-          type: "object",
-          properties: {
-            transaction_type: {
-              type: "string",
-              enum: ["deposit", "withdrawal", "transfer", "airdrop"],
-              description: "Filter by transaction type",
-            },
-            from: { type: "string", description: "Start date ISO YYYY-MM-DD" },
-            to: { type: "string", description: "End date ISO YYYY-MM-DD" },
-            limit: {
-              type: "number",
-              description: "Max records to return, default 10, max 50",
-            },
-          },
+          "Get the user's recent transactions. Use param name 'transaction_type' (not 'type'), 'from' for start date (not 'start_date' or 'date_range'), 'to' for end date, 'limit' for count.",
+        parameters: z.object({
+          transaction_type: z
+            .enum(["deposit", "withdrawal", "transfer", "airdrop"])
+            .optional()
+            .describe("Filter by transaction type"),
+          from: z.string().optional().describe("Start date ISO YYYY-MM-DD"),
+          to: z.string().optional().describe("End date ISO YYYY-MM-DD"),
+          limit: z
+            .number()
+            .optional()
+            .describe("Max records to return, default 10, max 50"),
         }),
         execute: async (params) => {
           const { transaction_type, from, to, limit = 10 } = params || {};
@@ -204,7 +204,7 @@ const streamChatResponse = async (messages, user) => {
       },
       getAccountSummary: {
         description: "Get the user's account balances, types, and statuses.",
-        parameters: jsonSchema({ type: "object", properties: {} }),
+        parameters: z.object({}),
         execute: async () => {
           return getAccountSummary(userId);
         },
@@ -212,7 +212,7 @@ const streamChatResponse = async (messages, user) => {
       getUserProfile: {
         description:
           "Get the user's non-sensitive profile details: city, job, age, nationality, account status.",
-        parameters: jsonSchema({ type: "object", properties: {} }),
+        parameters: z.object({}),
         execute: async () => {
           const raw = await getUserProfile(userId);
           return maskUserProfileForLLM(raw);
@@ -221,21 +221,19 @@ const streamChatResponse = async (messages, user) => {
       getActivitySummary: {
         description:
           "Get the user's recent account activity events such as logins, transfers, deposits.",
-        parameters: jsonSchema({
-          type: "object",
-          properties: {
-            action: {
-              type: "string",
-              description:
-                "Event type e.g. LOGIN, TRANSFER_COMPLETED, DEPOSIT, WITHDRAW",
-            },
-            from: { type: "string", description: "Start date ISO YYYY-MM-DD" },
-            to: { type: "string", description: "End date ISO YYYY-MM-DD" },
-            limit: {
-              type: "number",
-              description: "Max records, default 10, max 20",
-            },
-          },
+        parameters: z.object({
+          action: z
+            .string()
+            .optional()
+            .describe(
+              "Event type e.g. LOGIN, TRANSFER_COMPLETED, DEPOSIT, WITHDRAW",
+            ),
+          from: z.string().optional().describe("Start date ISO YYYY-MM-DD"),
+          to: z.string().optional().describe("End date ISO YYYY-MM-DD"),
+          limit: z
+            .number()
+            .optional()
+            .describe("Max records, default 10, max 20"),
         }),
         execute: async (params) => {
           const { action, from, to, limit = 10 } = params || {};
