@@ -1,6 +1,6 @@
-const ActivityLog = require("../models/ActivityLog");
+const ActivityLog = require("../../shared/models/ActivityLog");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../../shared/models/User");
 const mongoose = require("mongoose");
 
 // Core activity types with their configurations
@@ -10,8 +10,8 @@ const ACTIVITY_TYPES = {
     severity: "HIGH",
     getUserId: async (req, data) => {
       // For new applications, the user ID will be in the response data
-      if (data?.userId) {
-        return new mongoose.Types.ObjectId(data.userId);
+      if (data?.data?.userId) {
+        return new mongoose.Types.ObjectId(data.data.userId);
       }
       // Try to find user by email if not in response
       if (req.body?.email) {
@@ -26,9 +26,8 @@ const ACTIVITY_TYPES = {
     severity: "HIGH",
     getUserId: async (req, data) => {
       // Try to get user ID from response data first
-      if (data?.userId) {
-        // Convert string ID to ObjectId
-        return new mongoose.Types.ObjectId(data.userId);
+      if (data?.data?.userId) {
+        return new mongoose.Types.ObjectId(data.data.userId);
       }
       // Fallback to finding user by email
       const user = await User.findOne({ email: req.body.email });
@@ -38,61 +37,76 @@ const ACTIVITY_TYPES = {
   LOGIN: {
     severity: "HIGH",
     getUserId: async (req, data) => {
-      if (data.token) {
-        const decoded = jwt.verify(data.token, process.env.JWT_SECRET);
-        return decoded.user.id;
+      // FIX: Extract ID from the 'user' object in response data
+      if (data?.data?.user?.id) {
+        return data.data.user.id;
+      }
+      // Fallback: If not in response, try to find by email in request body
+      if (req.body?.email) {
+        const user = await User.findOne({ email: req.body.email });
+        return user?._id;
+      }
+      return null;
+    },
+  },
+  LOGIN_FAILED: {
+    severity: "HIGH",
+    getUserId: async (req) => {
+      // Find the user who attempted to login
+      if (req.body?.email) {
+        const user = await User.findOne({ email: req.body.email });
+        return user?._id;
       }
       return null;
     },
   },
   LOGOUT: {
     severity: "MEDIUM",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
 
   // Critical Financial Events
-
   DEPOSIT: {
     severity: "HIGH",
-    getUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   WITHDRAW: {
     severity: "HIGH",
-    getUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   AIRDROP: {
     severity: "HIGH",
-    getUserId: (req) => req.user && req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   TRANSACTION_COMPLETE: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   TRANSFER_INITIATED: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
 
   // Critical Account Events
   ACCOUNT_CREATION: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   ACCOUNT_CLOSURE: {
     severity: "CRITICAL",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   PROFILE_UPDATED: {
     severity: "MEDIUM",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   PASSWORD_CHANGED: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
   PREFERENCES_UPDATED: {
     severity: "LOW",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
 
   // V2 Onboarding Flow
@@ -102,7 +116,7 @@ const ACTIVITY_TYPES = {
   },
   VERIFY_CUSTOMER: {
     severity: "HIGH",
-    getUserId: (req) => req.user.id,
+    getUserId: (req) => req.user?.id,
   },
 
   // User completes their profile
@@ -112,6 +126,10 @@ const ACTIVITY_TYPES = {
   },
 
   // Admin Actions
+  CREATE_STAFF: {
+    severity: "HIGH",
+    getUserId: (req) => req.user?.id,
+  },
   VIEW_APPLICATIONS: {
     severity: "LOW",
     getUserId: (req) => req.user?.id,
@@ -144,8 +162,8 @@ const logActivity = async (req, res, action, details = "") => {
 
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
-    // For some activities like CUSTOMER_APPLICATION, userId might be null
-    if (!userId && action !== "CUSTOMER_APPLICATION") {
+    // For some activities like CUSTOMER_APPLICATION, userId might be null if user doesn't exist
+    if (!userId && action !== "CUSTOMER_APPLICATION" && action !== "LOGIN_FAILED") {
       console.error(`Could not determine user ID for activity: ${action}`);
       return;
     }
@@ -167,7 +185,7 @@ const logActivity = async (req, res, action, details = "") => {
       },
     });
 
-    const savedLog = await activityLog.save();
+    await activityLog.save();
   } catch (error) {
     console.error("Error logging activity:", error);
   }
@@ -176,10 +194,6 @@ const logActivity = async (req, res, action, details = "") => {
 /**
  * Express middleware factory for recording audit log entries.
  * Intercepts res.json to capture the response payload before async logging.
- * Logging failures are swallowed so they never break the primary request.
- * @param {string} action - Activity type key from ACTIVITY_TYPES
- * @param {string} [details] - Optional human-readable detail string
- * @returns {Function} Express middleware
  */
 const activityLogger = (action, details = "") => {
   return async (req, res, next) => {
@@ -201,5 +215,6 @@ const activityLogger = (action, details = "") => {
 
 module.exports = {
   activityLogger,
+  logActivity,
   ACTIVITY_TYPES,
 };

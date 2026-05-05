@@ -5,15 +5,10 @@ const {
   authorizeRoles,
 } = require("../../shared/middleware/authMiddleware");
 const {
-  checkActivityAccess,
-} = require("../../shared/middleware/activityMiddleware");
-const {
   getProfile,
   updateProfile,
   changePassword,
   deleteAccount,
-  getOwnActivity,
-  getUserActivity,
   updatePreferences,
   getAllCustomers,
   getAllStaff,
@@ -24,8 +19,7 @@ const {
   validatePasswordChange,
   validatePreferencesUpdate,
 } = require("./user.middleware");
-const User = require("../../shared/models/User");
-const { activityLogger } = require("../../shared/services/activityService");
+const { activityLogger } = require("../audit/audit.service");
 
 router.post("/me/reset-password", resetPassword);
 
@@ -45,18 +39,11 @@ router.put(
   activityLogger("PASSWORD_CHANGED", "User changed their password"),
   changePassword,
 );
-router.get("/me/activity", getOwnActivity);
 router.put(
   "/me/preferences",
   validatePreferencesUpdate,
   activityLogger("PREFERENCES_UPDATED", "User updated preferences"),
   updatePreferences,
-);
-router.get(
-  "/activity/:userId",
-  authorizeRoles("banker", "admin"),
-  checkActivityAccess,
-  getUserActivity,
 );
 router.get("/customers", authorizeRoles("banker", "admin"), getAllCustomers);
 router.get("/staff", authorizeRoles("admin"), getAllStaff);

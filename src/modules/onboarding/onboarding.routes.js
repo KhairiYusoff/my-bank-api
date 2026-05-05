@@ -20,7 +20,7 @@ const {
   validateInitialApplication,
   validateFullRegistration,
 } = require("./onboarding.validation");
-const { activityLogger } = require("../../shared/services/activityService");
+const { activityLogger } = require("../audit/audit.service");
 const {
   authRateLimit,
 } = require("../../shared/middleware/rateLimitMiddleware");

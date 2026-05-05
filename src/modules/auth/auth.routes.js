@@ -7,7 +7,7 @@ const {
 } = require("./auth.controller");
 const { authMiddleware } = require("../../shared/middleware/authMiddleware");
 const { validateLogin } = require("./auth.validation");
-const { activityLogger } = require("../../shared/services/activityService");
+const { activityLogger } = require("../audit/audit.service");
 const { authRateLimit } = require("../../shared/middleware/rateLimitMiddleware");
 const router = express.Router();
 

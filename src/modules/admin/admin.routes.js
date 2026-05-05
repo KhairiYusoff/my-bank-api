@@ -13,7 +13,7 @@ const {
   authorizeRoles,
 } = require("../../shared/middleware/authMiddleware");
 const { validateStaffRegistration } = require("./admin.validation");
-const { activityLogger } = require("../../shared/services/activityService");
+const { activityLogger } = require("../audit/audit.service");
 
 router.use(authMiddleware);
 

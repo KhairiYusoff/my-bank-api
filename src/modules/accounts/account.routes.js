@@ -14,7 +14,7 @@ const {
   authorizeRoles,
 } = require("../../shared/middleware/authMiddleware");
 const { validateAccountCreation } = require("./account.middleware");
-const { activityLogger } = require("../../shared/services/activityService");
+const { activityLogger } = require("../audit/audit.service");
 const router = express.Router();
 
 router.use(authMiddleware);

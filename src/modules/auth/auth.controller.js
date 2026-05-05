@@ -5,20 +5,26 @@ const { validationResult } = require("express-validator");
 const { success, error } = require("../../shared/utils/response");
 const { checkUserExists, checkToken } = require("../../shared/utils/validationHelpers");
 const { notifyNewApplication } = require("../../shared/services/websocketService");
+const { logActivity } = require("../audit/audit.service");
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
     let user = await User.findOne({ email });
-    const userError = checkUserExists(res, user);
-    if (userError) return userError;
+    
+    if (!user) {
+      await logActivity(req, res, "LOGIN_FAILED", `Login attempt failed: User with email ${email} not found`);
+      return error(res, { message: "Invalid credentials", statusCode: 400 });
+    }
 
     if (!user.isVerified) {
+      await logActivity(req, res, "LOGIN_FAILED", `Login attempt failed: User ${email} is not verified`);
       return error(res, { message: "User is not verified. Please complete verification.", statusCode: 403 });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      await logActivity(req, res, "LOGIN_FAILED", `Login attempt failed: Invalid password for user ${email}`);
       return error(res, { message: "Invalid credentials", statusCode: 400 });
     }
 
