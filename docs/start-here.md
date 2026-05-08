@@ -8,20 +8,19 @@ Welcome! This is the complete documentation for the MyBank API backend — the c
 
 **New to the project?** Start here:
 
-1. [PROBLEM](STRATEGIC/PROBLEM.md) — What problem does MyBank solve?
-2. [ARCHITECTURE](ARCHITECTURE/ARCHITECTURE.md) — How is it built?
-3. [REQUIREMENTS](STRATEGIC/REQUIREMENTS.md) — What features exist?
-4. [CONSTRAINTS](ARCHITECTURE/CONSTRAINTS.md) — Rules you must follow
+1. [PROBLEM](product/problem.md) — What problem does MyBank solve?
+2. [ARCHITECTURE](architecture/architecture.md) — How is it built?
+3. [REQUIREMENTS](product/requirements.md) — What features exist?
+4. [CONSTRAINTS](architecture/constraints.md) — Code patterns & rules
 
 **Looking for something specific?**
 
-- 🔗 **All API endpoints?** → [API CONTRACTS](API/CONTRACTS.md)
-- 📊 **Database schema?** → [DATA MODELS](MODELS/SCHEMA-OVERVIEW.md)
-- 🔐 **How auth works?** → [AUTHENTICATION](SECURITY/AUTHENTICATION.md)
-- 👥 **Permissions matrix?** → [AUTHORIZATION](SECURITY/AUTHORIZATION.md)
-- 🔌 **External services?** → [PROVIDERS](PROVIDERS.md)
-- 🚀 **What's next?** → [ROADMAP](ROADMAP.md)
-- 📈 **AI phases?** → [AI-ROADMAP](AI-ROADMAP.md)
+- 📊 **Database schema?** → [DATA MODELS](engineering/models/schema-overview.md)
+- 🔐 **How auth works?** → [AUTHENTICATION](engineering/security/authentication.md)
+- 👥 **Permissions matrix?** → [AUTHORIZATION](engineering/security/authorization.md)
+- 🚀 **Tech stack & why?** → [TECH-STACK](architecture/tech-stack.md)
+- 📈 **Progress tracking?** → [TRACKER](project/tracker.md)
+- 🗺️ **What's next?** → [ROADMAP](project/roadmap.md)
 
 ---
 
@@ -91,7 +90,7 @@ my-bank-api/
 - **JWT tokens** stored in httpOnly cookies (secure by default)
 - **No session database** — JWT is stateless
 - **Role-based:** customer, banker, admin
-- See [AUTHENTICATION](SECURITY/AUTHENTICATION.md) for flow
+- See [AUTHENTICATION](engineering/security/authentication.md) for flow
 
 ---
 
@@ -102,7 +101,7 @@ my-bank-api/
 3. **Transfer** — Customer moves money A → B (2 transaction records, both atomic)
 4. **Airdrop** — Admin adds money to any account (testing/promotional)
 
-All operations create audit log entries. See [API CONTRACTS](API/CONTRACTS.md) for endpoints.
+All operations create audit log entries. See [ARCHITECTURE](architecture/architecture.md) for data flow details and [DATA MODELS](engineering/models/schema-overview.md) for schema.
 
 ---
 
@@ -111,38 +110,33 @@ All operations create audit log entries. See [API CONTRACTS](API/CONTRACTS.md) f
 ```
 📄 START-HERE.md (you are here)
 
-📁 STRATEGIC/
-  ├─ PROBLEM.md           Why MyBank exists
-  ├─ REQUIREMENTS.md      What's been built
-  └─ USER-STORIES.md      [BLANK] Future AI features
+📁 architecture/
+  ├─ architecture.md      System design, data flow, module tree
+  ├─ constraints.md       Mandatory patterns and rules
+  └─ tech-stack.md        Why each tool & version
 
-📁 ARCHITECTURE/
-  ├─ ARCHITECTURE.md      Data flow, module tree
-  ├─ TECH-STACK.md        Why each tool
-  └─ CONSTRAINTS.md       Rules you must follow
+📁 product/
+  ├─ problem.md           Why MyBank exists, market problem
+  ├─ requirements.md      Feature acceptance criteria
+  └─ user-stories.md      [BLANK] Future AI features (Phase 1-4)
 
-📁 API/
-  └─ CONTRACTS.md         All 8 endpoints
+📁 engineering/
+  ├─ models/
+  │   └─ schema-overview.md   All 8 Mongoose models + relationships
+  ├─ security/
+  │   ├─ authentication.md    JWT + httpOnly cookie flow
+  │   └─ authorization.md     RBAC matrix per role
+  └─ providers/
+      └─ ai/
+          ├─ groq.md               Groq LLM docs
+          ├─ cohere.md             Cohere embeddings docs
+          ├─ langchain.md          LangChain.js research
+          ├─ vercel-ai-sdk.md      Vercel AI SDK research
+          └─ atlas-vector-search.md MongoDB Atlas Vector docs
 
-📁 MODELS/
-  └─ SCHEMA-OVERVIEW.md   All 8 models + relationships
-
-📁 SECURITY/
-  ├─ AUTHENTICATION.md    JWT + httpOnly flow
-  └─ AUTHORIZATION.md     RBAC matrix
-
-📁 technical/
-  ├─ MENTAL-MODELS.md     Concepts (notifications, fraud, audit)
-  ├─ NODEJS-PRACTICES.md  [BLANK]
-  ├─ MONGODB-PRACTICES.md [BLANK]
-  └─ ZOD-PRACTICES.md     [BLANK]
-
-📄 PROVIDERS.md           notification-service webhook + future Groq/Cohere
-📄 ROADMAP.md             Timeline + phases
-📄 TRACKER.md             Daily progress
-📄 RESEARCH.md            Decisions + learnings
-📄 AI-ROADMAP.md          Phase 1-4 AI evolution
-📄 MENTAL-MODELS.md       Banking concepts
+📁 project/
+  ├─ roadmap.md           MVP timeline + Phase 1-4 evolution
+  └─ tracker.md           Daily progress & next steps
 ```
 
 ---
@@ -167,19 +161,21 @@ All operations create audit log entries. See [API CONTRACTS](API/CONTRACTS.md) f
 2. `npm install`
 3. Create `.env.local` with `MONGODB_URI`, `JWT_SECRET`
 4. `npm run dev` — server starts on port 5000
-5. See [CONSTRAINTS](ARCHITECTURE/CONSTRAINTS.md) for code patterns
+5. See [CONSTRAINTS](architecture/constraints.md) for code patterns
 
 ---
 
 ## Next Steps
 
-- **Phase 1 AI (May 2026):** Chat widget for product Q&A ([AI-ROADMAP](AI-ROADMAP.md))
+- **Phase 1 AI (May 2026):** Chat widget for product Q&A
 - **Phase 2 AI (June 2026):** Spend insights with embeddings
 - **Phase 3 AI (July 2026):** Agentic advisor with tools
 - **Phase 4 AI (August 2026):** Proactive nudges
+
+See [ROADMAP](project/roadmap.md) for timeline details.
 
 ---
 
 **Last Updated:** May 8, 2026  
 **Maintainer:** Solo dev (you)  
-**Questions?** Refer to [RESEARCH.md](RESEARCH.md) for decision context.
+**Questions?** Check the relevant doc or refer to [TRACKER](project/tracker.md) for recent decisions.

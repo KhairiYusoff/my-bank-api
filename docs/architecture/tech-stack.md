@@ -16,24 +16,24 @@
 
 ## Authentication & Security
 
-| Tool                 | Version      | Why   |
-| -------------------- | ------------ | ----- | --------------------------------------- |
-| **JWT**              | jsonwebtoken | 9.x   | Stateless tokens, no session DB needed  |
-| **Password Hash**    | bcryptjs     | 2.x   | Industry standard, salted hashing       |
-| **CORS**             | cors         | 2.8.x | Cross-origin requests, restrict origins |
-| **Helmet**           | helmet       | 7.x   | HTTP security headers                   |
-| **Input Validation** | zod          | 4.x   | Schema validation, type inference       |
+| Tool                 | Package      | Version | Why                               |
+| -------------------- | ------------ | ------- | --------------------------------- |
+| **JWT**              | jsonwebtoken | 9.x     | Stateless tokens, no session DB   |
+| **Password Hash**    | bcryptjs     | 2.x     | Industry standard, salted hashing |
+| **CORS**             | cors         | 2.8.x   | Cross-origin requests, restrict   |
+| **Helmet**           | helmet       | 7.x     | HTTP security headers             |
+| **Input Validation** | zod          | 4.x     | Schema validation, type inference |
 
 ---
 
 ## Data & Utilities
 
-| Tool            | Version | Why  |
-| --------------- | ------- | ---- | ------------------------------------------ |
-| **HTTP**        | axios   | 1.x  | Promise-based HTTP client, retry logic     |
-| **Environment** | dotenv  | 16.x | Load .env variables safely                 |
-| **Logging**     | winston | 3.x  | Structured logging, log levels, transports |
-| **Dates**       | dayjs   | 1.x  | Lightweight date parser, immutable         |
+| Tool            | Package | Version | Why                                |
+| --------------- | ------- | ------- | ---------------------------------- |
+| **HTTP**        | axios   | 1.x     | Promise-based HTTP client, retry   |
+| **Environment** | dotenv  | 16.x    | Load .env variables safely         |
+| **Logging**     | winston | 3.x     | Structured logging, log levels     |
+| **Dates**       | dayjs   | 1.x     | Lightweight date parser, immutable |
 
 ---
 
