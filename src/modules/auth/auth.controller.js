@@ -28,7 +28,12 @@ exports.login = async (req, res) => {
       return error(res, { message: "Invalid credentials", statusCode: 400 });
     }
 
-    const payload = { user: { id: user.id } };
+    const payload = { 
+      user: { 
+        id: user.id,
+        role: user.role 
+      } 
+    };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
@@ -94,7 +99,12 @@ exports.refreshToken = async (req, res) => {
     const userError = checkUserExists(res, user);
     if (userError) return userError;
 
-    const payload = { user: { id: user.id } };
+    const payload = { 
+      user: { 
+        id: user.id,
+        role: user.role 
+      } 
+    };
     const newToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
