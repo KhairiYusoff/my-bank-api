@@ -27,6 +27,7 @@ const notificationRoutes = require("./modules/notifications/notification.routes"
 
 // 4. Initialize Express app
 const app = express();
+app.set("trust proxy", 1);
 
 // 5. Connect to Database
 connectDB();
