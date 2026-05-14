@@ -1,29 +1,36 @@
 const axios = require("axios");
 const { error } = require("../../shared/utils/response");
 
-const NOTIFICATION_API_URL = process.env.NOTIFICATION_API_URL || "http://localhost:4001/api/notifications";
+const NOTIFICATION_API_URL =
+  process.env.NOTIFICATION_API_URL || "http://localhost:4001/api/notifications";
 
 exports.proxyNotificationRequest = async (req, res) => {
   try {
-    const { method, body, query, headers } = req;
-    
-    // Construct the URL for the microservice
-    const url = req.params.id ? `${NOTIFICATION_API_URL}/${req.params.id}` : NOTIFICATION_API_URL;
+    const { method, body, query } = req;
 
-    // We pass the JWT token from the original request to the microservice
-    // The microservice will verify this token itself
+    // Construct the URL for the microservice
+    const url = req.params.id
+      ? `${NOTIFICATION_API_URL}/${req.params.id}`
+      : NOTIFICATION_API_URL;
+
+    // Build a Cookie header string from the parsed cookie object so the
+    // notification-service cookie-parser can reconstruct req.cookies correctly.
+    const cookieHeader = Object.entries(req.cookies || {})
+      .map(([k, v]) => `${k}=${v}`)
+      .join("; ");
+
     const response = await axios({
       method,
       url,
       data: body,
       params: query,
       headers: {
-        'Authorization': headers.authorization,
-        'Cookie': headers.cookie,
-        'Content-Type': 'application/json'
+        ...(cookieHeader && { Cookie: cookieHeader }),
+        "Content-Type": "application/json",
       },
+      withCredentials: true,
       timeout: 5000,
-      validateStatus: () => true // Allow all status codes to be passed back to client
+      validateStatus: () => true,
     });
 
     return res.status(response.status).json(response.data);
@@ -31,7 +38,7 @@ exports.proxyNotificationRequest = async (req, res) => {
     console.error("Notification Proxy Error:", err.message);
     return error(res, {
       message: "Failed to communicate with notification service",
-      statusCode: 502
+      statusCode: 502,
     });
   }
 };

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { notifyCustomer } = require("./websocketService");
 
 async function sendNotification(notification) {
   const NOTIFICATION_API_URL =
@@ -18,12 +19,19 @@ async function sendNotification(notification) {
       },
       timeout: 5000,
     });
+
+    // Push real-time event to the customer's socket room
+    const userId = notification.recipient?.userId;
+    if (userId) {
+      notifyCustomer(userId, response.data.data || notification);
+    }
+
     return response.data;
   } catch (err) {
     // Log but do not throw to avoid blocking main flow
     console.error(
       "Failed to send notification:",
-      err.response?.data || err.message
+      err.response?.data || err.message,
     );
     return null;
   }
