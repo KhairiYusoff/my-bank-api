@@ -1,5 +1,5 @@
 const { success, error } = require("../../shared/utils/response");
-const expenseService = require("../../shared/services/expenseService");
+const expenseService = require("./expense.service");
 const {
   getAllCategories,
   getPaymentMethodOptions,
