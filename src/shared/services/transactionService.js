@@ -190,6 +190,7 @@ class TransactionService {
     transactionId,
   ) {
     try {
+      // Notify sender (User A)
       await sendNotification({
         type: "transfer",
         title: "Transfer Completed",
@@ -198,6 +199,30 @@ class TransactionService {
         recipient: {
           role: "customer",
           userId: fromAccount.user.toString(),
+        },
+        source: {
+          service: "my-bank-api",
+          id: transactionId.toString(),
+        },
+        data: {
+          amount,
+          fromAccountNumber: fromAccount.accountNumber,
+          toAccountNumber: toAccount.accountNumber,
+          transactionId: transactionId.toString(),
+        },
+        read: false,
+        delivered: false,
+      });
+
+      // Notify recipient (User B)
+      await sendNotification({
+        type: "transfer",
+        title: "Money Received",
+        message: `You have received RM${amount} from account ${fromAccount.accountNumber} to your account ${toAccount.accountNumber}.`,
+        link: `/transactions/${transactionId}`,
+        recipient: {
+          role: "customer",
+          userId: toAccount.user.toString(),
         },
         source: {
           service: "my-bank-api",
