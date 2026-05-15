@@ -1,6 +1,6 @@
 const { success, error } = require("../../shared/utils/response");
 const { checkAmount } = require("../../shared/utils/validationHelpers");
-const transactionService = require("../../shared/services/transactionService");
+const transactionService = require("./transaction.service");
 const Transaction = require("../../shared/models/Transaction");
 
 exports.transferFunds = async (req, res) => {
