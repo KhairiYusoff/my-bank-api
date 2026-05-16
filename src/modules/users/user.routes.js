@@ -18,7 +18,7 @@ const {
   validateProfileUpdate,
   validatePasswordChange,
   validatePreferencesUpdate,
-} = require("./user.middleware");
+} = require("../../shared/middleware/user.middleware");
 const { activityLogger } = require("../audit/audit.service");
 
 router.post("/me/reset-password", resetPassword);

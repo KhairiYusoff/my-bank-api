@@ -13,7 +13,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
-const { validateAccountCreation } = require("./account.middleware");
+const { validateAccountCreation } = require("../../shared/middleware/account.middleware");
 const { activityLogger } = require("../audit/audit.service");
 const router = express.Router();
 
