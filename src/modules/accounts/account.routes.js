@@ -12,7 +12,7 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../shared/middleware/authMiddleware");
+} = require("../../shared/middleware/auth.middleware");
 const { validateAccountCreation } = require("./account.middleware");
 const { activityLogger } = require("../audit/audit.service");
 const router = express.Router();

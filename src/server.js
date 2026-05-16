@@ -9,11 +9,11 @@ const cookieParser = require("cookie-parser");
 const swaggerUi = require("swagger-ui-express");
 
 // 3. Internal dependencies
-const errorHandler = require("./shared/utils/errorHandler");
+const errorHandler = require("./shared/utils/error.handler");
 const connectDB = require("./config/db");
 const swaggerSpec = require("./config/swaggerConfig");
-const { rateLimitMiddleware } = require("./shared/middleware/rateLimitMiddleware");
-const { initializeSocket } = require("./shared/services/websocketService");
+const { rateLimitMiddleware } = require("./shared/middleware/rate-limit.middleware");
+const { initializeSocket } = require("./shared/services/websocket.service");
 const authRoutes = require("./modules/auth/auth.routes");
 const adminRoutes = require("./modules/admin/admin.routes");
 const accountRoutes = require("./modules/accounts/account.routes");

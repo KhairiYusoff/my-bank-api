@@ -3,8 +3,8 @@ const User = require("../../shared/models/User");
 const Transaction = require("../../shared/models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../../shared/utils/response");
-const { sendNotification } = require("../../shared/services/notificationService");
-const { checkAmount, checkAccountExists } = require("../../shared/utils/validationHelpers");
+const { sendNotification } = require("../../shared/services/notification.service");
+const { checkAmount, checkAccountExists } = require("../../shared/utils/validation.helpers");
 
 exports.createAccount = async (req, res) => {
   const {

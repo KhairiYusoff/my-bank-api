@@ -1,6 +1,6 @@
 const express = require("express");
 const { proxyNotificationRequest } = require("./notification.controller");
-const { authMiddleware } = require("../../shared/middleware/authMiddleware");
+const { authMiddleware } = require("../../shared/middleware/auth.middleware");
 const router = express.Router();
 
 router.use(authMiddleware);

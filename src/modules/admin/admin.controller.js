@@ -2,7 +2,7 @@ const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const bcrypt = require("bcryptjs");
 const { sendEmail } = require("../../shared/utils/email");
-const { sendNotification } = require("../../shared/services/notificationService");
+const { sendNotification } = require("../../shared/services/notification.service");
 const { success, error } = require("../../shared/utils/response");
 
 // Only Admins Can Create Other Admins & Bankers

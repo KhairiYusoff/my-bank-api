@@ -12,10 +12,10 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../shared/middleware/authMiddleware");
+} = require("../../shared/middleware/auth.middleware");
 const {
   verifyProfileCompletionToken,
-} = require("../../shared/middleware/tokenMiddleware");
+} = require("../../shared/middleware/token.middleware");
 const {
   validateInitialApplication,
   validateFullRegistration,
@@ -23,7 +23,7 @@ const {
 const { activityLogger } = require("../audit/audit.service");
 const {
   authRateLimit,
-} = require("../../shared/middleware/rateLimitMiddleware");
+} = require("../../shared/middleware/rate-limit.middleware");
 
 router.post("/apply", [
   authRateLimit,

@@ -1,5 +1,5 @@
 const { success, error } = require("../../shared/utils/response");
-const { checkAmount } = require("../../shared/utils/validationHelpers");
+const { checkAmount } = require("../../shared/utils/validation.helpers");
 const transactionService = require("./transaction.service");
 const Transaction = require("../../shared/models/Transaction");
 

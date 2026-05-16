@@ -7,7 +7,7 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../shared/middleware/authMiddleware");
+} = require("../../shared/middleware/auth.middleware");
 
 const router = express.Router();
 

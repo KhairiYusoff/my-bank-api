@@ -1,7 +1,7 @@
 const express = require('express');
 const { chat, getInsights } = require('./ai.controller');
-const { authMiddleware } = require('../../shared/middleware/authMiddleware');
-const { aiRateLimit } = require('../../shared/middleware/rateLimitMiddleware');
+const { authMiddleware } = require('../../shared/middleware/auth.middleware');
+const { aiRateLimit } = require('../../shared/middleware/rate-limit.middleware');
 
 const router = express.Router();
 

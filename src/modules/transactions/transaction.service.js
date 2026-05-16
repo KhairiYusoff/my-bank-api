@@ -3,7 +3,7 @@ const Transaction = require("../../shared/models/Transaction");
 const mongoose = require("mongoose");
 const {
   sendNotification,
-} = require("../../shared/services/notificationService");
+} = require("../../shared/services/notification.service");
 
 /**
  * Service layer for transaction operations

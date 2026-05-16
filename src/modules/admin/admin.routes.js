@@ -11,7 +11,7 @@ const {
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../shared/middleware/authMiddleware");
+} = require("../../shared/middleware/auth.middleware");
 const { validateStaffRegistration } = require("./admin.validation");
 const { activityLogger } = require("../audit/audit.service");
 

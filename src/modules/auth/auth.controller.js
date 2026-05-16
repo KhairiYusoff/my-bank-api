@@ -3,8 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const { success, error } = require("../../shared/utils/response");
-const { checkUserExists, checkToken } = require("../../shared/utils/validationHelpers");
-const { notifyNewApplication } = require("../../shared/services/websocketService");
+const { checkUserExists, checkToken } = require("../../shared/utils/validation.helpers");
+const { notifyNewApplication } = require("../../shared/services/websocket.service");
 const { logActivity } = require("../audit/audit.service");
 
 exports.login = async (req, res) => {

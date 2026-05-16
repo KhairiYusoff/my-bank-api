@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { notifyCustomer } = require("./websocketService");
+const { notifyCustomer } = require("./websocket.service");
 
 async function sendNotification(notification) {
   const NOTIFICATION_API_URL =

@@ -11,7 +11,7 @@ const {
   checkPaymentMethod,
   checkExpenseDate,
   checkExpenseDescription,
-} = require("../../shared/utils/validationHelpers");
+} = require("../../shared/utils/validation.helpers");
 
 exports.createExpense = async (req, res) => {
   const {

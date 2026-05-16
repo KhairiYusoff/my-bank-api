@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   authMiddleware,
   authorizeRoles,
-} = require("../../shared/middleware/authMiddleware");
+} = require("../../shared/middleware/auth.middleware");
 const {
   transferFunds,
   getAccountTransactions,
@@ -14,7 +14,7 @@ const { activityLogger } = require("../audit/audit.service");
 const {
   validateTransfer,
   validateTransaction,
-} = require("../../shared/middleware/validationMiddleware");
+} = require("../../shared/middleware/validation.middleware");
 
 router.use(authMiddleware);
 

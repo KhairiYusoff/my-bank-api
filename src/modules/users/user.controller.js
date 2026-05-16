@@ -1,7 +1,7 @@
 const User = require("../../shared/models/User");
 const bcrypt = require("bcryptjs");
 const { success, error } = require("../../shared/utils/response");
-const { checkUserExists } = require("../../shared/utils/validationHelpers");
+const { checkUserExists } = require("../../shared/utils/validation.helpers");
 
 exports.getProfile = async (req, res) => {
   try {
