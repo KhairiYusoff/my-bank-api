@@ -3,8 +3,13 @@ const User = require("../../shared/models/User");
 const Transaction = require("../../shared/models/Transaction");
 const mongoose = require("mongoose");
 const { success, error } = require("../../shared/utils/response");
-const { sendNotification } = require("../../shared/services/notification.service");
-const { checkAmount, checkAccountExists } = require("../../shared/utils/validation.helpers");
+const {
+  sendNotification,
+} = require("../../shared/services/notification.service");
+const {
+  checkAmount,
+  checkAccountExists,
+} = require("../../shared/utils/validation.helpers");
 
 exports.createAccount = async (req, res) => {
   const {
@@ -56,7 +61,7 @@ exports.createAccount = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -114,7 +119,7 @@ exports.getAccounts = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -209,7 +214,7 @@ exports.getAllAccounts = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -227,7 +232,10 @@ exports.getBalance = async (req, res) => {
     const account = await Account.findOne(query);
 
     if (!account) {
-      return error(res, { message: "Account not found or access denied", statusCode: 404 });
+      return error(res, {
+        message: "Account not found or access denied",
+        statusCode: 404,
+      });
     }
 
     return success(res, {
@@ -238,7 +246,7 @@ exports.getBalance = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -267,7 +275,7 @@ exports.deleteAccount = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -276,7 +284,7 @@ exports.deleteAccount = async (req, res) => {
 exports.deposit = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  const amountError = checkAmount(res, amount, 'deposit');
+  const amountError = checkAmount(res, amount, "deposit");
   if (amountError) return amountError;
 
   try {
@@ -288,7 +296,11 @@ exports.deposit = async (req, res) => {
 
     const account = await Account.findOne(query);
 
-    const accountError = checkAccountExists(res, account, "Account not found or access denied");
+    const accountError = checkAccountExists(
+      res,
+      account,
+      "Account not found or access denied",
+    );
     if (accountError) return accountError;
 
     const transaction = new Transaction({
@@ -352,7 +364,7 @@ exports.deposit = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -361,11 +373,11 @@ exports.deposit = async (req, res) => {
 exports.withdraw = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  const amountError = checkAmount(res, amount, 'withdraw');
+  const amountError = checkAmount(res, amount, "withdraw");
   if (amountError) return amountError;
 
   try {
-        const query = { accountNumber };
+    const query = { accountNumber };
     // If the user is a customer, they can only withdraw from their own account
     if (req.user.role === "customer") {
       query.user = req.user.id;
@@ -430,7 +442,10 @@ exports.withdraw = async (req, res) => {
         delivered: false,
       });
     } catch (notifyErr) {
-      console.error("Failed to send withdrawal notification:", notifyErr.message);
+      console.error(
+        "Failed to send withdrawal notification:",
+        notifyErr.message,
+      );
     }
 
     return success(res, {
@@ -441,7 +456,7 @@ exports.withdraw = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -450,7 +465,7 @@ exports.withdraw = async (req, res) => {
 exports.airdrop = async (req, res) => {
   const { accountNumber, amount, description } = req.body;
 
-  const amountError = checkAmount(res, amount, 'airdrop');
+  const amountError = checkAmount(res, amount, "airdrop");
   if (amountError) return amountError;
 
   try {
@@ -489,7 +504,7 @@ exports.airdrop = async (req, res) => {
       await sendNotification({
         type: "airdrop",
         title: "Airdrop Received",
-        message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}. ${description ? `Description: ${description}` : ''}`,
+        message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}. ${description ? `Description: ${description}` : ""}`,
         link: `/accounts/${account.accountNumber}`,
         recipient: {
           role: "customer",
@@ -520,7 +535,7 @@ exports.airdrop = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };

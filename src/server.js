@@ -12,7 +12,9 @@ const swaggerUi = require("swagger-ui-express");
 const errorHandler = require("./shared/utils/error.handler");
 const connectDB = require("./config/db");
 const swaggerSpec = require("./config/swaggerConfig");
-const { rateLimitMiddleware } = require("./shared/middleware/rate-limit.middleware");
+const {
+  rateLimitMiddleware,
+} = require("./shared/middleware/rate-limit.middleware");
 const { initializeSocket } = require("./shared/services/websocket.service");
 const authRoutes = require("./modules/auth/auth.routes");
 const adminRoutes = require("./modules/admin/admin.routes");
@@ -34,10 +36,7 @@ connectDB();
 
 // 6. Middleware
 const corsOptions = {
-  origin: [
-    process.env.ADMIN_FRONTEND_URL,
-    process.env.CUSTOMER_FRONTEND_URL
-  ],
+  origin: [process.env.ADMIN_FRONTEND_URL, process.env.CUSTOMER_FRONTEND_URL],
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -61,11 +60,11 @@ if (process.env.NODE_ENV !== "production") {
   });
 }
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   });
 });
 

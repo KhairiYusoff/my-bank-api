@@ -8,13 +8,13 @@ exports.getProfile = async (req, res) => {
     const user = await User.findById(req.user.id).select("-password");
     const userError = checkUserExists(res, user);
     if (userError) return userError;
-    
+
     return success(res, { data: user });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -82,7 +82,7 @@ exports.updateProfile = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -117,7 +117,7 @@ exports.changePassword = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -135,7 +135,7 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({ email });
     const userError = checkUserExists(res, user);
     if (userError) return userError;
-    
+
     user.password = newPassword;
     user.passwordChangedAt = new Date();
     await user.save();
@@ -144,7 +144,7 @@ exports.resetPassword = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -161,7 +161,7 @@ exports.deleteAccount = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -172,7 +172,7 @@ exports.updatePreferences = async (req, res) => {
 
   try {
     const user = await User.findById(req.user.id);
-    
+
     // Validate user exists
     const userError = checkUserExists(res, user);
     if (userError) return userError;
@@ -188,7 +188,7 @@ exports.updatePreferences = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -277,7 +277,7 @@ exports.getAllCustomers = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -342,7 +342,7 @@ exports.getAllStaff = async (req, res) => {
     console.error(err.message);
     res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };

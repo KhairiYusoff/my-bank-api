@@ -2,7 +2,9 @@ const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const bcrypt = require("bcryptjs");
 const { sendEmail } = require("../../shared/utils/email");
-const { sendNotification } = require("../../shared/services/notification.service");
+const {
+  sendNotification,
+} = require("../../shared/services/notification.service");
 const { success, error } = require("../../shared/utils/response");
 
 // Only Admins Can Create Other Admins & Bankers
@@ -50,13 +52,19 @@ exports.updateStaff = async (req, res) => {
     const { role, status } = req.body;
 
     if (staffId === adminId) {
-      return res.status(400).json({ msg: "You cannot update your own role or status." });
+      return res
+        .status(400)
+        .json({ msg: "You cannot update your own role or status." });
     }
 
     const staff = await User.findById(staffId);
     if (!staff) return res.status(404).json({ msg: "Staff not found." });
     if (staff.role !== "banker" && staff.role !== "admin") {
-      return res.status(400).json({ msg: "Only staff (banker/admin) can be updated via this endpoint." });
+      return res
+        .status(400)
+        .json({
+          msg: "Only staff (banker/admin) can be updated via this endpoint.",
+        });
     }
 
     const allowedRoles = ["banker", "admin"];
@@ -64,16 +72,19 @@ exports.updateStaff = async (req, res) => {
     let updated = false;
 
     if (role) {
-      if (!allowedRoles.includes(role)) return res.status(400).json({ msg: "Invalid role." });
+      if (!allowedRoles.includes(role))
+        return res.status(400).json({ msg: "Invalid role." });
       staff.role = role;
       updated = true;
     }
     if (status) {
-      if (!allowedStatus.includes(status)) return res.status(400).json({ msg: "Invalid status." });
+      if (!allowedStatus.includes(status))
+        return res.status(400).json({ msg: "Invalid status." });
       staff.status = status;
       updated = true;
     }
-    if (!updated) return res.status(400).json({ msg: "No valid fields to update." });
+    if (!updated)
+      return res.status(400).json({ msg: "No valid fields to update." });
 
     await staff.save();
     return res.json({ msg: "Staff updated successfully.", staff });
@@ -90,13 +101,17 @@ exports.updateCustomer = async (req, res) => {
     const { status } = req.body;
 
     if (customerId === adminId) {
-      return res.status(400).json({ msg: "You cannot update your own status." });
+      return res
+        .status(400)
+        .json({ msg: "You cannot update your own status." });
     }
 
     const customer = await User.findById(customerId);
     if (!customer) return res.status(404).json({ msg: "Customer not found." });
     if (customer.role !== "customer") {
-      return res.status(400).json({ msg: "Only customers can be updated via this endpoint." });
+      return res
+        .status(400)
+        .json({ msg: "Only customers can be updated via this endpoint." });
     }
 
     const allowedStatus = ["active", "suspended", "terminated"];
@@ -119,13 +134,19 @@ exports.deleteStaff = async (req, res) => {
     const adminId = req.user.id;
 
     if (staffId === adminId) {
-      return res.status(400).json({ msg: "You cannot delete your own account." });
+      return res
+        .status(400)
+        .json({ msg: "You cannot delete your own account." });
     }
 
     const staff = await User.findById(staffId);
     if (!staff) return res.status(404).json({ msg: "Staff not found." });
     if (staff.role !== "banker") {
-      return res.status(400).json({ msg: "Only banker accounts can be deleted via this endpoint." });
+      return res
+        .status(400)
+        .json({
+          msg: "Only banker accounts can be deleted via this endpoint.",
+        });
     }
 
     await User.deleteOne({ _id: staffId });
@@ -142,13 +163,19 @@ exports.deleteCustomer = async (req, res) => {
     const adminId = req.user.id;
 
     if (customerId === adminId) {
-      return res.status(400).json({ msg: "You cannot delete your own account." });
+      return res
+        .status(400)
+        .json({ msg: "You cannot delete your own account." });
     }
 
     const customer = await User.findById(customerId);
     if (!customer) return res.status(404).json({ msg: "Customer not found." });
     if (customer.role !== "customer") {
-      return res.status(400).json({ msg: "Only customer accounts can be deleted via this endpoint." });
+      return res
+        .status(400)
+        .json({
+          msg: "Only customer accounts can be deleted via this endpoint.",
+        });
     }
 
     await User.deleteOne({ _id: customerId });

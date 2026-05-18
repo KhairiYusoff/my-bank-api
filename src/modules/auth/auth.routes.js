@@ -8,11 +8,22 @@ const {
 const { authMiddleware } = require("../../shared/middleware/auth.middleware");
 const { validateLogin } = require("./auth.validation");
 const { activityLogger } = require("../audit/audit.service");
-const { authRateLimit } = require("../../shared/middleware/rate-limit.middleware");
+const {
+  authRateLimit,
+} = require("../../shared/middleware/rate-limit.middleware");
 const router = express.Router();
 
-router.post("/login", [authRateLimit, validateLogin, activityLogger("LOGIN", "User login attempt"), login]);
-router.post("/logout", [authMiddleware, activityLogger("LOGOUT", "User logout"), logout]);
+router.post("/login", [
+  authRateLimit,
+  validateLogin,
+  activityLogger("LOGIN", "User login attempt"),
+  login,
+]);
+router.post("/logout", [
+  authMiddleware,
+  activityLogger("LOGOUT", "User logout"),
+  logout,
+]);
 router.post("/refresh-token", refreshToken);
 router.get("/check-token", authMiddleware, checkToken);
 

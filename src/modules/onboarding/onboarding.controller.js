@@ -2,7 +2,9 @@ const { validationResult } = require("express-validator");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const { success, error } = require("../../shared/utils/response");
-const { notifyNewApplication } = require("../../shared/services/websocket.service");
+const {
+  notifyNewApplication,
+} = require("../../shared/services/websocket.service");
 const {
   buildProfileCompletionUrl,
   sendApprovalEmail,
@@ -273,7 +275,7 @@ exports.getPendingApplications = async (req, res) => {
 
     let applications = await User.find(filter)
       .select(
-        "name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete"
+        "name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete",
       )
       .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip(skip)
