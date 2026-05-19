@@ -74,11 +74,15 @@ exports.approveApplication = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user)
-      return res.status(404).json({ msg: "User application not found" });
+      return error(res, {
+        message: "User application not found",
+        statusCode: 404,
+      });
     if (user.applicationStatus !== "pending") {
-      return res
-        .status(400)
-        .json({ msg: `Application is already ${user.applicationStatus}` });
+      return error(res, {
+        message: `Application is already ${user.applicationStatus}`,
+        statusCode: 400,
+      });
     }
 
     user.applicationStatus = "approved";
@@ -93,14 +97,14 @@ exports.approveApplication = async (req, res) => {
 
     await user.save();
 
-    res.json({
-      msg: "Application approved. An email has been sent to the user to complete their profile.",
-      userId: user._id,
-      completeProfileUrl,
+    return success(res, {
+      message:
+        "Application approved. An email has been sent to the user to complete their profile.",
+      data: { userId: user._id, completeProfileUrl },
     });
   } catch (err) {
     console.error("Error approving application:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    return error(res, { message: "Internal server error", statusCode: 500 });
   }
 };
 
@@ -186,13 +190,18 @@ exports.completeProfile = async (req, res) => {
 exports.verifyCustomer = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    if (!user)
+      return error(res, { message: "User not found", statusCode: 404 });
     if (!user.isProfileComplete)
-      return res.status(400).json({
-        msg: "Cannot verify. The user has not completed their profile yet.",
+      return error(res, {
+        message: "Cannot verify. The user has not completed their profile yet.",
+        statusCode: 400,
       });
     if (user.isVerified)
-      return res.status(400).json({ msg: "User is already verified." });
+      return error(res, {
+        message: "User is already verified.",
+        statusCode: 400,
+      });
 
     user.isVerified = true;
     user.applicationStatus = "completed";
@@ -215,12 +224,13 @@ exports.verifyCustomer = async (req, res) => {
 
     await sendActivationEmail({ email: user.email, name: user.name });
 
-    res.json({
-      msg: "Customer has been successfully verified and their account is now active.",
+    return success(res, {
+      message:
+        "Customer has been successfully verified and their account is now active.",
     });
   } catch (err) {
     console.error("Error verifying customer:", err);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    return error(res, { message: "Internal server error", statusCode: 500 });
   }
 };
 
@@ -300,6 +310,6 @@ exports.getPendingApplications = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching pending applications:", err.message);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    return error(res, { message: "Internal server error", statusCode: 500 });
   }
 };
