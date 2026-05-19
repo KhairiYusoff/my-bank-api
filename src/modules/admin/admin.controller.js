@@ -11,7 +11,10 @@ const handleError = (res, err) => {
 exports.createStaff = async (req, res) => {
   try {
     const { role } = await adminService.createStaff(req.body);
-    return success(res, { message: `${role} created successfully.`, statusCode: 201 });
+    return success(res, {
+      message: `${role} created successfully.`,
+      statusCode: 201,
+    });
   } catch (err) {
     console.error(err.message);
     handleError(res, err);
@@ -25,7 +28,10 @@ exports.updateStaff = async (req, res) => {
       req.user.id,
       req.body,
     );
-    return res.json({ msg: "Staff updated successfully.", staff });
+    return success(res, {
+      message: "Staff updated successfully.",
+      data: staff,
+    });
   } catch (err) {
     console.error(err.message);
     handleError(res, err);
@@ -39,7 +45,10 @@ exports.updateCustomer = async (req, res) => {
       req.user.id,
       req.body,
     );
-    return res.json({ msg: "Customer updated successfully.", customer });
+    return success(res, {
+      message: "Customer updated successfully.",
+      data: customer,
+    });
   } catch (err) {
     console.error(err.message);
     handleError(res, err);
@@ -49,7 +58,7 @@ exports.updateCustomer = async (req, res) => {
 exports.deleteStaff = async (req, res) => {
   try {
     await adminService.deleteStaff(req.params.staffId, req.user.id);
-    return res.json({ msg: "Staff (banker) deleted successfully." });
+    return success(res, { message: "Staff (banker) deleted successfully." });
   } catch (err) {
     console.error(err.message);
     handleError(res, err);
@@ -59,7 +68,7 @@ exports.deleteStaff = async (req, res) => {
 exports.deleteCustomer = async (req, res) => {
   try {
     await adminService.deleteCustomer(req.params.customerId, req.user.id);
-    return res.json({ msg: "Customer deleted successfully." });
+    return success(res, { message: "Customer deleted successfully." });
   } catch (err) {
     console.error(err.message);
     handleError(res, err);
