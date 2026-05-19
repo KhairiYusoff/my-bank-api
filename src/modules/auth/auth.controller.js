@@ -12,6 +12,13 @@ const {
 } = require("../../shared/services/websocket.service");
 const { logActivity } = require("../audit/audit.service");
 
+const handleError = (res, err) => {
+  const statusCode = err.statusCode || 500;
+  res
+    .status(statusCode)
+    .json({ success: false, message: err.message || "Internal server error" });
+};
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -104,10 +111,7 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    handleError(res, err);
   }
 };
 
@@ -167,10 +171,7 @@ exports.logout = async (req, res) => {
     return success(res, { message: "Logged out successfully." });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    handleError(res, err);
   }
 };
 
