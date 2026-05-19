@@ -13,6 +13,13 @@ const {
   checkExpenseDescription,
 } = require("../../shared/utils/validation.helpers");
 
+const handleError = (res, err) => {
+  const statusCode = err.statusCode || 500;
+  res
+    .status(statusCode)
+    .json({ success: false, message: err.message || "Internal server error" });
+};
+
 exports.createExpense = async (req, res) => {
   const {
     amount,
@@ -77,10 +84,7 @@ exports.createExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Create expense error:", err.message);
-    return error(res, {
-      message: err.message || "Failed to create expense",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -124,10 +128,7 @@ exports.getExpenses = async (req, res) => {
     });
   } catch (err) {
     console.error("Get expenses error:", err.message);
-    return error(res, {
-      message: err.message || "Failed to get expenses",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -143,18 +144,7 @@ exports.getExpenseById = async (req, res) => {
     });
   } catch (err) {
     console.error("Get expense error:", err.message);
-
-    if (err.message.includes("not found")) {
-      return error(res, {
-        message: err.message,
-        statusCode: 404,
-      });
-    }
-
-    return error(res, {
-      message: err.message || "Failed to get expense",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -225,21 +215,7 @@ exports.updateExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Update expense error:", err.message);
-
-    if (
-      err.message.includes("not found") ||
-      err.message.includes("access denied")
-    ) {
-      return error(res, {
-        message: err.message,
-        statusCode: 404,
-      });
-    }
-
-    return error(res, {
-      message: err.message || "Failed to update expense",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -254,21 +230,7 @@ exports.deleteExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Delete expense error:", err.message);
-
-    if (
-      err.message.includes("not found") ||
-      err.message.includes("access denied")
-    ) {
-      return error(res, {
-        message: err.message,
-        statusCode: 404,
-      });
-    }
-
-    return error(res, {
-      message: err.message || "Failed to delete expense",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -295,10 +257,7 @@ exports.getMonthlyAnalytics = async (req, res) => {
     });
   } catch (err) {
     console.error("Get monthly analytics error:", err.message);
-    return error(res, {
-      message: err.message || "Failed to get monthly analytics",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -327,10 +286,7 @@ exports.getYearlyAnalytics = async (req, res) => {
     });
   } catch (err) {
     console.error("Get yearly analytics error:", err.message);
-    return error(res, {
-      message: err.message || "Failed to get yearly analytics",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
@@ -347,10 +303,7 @@ exports.getDashboardStats = async (req, res) => {
     });
   } catch (err) {
     console.error("Get dashboard stats error:", err.message);
-    return error(res, {
-      message: err.message || "Failed to get dashboard stats",
-      statusCode: 500,
-    });
+    handleError(res, err);
   }
 };
 
