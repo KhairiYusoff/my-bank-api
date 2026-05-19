@@ -1,80 +1,82 @@
 # Priority Board (May 2026)
 
-**Last Updated:** May 15, 2026  
-**Current Status:** All 4 repos deployed. P0 + P1 complete. Now on P2: codebase hardening.
+**Last Updated:** May 18, 2026  
+**Current Status:** P0 + P1 + P2 fully complete. Ready for P3.
 
 ---
 
 ## ✅ P0: Production Bugs — DONE
 
-**my-bank-customer (Vercel)**
-
-- [x] Bug: Transfer recipient (User B) bell icon not updating in real-time — fixed May 15
-  - Root cause: `_sendTransferNotification` only called `sendNotification` for sender, never recipient
-
-**my-bank-api (Render)**
-
-- [x] No active P0 bugs
+- [x] Transfer recipient (User B) bell icon not updating in real-time — fixed May 15
+  - Root cause: `_sendTransferNotification` only notified sender, not recipient
 
 ---
 
 ## ✅ P1: Deployment Blockers — DONE
 
-**my-bank-admin-portal → Vercel** ✅ Live  
-**notification-service → Railway/Render** ✅ Live
+- [x] my-bank-admin-portal → Vercel ✅ Live
+- [x] notification-service → Railway/Render ✅ Live
 
 ---
 
-## 🟡 P2: Codebase Hardening (CURRENT SPRINT — Week of May 13–17)
+## ✅ P2: Codebase Hardening — DONE (May 15–18)
 
-> Goal: Fix all structural rot before adding new features. Find bad patterns, dead code, naming inconsistencies.
+### ✅ 2A — Dead Code Removed (May 15)
 
-### Phase 2A — Dead Code & Redundancy (DO FIRST)
+- [x] Deleted `shared/services/transactionService.js` (duplicate)
+- [x] Deleted `shared/services/expenseService.js` (duplicate)
+- [x] Deleted `shared/constants/expense.js` (dead, zero imports)
+- [x] Rewired `transaction.controller` + `expense.controller` to their local module services
 
-- [ ] **Delete** `src/shared/services/transactionService.js` — exact duplicate of `modules/transactions/transaction.service.js`
-  - ⚠️ BLOCKER: `modules/transactions/transaction.controller.js` still imports the OLD shared version — must update import first
-- [ ] **Delete** `src/shared/services/expenseService.js` — exact duplicate of `modules/expenses/expense.service.js`
-  - ⚠️ BLOCKER: `modules/expenses/expense.controller.js` still imports the OLD shared version — must update import first
-- [ ] **Delete** `src/shared/constants/expense.js` — exact copy of `modules/expenses/expense.constants.js`, zero imports anywhere (pure dead code)
+### ✅ 2B — Naming Standardised (May 15)
 
-### Phase 2B — Naming Inconsistencies
+- [x] 11 files renamed in `shared/middleware/`, `shared/services/`, `shared/utils/` to `dot.notation`
+- [x] 19 import paths updated across all modules + `server.js`
 
-| Location             | Current (wrong)           | Target (correct)           |
-| -------------------- | ------------------------- | -------------------------- |
-| `shared/middleware/` | `authMiddleware.js`       | `auth.middleware.js`       |
-| `shared/middleware/` | `accountMiddleware.js`    | `account.middleware.js`    |
-| `shared/middleware/` | `activityMiddleware.js`   | `activity.middleware.js`   |
-| `shared/middleware/` | `rateLimitMiddleware.js`  | `rate-limit.middleware.js` |
-| `shared/middleware/` | `tokenMiddleware.js`      | `token.middleware.js`      |
-| `shared/middleware/` | `userMiddleware.js`       | `user.middleware.js`       |
-| `shared/middleware/` | `validationMiddleware.js` | `validation.middleware.js` |
-| `shared/services/`   | `notificationService.js`  | `notification.service.js`  |
-| `shared/services/`   | `websocketService.js`     | `websocket.service.js`     |
-| `shared/utils/`      | `errorHandler.js`         | `error.handler.js`         |
-| `shared/utils/`      | `validationHelpers.js`    | `validation.helpers.js`    |
+### ✅ 2D — Duplicate Middleware Eliminated (May 15)
 
-> Models stay PascalCase (`Account.js`, `User.js`) — correct for Mongoose models/classes.
+- [x] Deleted `modules/accounts/account.middleware.js` (identical to shared)
+- [x] Deleted `modules/users/user.middleware.js` (identical to shared)
 
-### Phase 2C — Fat Controllers (no service layer)
+### ✅ 2C — Fat Controllers Extracted (May 18)
 
-These controllers contain business logic — violates the route → controller → service pattern:
-
-- [ ] `accounts/account.controller.js` — **526 lines**, no `account.service.js` exists
-  - Extract: deposit, withdraw, transfer, balance logic into `account.service.js`
-- [ ] `users/user.controller.js` — **348 lines**, no `user.service.js` exists
-  - Extract: profile update, password change, KYC logic into `user.service.js`
-- [ ] `admin/admin.controller.js` — **160 lines**, no `admin.service.js` exists
-  - Extract: approve/reject/airdrop logic into `admin.service.js`
-
-### Phase 2D — Duplicate Middleware
-
-- [ ] Verify `modules/accounts/account.middleware.js` vs `shared/middleware/accountMiddleware.js` — consolidate to shared only
-- [ ] Verify `modules/users/user.middleware.js` vs `shared/middleware/userMiddleware.js` — consolidate to shared only
+- [x] `account.service.js` created — `account.controller.js`: 526 → 149 lines
+- [x] `user.service.js` created — `user.controller.js`: 348 → 113 lines
+- [x] `admin.service.js` created — `admin.controller.js`: 160 → 67 lines
+- [x] All 3 controllers now HTTP-only: extract params → call service → respond
 
 ---
 
-**P2 Order:** 2A first (unblocks cleanest imports) → 2B → 2C → 2D  
-**Backlog size:** ~15 items, estimated ~1.5 days total
+## 👉 WHAT TO DO RIGHT NOW
+
+Start P3 — AI features.
+   - If you want a fully clean codebase first → do 2C (accounts service extraction is biggest value)
+   - If you're itching to build → skip to P3, come back to 2C when you next touch those modules
+
+---
+
+## 🔵 P3: AI Features (NEXT)
+
+**Status:** Code partially written, on hold since May 8. Ready to evaluate.
+
+- [ ] RAG setup in my-bank-api
+- [ ] AI chatbot in my-bank-customer
+- [ ] Knowledge base integration
+
+**Gate:** P2 structural audit ✅ done. P2C is optional before P3.  
+**Start:** Week of May 20 if you skip 2C, or May 27 if you do 2C first.
+
+---
+
+## Weekly Check-In
+
+| Week      | P0 Status  | P1 Status   | P2 Status       | P3 Status | Notes                     |
+| --------- | ---------- | ----------- | --------------- | --------- | ------------------------- |
+| May 8–10  | ✅ Fixed   | ✅ Deployed | Queued          | Paused    | Deployed admin + notif    |
+| May 13–17 | ✅ Monitor | ✅ Stable   | 2A+2B+2D done   | Paused    | Structural audit complete |
+| May 18    | ✅ Monitor | ✅ Stable   | Prettier commit | —         | **YOU ARE HERE**          |
+| May 20–24 | Monitor    | Stable      | 2C (optional)   | Evaluate  | Fat controller extraction |
+| May 27–31 | Monitor    | Stable      | Done            | Start     | Phase 1 AI begins         |
 
 ---
 
