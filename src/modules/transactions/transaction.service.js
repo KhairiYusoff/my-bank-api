@@ -1,5 +1,6 @@
 const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
+const User = require("../../shared/models/User");
 const mongoose = require("mongoose");
 const {
   sendNotification,
@@ -35,11 +36,15 @@ class TransactionService {
     const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
 
     if (!fromAccount || !toAccount) {
-      throw new Error("Account not found");
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
     }
 
     if (fromAccount.balance < amount) {
-      throw new Error("Insufficient funds");
+      const err = new Error("Insufficient funds");
+      err.statusCode = 400;
+      throw err;
     }
 
     // 2. Create transaction records (one for each account)
@@ -115,7 +120,9 @@ class TransactionService {
     if (user.role === "customer") {
       const account = await Account.findOne({ accountNumber, user: user.id });
       if (!account) {
-        throw new Error("Account not found or access denied");
+        const err = new Error("Account not found or access denied");
+        err.statusCode = 404;
+        throw err;
       }
     }
 
@@ -155,7 +162,9 @@ class TransactionService {
     const transaction = await Transaction.findById(transactionId);
 
     if (!transaction) {
-      throw new Error("Transaction not found");
+      const err = new Error("Transaction not found");
+      err.statusCode = 404;
+      throw err;
     }
 
     // For customers, verify they own the account associated with the transaction
@@ -166,7 +175,9 @@ class TransactionService {
       });
 
       if (!account) {
-        throw new Error("Transaction not found");
+        const err = new Error("Transaction not found");
+        err.statusCode = 404;
+        throw err;
       }
     }
 
@@ -236,6 +247,89 @@ class TransactionService {
     } catch (notifyErr) {
       console.error("Failed to send transfer notification:", notifyErr.message);
     }
+  }
+}
+
+  async getAllTransactions({
+    page = 1,
+    limit = 10,
+    sort = "desc",
+    type,
+    status,
+    performedBy,
+    minAmount,
+    maxAmount,
+    dateFrom,
+    dateTo,
+    search,
+    accountNumber,
+  } = {}) {
+    const query = {};
+    if (type) query.type = type;
+    if (status) query.status = status;
+    if (performedBy) query.performedBy = performedBy;
+    if (minAmount || maxAmount) {
+      query.amount = {};
+      if (minAmount) query.amount.$gte = Number(minAmount);
+      if (maxAmount) query.amount.$lte = Number(maxAmount);
+    }
+    if (dateFrom || dateTo) {
+      query.date = {};
+      if (dateFrom) query.date.$gte = new Date(dateFrom);
+      if (dateTo) query.date.$lte = new Date(dateTo);
+    }
+
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
+    const sortDir = sort === "asc" ? 1 : -1;
+
+    const populate = [
+      { path: "account", select: "accountNumber" },
+      { path: "performedBy", select: "name role" },
+    ];
+
+    let finalQuery = query;
+
+    if (search) {
+      const accounts = await Account.find({
+        accountNumber: new RegExp(search, "i"),
+      }).select("_id");
+      const users = await User.find({
+        $or: [
+          { name: new RegExp(search, "i") },
+          { email: new RegExp(search, "i") },
+        ],
+      }).select("_id");
+      const accountIds = accounts.map((a) => a._id);
+      const userIds = users.map((u) => u._id);
+      const orClauses = [
+        ...(accountIds.length ? [{ account: { $in: accountIds } }] : []),
+        ...(userIds.length ? [{ performedBy: { $in: userIds } }] : []),
+      ];
+      if (orClauses.length) {
+        finalQuery = { ...query, $or: orClauses };
+      }
+    }
+
+    const [transactions, total] = await Promise.all([
+      Transaction.find(finalQuery)
+        .sort({ date: sortDir })
+        .skip(skip)
+        .limit(numericLimit)
+        .populate(populate),
+      Transaction.countDocuments(query),
+    ]);
+
+    return {
+      transactions,
+      meta: {
+        total,
+        page: numericPage,
+        limit: numericLimit,
+        pages: Math.ceil(total / numericLimit),
+      },
+    };
   }
 }
 
