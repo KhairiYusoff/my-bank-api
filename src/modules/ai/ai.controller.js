@@ -1,34 +1,37 @@
-const { streamChatResponse, generateInsightsText } = require('./ai.service');
-const { getSpendingBreakdown } = require('./ai.tools');
-const { maskSpendingDataForLLM } = require('./ai.guardrails');
-const { success, error } = require('../../shared/utils/response');
+const { streamChatResponse, generateInsightsText } = require("./ai.service");
+const { getSpendingBreakdown } = require("./ai.tools");
+const { maskSpendingDataForLLM } = require("./ai.guardrails");
+const { success, error } = require("../../shared/utils/response");
 
-const ALLOWED_PERIODS = ['week', 'month', 'quarter', 'year'];
+const ALLOWED_PERIODS = ["week", "month", "quarter", "year"];
 
-const chat = async (req, res) => {
+exports.chat = async (req, res) => {
   try {
     const { messages } = req.body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      return error(res, { message: 'messages array is required', statusCode: 400 });
+      return error(res, {
+        message: "messages array is required",
+        statusCode: 400,
+      });
     }
 
     const result = await streamChatResponse(messages, req.user);
 
     result.pipeUIMessageStreamToResponse(res);
   } catch (err) {
-    console.error('[AI] chat error:', err);
-    return error(res, { message: 'AI service error', statusCode: 500 });
+    console.error("[AI] chat error:", err);
+    return error(res, { message: "AI service error", statusCode: 500 });
   }
 };
 
-const getInsights = async (req, res) => {
+exports.getInsights = async (req, res) => {
   try {
-    const period = req.query.period || 'month';
+    const period = req.query.period || "month";
 
     if (!ALLOWED_PERIODS.includes(period)) {
       return error(res, {
-        message: `Invalid period. Allowed values: ${ALLOWED_PERIODS.join(', ')}`,
+        message: `Invalid period. Allowed values: ${ALLOWED_PERIODS.join(", ")}`,
         statusCode: 400,
       });
     }
@@ -44,9 +47,7 @@ const getInsights = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('[AI] insights error:', err);
-    return error(res, { message: 'AI insights error', statusCode: 500 });
+    console.error("[AI] insights error:", err);
+    return error(res, { message: "AI insights error", statusCode: 500 });
   }
 };
-
-module.exports = { chat, getInsights };
