@@ -1,7 +1,7 @@
 # Priority Board (May 2026)
 
-**Last Updated:** May 18, 2026  
-**Current Status:** P0 + P1 + P2 fully complete. Ready for P3.
+**Last Updated:** May 19, 2026  
+**Current Status:** P0 + P1 + P2 (A–E) fully complete. Ready for P3.
 
 ---
 
@@ -47,11 +47,36 @@
 
 ---
 
+## ✅ P2E: Final Consistency Audit — DONE (May 19)
+
+**Goal:** Every module uses identical patterns — `handleError`, `success()/error()` utils, `exports.fn` style, fat-free controllers.
+
+### Error handling — `handleError` + service `statusCode`
+
+- [x] `transaction.controller.js` — add `handleError`, replace 4× inline `res.status(500).json`
+- [x] `transaction.service.js` — set `err.statusCode` on thrown errors; add `getAllTransactions()`
+- [x] `auth.controller.js` — add `handleError`, replace 3× inline `res.status(500).json`
+- [x] `expense.controller.js` — add `handleError`, replace hardcoded `statusCode: 500` catch blocks
+- [x] `expense.service.js` — set `err.statusCode` on 404-class errors ("not found" / "access denied")
+
+### Response format — `success()/error()` utilities everywhere
+
+- [x] `admin.controller.js` — replace 4× `res.json({ msg })` with `success(res, { message, data })`
+- [x] `onboarding.controller.js` — replace `res.json({ msg })` / `res.status(x).json({ msg })` in `approveApplication`, `verifyCustomer`, `getPendingApplications`
+
+### Export pattern — `exports.fn` not `module.exports = {}`
+
+- [x] `ai.controller.js` — convert `module.exports = { chat, getInsights }` to `exports.chat` / `exports.getInsights`
+
+### Fat controller
+
+- [x] `transaction.controller.js` — extract `getAllTransactions` DB logic to `transaction.service.js`
+
+---
+
 ## 👉 WHAT TO DO RIGHT NOW
 
-Start P3 — AI features.
-   - If you want a fully clean codebase first → do 2C (accounts service extraction is biggest value)
-   - If you're itching to build → skip to P3, come back to 2C when you next touch those modules
+Start P3 — AI features. Codebase is fully clean.
 
 ---
 
@@ -70,13 +95,14 @@ Start P3 — AI features.
 
 ## Weekly Check-In
 
-| Week      | P0 Status  | P1 Status   | P2 Status       | P3 Status | Notes                     |
-| --------- | ---------- | ----------- | --------------- | --------- | ------------------------- |
-| May 8–10  | ✅ Fixed   | ✅ Deployed | Queued          | Paused    | Deployed admin + notif    |
-| May 13–17 | ✅ Monitor | ✅ Stable   | 2A+2B+2D done   | Paused    | Structural audit complete |
-| May 18    | ✅ Monitor | ✅ Stable   | Prettier commit | —         | **YOU ARE HERE**          |
-| May 20–24 | Monitor    | Stable      | 2C (optional)   | Evaluate  | Fat controller extraction |
-| May 27–31 | Monitor    | Stable      | Done            | Start     | Phase 1 AI begins         |
+| Week      | P0 Status  | P1 Status   | P2 Status     | P3 Status | Notes                     |
+| --------- | ---------- | ----------- | ------------- | --------- | ------------------------- |
+| May 8–10  | ✅ Fixed   | ✅ Deployed | Queued        | Paused    | Deployed admin + notif    |
+| May 13–17 | ✅ Monitor | ✅ Stable   | 2A+2B+2D done | Paused    | Structural audit complete |
+| May 18    | ✅ Monitor | ✅ Stable   | 2C done       | —         | Fat controllers extracted |
+| May 19    | ✅ Monitor | ✅ Stable   | 2E done       | —         | **YOU ARE HERE**          |
+| May 20–24 | Monitor    | Stable      | 2E done       | Evaluate  | Start P3 eval             |
+| May 27–31 | Monitor    | Stable      | Done          | Start     | Phase 1 AI begins         |
 
 ---
 
