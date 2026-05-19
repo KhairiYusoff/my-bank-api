@@ -248,7 +248,6 @@ class TransactionService {
       console.error("Failed to send transfer notification:", notifyErr.message);
     }
   }
-}
 
   async getAllTransactions({
     page = 1,
