@@ -1,15 +1,6 @@
 const { validationResult } = require("express-validator");
-const User = require("../../shared/models/User");
-const Account = require("../../shared/models/Account");
 const { success, error } = require("../../shared/utils/response");
-const {
-  notifyNewApplication,
-} = require("../../shared/services/websocket.service");
-const {
-  buildProfileCompletionUrl,
-  sendApprovalEmail,
-  sendActivationEmail,
-} = require("./onboarding.service");
+const onboardingService = require("./onboarding.service");
 
 exports.apply = async (req, res) => {
   const errorsResult = validationResult(req);
@@ -22,89 +13,33 @@ exports.apply = async (req, res) => {
   }
 
   const { name, email, phoneNumber } = req.body;
-
   try {
-    let user = await User.findOne({ $or: [{ email }, { phoneNumber }] });
-    if (user) {
-      const duplicateMsg =
-        user.email === email
-          ? "An application with this email already exists"
-          : "An application with this phone number already exists";
-      return error(res, { message: duplicateMsg, statusCode: 400 });
-    }
-
-    user = new User({
-      name,
-      email,
-      phoneNumber,
-      role: "customer",
-      isVerified: false,
-      isProfileComplete: false,
-      applicationStatus: "pending",
-    });
-    await user.save();
-
-    notifyNewApplication(user);
-
+    const result = await onboardingService.applyForAccount({ name, email, phoneNumber });
     return success(res, {
-      message:
-        "Application submitted successfully. A bank representative will contact you.",
-      data: { userId: user._id.toString() },
+      message: "Application submitted successfully. A bank representative will contact you.",
+      data: result,
       statusCode: 201,
     });
   } catch (err) {
     console.error("Registration error:", err.message);
-    if (err.name === "ValidationError") {
-      return error(res, {
-        message: "Invalid user data",
-        errors: Object.values(err.errors).map((e) => e.message),
-        statusCode: 400,
-      });
-    } else if (err.code === 11000) {
-      return error(res, { message: "Email already in use", statusCode: 400 });
-    }
     return error(res, {
-      message: "Server error. Please try again later.",
-      statusCode: 500,
+      message: err.message || "Server error. Please try again later.",
+      statusCode: err.statusCode || 500,
+      errors: err.errors,
     });
   }
 };
 
 exports.approveApplication = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    if (!user)
-      return error(res, {
-        message: "User application not found",
-        statusCode: 404,
-      });
-    if (user.applicationStatus !== "pending") {
-      return error(res, {
-        message: `Application is already ${user.applicationStatus}`,
-        statusCode: 400,
-      });
-    }
-
-    user.applicationStatus = "approved";
-
-    const { url: completeProfileUrl } = buildProfileCompletionUrl(user._id);
-
-    await sendApprovalEmail({
-      email: user.email,
-      name: user.name,
-      completeProfileUrl,
-    });
-
-    await user.save();
-
+    const result = await onboardingService.approveApplication(req.params.userId);
     return success(res, {
-      message:
-        "Application approved. An email has been sent to the user to complete their profile.",
-      data: { userId: user._id, completeProfileUrl },
+      message: "Application approved. An email has been sent to the user to complete their profile.",
+      data: result,
     });
   } catch (err) {
-    console.error("Error approving application:", err);
-    return error(res, { message: "Internal server error", statusCode: 500 });
+    console.error("Error approving application:", err.message);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -130,16 +65,7 @@ exports.completeProfile = async (req, res) => {
   } = req.body;
 
   try {
-    const user = await User.findById(userId);
-    if (!user)
-      return error(res, { message: "User not found", statusCode: 404 });
-    if (user.isProfileComplete)
-      return error(res, {
-        message: "Profile has already been completed.",
-        statusCode: 400,
-      });
-
-    Object.assign(user, {
+    await onboardingService.completeProfile(userId, {
       password,
       address,
       dateOfBirth,
@@ -156,160 +82,39 @@ exports.completeProfile = async (req, res) => {
       educationLevel,
       residencyStatus,
       nextOfKin,
-      isProfileComplete: true,
     });
-
-    await user.save();
-
     return success(res, {
-      message:
-        "Your profile has been completed successfully. It is now pending final verification.",
+      message: "Your profile has been completed successfully. It is now pending final verification.",
     });
   } catch (err) {
-    console.error("Error completing profile:", err);
-    if (err.name === "ValidationError") {
-      return error(res, {
-        message: "Invalid user data",
-        statusCode: 400,
-        errors: Object.values(err.errors).map((e) => e.message),
-      });
-    } else if (err.code === 11000) {
-      const field = Object.keys(err.keyPattern)[0];
-      return error(res, {
-        message: `This ${field} is already in use by another account.`,
-        statusCode: 400,
-      });
-    }
+    console.error("Error completing profile:", err.message);
     return error(res, {
-      message: "Server error. Please try again later.",
-      statusCode: 500,
+      message: err.message || "Server error. Please try again later.",
+      statusCode: err.statusCode || 500,
+      errors: err.errors,
     });
   }
 };
 
 exports.verifyCustomer = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
-    if (!user)
-      return error(res, { message: "User not found", statusCode: 404 });
-    if (!user.isProfileComplete)
-      return error(res, {
-        message: "Cannot verify. The user has not completed their profile yet.",
-        statusCode: 400,
-      });
-    if (user.isVerified)
-      return error(res, {
-        message: "User is already verified.",
-        statusCode: 400,
-      });
-
-    user.isVerified = true;
-    user.applicationStatus = "completed";
-    await user.save();
-
-    const accountTypeMap = {
-      savings: "Savings",
-      checking: "Checking",
-      business: "Business",
-    };
-    await Account.create({
-      user: user._id,
-      accountNumber: `MYB${Date.now()}`,
-      accountType: accountTypeMap[user.accountType] || "Savings",
-      balance: 0,
-      currency: "MYR",
-      status: "Active",
-      dateOpened: new Date(),
-    });
-
-    await sendActivationEmail({ email: user.email, name: user.name });
-
+    await onboardingService.verifyCustomer(req.params.userId);
     return success(res, {
-      message:
-        "Customer has been successfully verified and their account is now active.",
+      message: "Customer has been successfully verified and their account is now active.",
     });
   } catch (err) {
-    console.error("Error verifying customer:", err);
-    return error(res, { message: "Internal server error", statusCode: 500 });
+    console.error("Error verifying customer:", err.message);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
 exports.getPendingApplications = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 10,
-      sortBy = "createdAt",
-      order = "desc",
-      name,
-      email,
-      phoneNumber,
-      identityNumber,
-      dateFrom,
-      dateTo,
-      search,
-    } = req.query;
-    const numericPage = Math.max(parseInt(page, 10), 1);
-    const numericLimit = Math.max(parseInt(limit, 10), 1);
-    const skip = (numericPage - 1) * numericLimit;
-
-    const filter = { isVerified: false, role: "customer" };
-    if (name) filter.name = new RegExp(name, "i");
-    if (email) filter.email = new RegExp(email, "i");
-    if (phoneNumber) filter.phoneNumber = new RegExp(phoneNumber, "i");
-    if (identityNumber) filter.identityNumber = new RegExp(identityNumber, "i");
-    if (dateFrom || dateTo) {
-      filter.createdAt = {};
-      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
-      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
-    }
-    if (search) {
-      filter.$or = [
-        { name: new RegExp(search, "i") },
-        { email: new RegExp(search, "i") },
-        { phoneNumber: new RegExp(search, "i") },
-        { identityNumber: new RegExp(search, "i") },
-      ];
-    }
-
-    const decodeHtmlEntities = (str) =>
-      str
-        ? str
-            .replace(/&amp;/g, "&")
-            .replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/&quot;/g, '"')
-            .replace(/&#x27;/g, "'")
-            .replace(/&#x2F;/g, "/")
-        : str;
-
-    let applications = await User.find(filter)
-      .select(
-        "name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete",
-      )
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 })
-      .skip(skip)
-      .limit(numericLimit)
-      .lean();
-
-    applications = applications.map((app) => ({
-      ...app,
-      name: decodeHtmlEntities(app.name),
-    }));
-
-    const total = await User.countDocuments(filter);
-
-    return success(res, {
-      data: applications,
-      meta: {
-        page: numericPage,
-        limit: numericLimit,
-        pages: Math.ceil(total / numericLimit),
-        total,
-      },
-    });
+    const { applications, meta } = await onboardingService.getPendingApplications(req.query);
+    return success(res, { data: applications, meta });
   } catch (err) {
     console.error("Error fetching pending applications:", err.message);
-    return error(res, { message: "Internal server error", statusCode: 500 });
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
+
