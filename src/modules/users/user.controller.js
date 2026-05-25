@@ -1,20 +1,13 @@
 const { success, error } = require("../../shared/utils/response");
 const userService = require("./user.service");
 
-const handleError = (res, err) => {
-  const statusCode = err.statusCode || 500;
-  res
-    .status(statusCode)
-    .json({ success: false, message: err.message || "Internal server error" });
-};
-
 exports.getProfile = async (req, res) => {
   try {
     const user = await userService.getProfile(req.user.id);
     return success(res, { data: user });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -24,7 +17,7 @@ exports.updateProfile = async (req, res) => {
     return success(res, { message: "Profile updated", data: userResponse });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -35,7 +28,7 @@ exports.changePassword = async (req, res) => {
     return success(res, { message: "Password changed successfully" });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -52,7 +45,7 @@ exports.resetPassword = async (req, res) => {
     return success(res, { message: "Password reset successfully" });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -62,7 +55,7 @@ exports.deleteAccount = async (req, res) => {
     return success(res, { message: "User account deleted successfully" });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -80,7 +73,7 @@ exports.updatePreferences = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -94,7 +87,7 @@ exports.getAllCustomers = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -108,6 +101,6 @@ exports.getAllStaff = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };

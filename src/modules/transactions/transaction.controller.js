@@ -1,13 +1,6 @@
-const { success } = require("../../shared/utils/response");
+const { success, error } = require("../../shared/utils/response");
 const { checkAmount } = require("../../shared/utils/validation.helpers");
 const transactionService = require("./transaction.service");
-
-const handleError = (res, err) => {
-  const statusCode = err.statusCode || 500;
-  res
-    .status(statusCode)
-    .json({ success: false, message: err.message || "Internal server error" });
-};
 
 exports.transferFunds = async (req, res) => {
   const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
@@ -26,7 +19,7 @@ exports.transferFunds = async (req, res) => {
     return success(res, { message: "Transfer successful", data: result });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -49,7 +42,7 @@ exports.getAccountTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -62,7 +55,7 @@ exports.getAllTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
 
@@ -77,6 +70,6 @@ exports.getTransactionDetails = async (req, res) => {
     return success(res, { data: transaction });
   } catch (err) {
     console.error(err.message);
-    handleError(res, err);
+    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
   }
 };
