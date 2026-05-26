@@ -1,5 +1,8 @@
 const { error } = require('./response');
-const { EXPENSE_CATEGORIES, PAYMENT_METHODS } = require('../constants/expense');
+const {
+  EXPENSE_CATEGORIES,
+  PAYMENT_METHODS,
+} = require('../../modules/expenses/expense.constants');
 
 /**
  * Common validation helpers to reduce code duplication
