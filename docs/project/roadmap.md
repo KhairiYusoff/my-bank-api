@@ -56,7 +56,7 @@ Tracker handles _what's being worked on right now_. This file handles _the full 
 
 ---
 
-## Phase 2 — Architecture Completion 🔵 (May 2026 — current)
+## Phase 2 — Architecture Completion ✅ (Completed May 25, 2026)
 
 **Goal:** Every module follows the route → controller → service contract without exception.
 
@@ -69,11 +69,16 @@ Audit (May 22, 2026) found 4 remaining gaps:
 | 2C  | `audit`       | Service only covers writes — getOwnActivity, getUserActivity, getAllActivities have pagination/filter/sort logic in controller            |
 | 2D  | 6 controllers | Local `handleError` copies instead of shared `error()` utility — violates constraint #1                                                   |
 
-**Gate to Phase 3:** All 4 gaps closed.
+**Result (May 25, 2026):** All 4 gaps closed.
+
+- ✅ 2D complete: Replaced local `handleError` copies with shared `error()` utility in 6 controllers
+- ✅ 2A complete: Created `auth.service.js`; controller now HTTP-only
+- ✅ 2B complete: Expanded `onboarding.service.js`; controller now HTTP-only
+- ✅ 2C complete: Expanded `audit.service.js` with shared `_queryLogs` read builder; controller now HTTP-only
 
 ---
 
-## Phase 3 — AI Features 🔵 (Planned: June 2026)
+## Phase 3 — AI Features 🔵 (Current)
 
 **Goal:** Production-grade AI features in the banking context.
 
@@ -83,7 +88,7 @@ Scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.
 - [ ] AI chatbot UI — my-bank-customer
 - [ ] Financial insights — spending breakdown with AI narrative
 
-**Gate:** Phase 2 must be fully closed first.
+**Gate:** Phase 2 closed on May 25, 2026. Phase 3 is now active.
 
 ---
 

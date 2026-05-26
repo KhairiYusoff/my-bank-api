@@ -1,24 +1,32 @@
 # Tracker
 
-**Last Updated:** May 22, 2026
-**Current Phase:** Phase 2 — Architecture Completion
+**Last Updated:** May 25, 2026
+**Current Phase:** Phase 3 — AI Features
 
 See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ---
 
-## Now — Phase 2 Architecture Gaps
+## Now — Phase 3 AI Features
 
-| #   | Task                                                                                                    | Status  |
-| --- | ------------------------------------------------------------------------------------------------------- | ------- |
-| 2A  | Create `auth.service.js` — extract login, logout, refreshToken out of controller                        | ⬜ TODO |
-| 2B  | Expand `onboarding.service.js` — extract apply, completeProfile, verifyCustomer, getPendingApplications | ⬜ TODO |
-| 2C  | Expand `audit.service.js` — extract getOwnActivity, getUserActivity, getAllActivities read logic        | ⬜ TODO |
-| 2D  | Replace all 6 local `handleError` copies with shared `error()` utility                                  | ⬜ TODO |
+| # | Task | Status |
+|---|------|--------|
+| 3A | RAG setup — knowledge base integration in my-bank-api | ⬜ TODO |
+| 3B | AI chatbot UI — my-bank-customer | ⬜ TODO |
+| 3C | Financial insights — spending breakdown with AI narrative | ⬜ TODO |
 
 ---
 
 ## Completed
+
+### Phase 2 — Architecture Completion (May 25, 2026) ✅
+
+| # | Task |
+|---|------|
+| 2D | Replaced all 6 local `handleError` copies with shared `error()` utility |
+| 2A | Created `auth.service.js` — extracted login, logout, refreshToken |
+| 2B | Expanded `onboarding.service.js` — extracted apply, completeProfile, verifyCustomer, getPendingApplications |
+| 2C | Expanded `audit.service.js` — extracted 3 read functions with shared `_queryLogs` builder |
 
 ### Phase 1 — Codebase Hardening (May 13–19, 2026) ✅
 
@@ -32,6 +40,5 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Notes
 
-- 2D (handleError) is a quick sweep — good warm-up before the service extractions
-- Phase 3 (AI) is blocked on Phase 2 being fully closed
-- `notifications` module has no service layer but it's a thin proxy — low priority, not blocking
+- AI scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`
+- `notifications` module has no service layer — thin proxy, low priority, not blocking P3
