@@ -213,8 +213,83 @@ const activityLogger = (action, details = "") => {
   };
 };
 
+// ─── Read helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Shared query builder for all three activity log read functions.
+ * baseQuery: the starting filter ({ user: id } or {})
+ * params: parsed query string values
+ * defaultLimit: 10 for scoped reads, 20 for global admin reads
+ */
+async function _queryLogs(baseQuery, params, defaultLimit) {
+  const {
+    page = 1,
+    limit = defaultLimit,
+    action,
+    status,
+    severity,
+    startDate,
+    endDate,
+    userId,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = params;
+
+  const query = { ...baseQuery };
+  if (userId) query.user = userId;
+  if (action) query.action = action;
+  if (status) query.status = status;
+  if (severity) query.severity = severity;
+  if (startDate || endDate) {
+    query.createdAt = {};
+    if (startDate) query.createdAt.$gte = new Date(startDate);
+    if (endDate) query.createdAt.$lte = new Date(endDate);
+  }
+
+  const numPage = parseInt(page);
+  const numLimit = parseInt(limit);
+  const skip = (numPage - 1) * numLimit;
+
+  const validSortFields = ["createdAt", "action", "status", "severity"];
+  const sortField = validSortFields.includes(sortBy) ? sortBy : "createdAt";
+  const sortDirection = sortOrder.toLowerCase() === "asc" ? 1 : -1;
+
+  const total = await ActivityLog.countDocuments(query);
+  const activities = await ActivityLog.find(query)
+    .sort({ [sortField]: sortDirection })
+    .skip(skip)
+    .limit(numLimit)
+    .populate("user", "name email")
+    .populate("relatedEntity", "accountNumber name email");
+
+  return {
+    activities: activities.map((a) => a.format()),
+    meta: {
+      page: numPage,
+      limit: numLimit,
+      total,
+      pages: Math.ceil(total / numLimit),
+    },
+  };
+}
+
+async function getOwnActivityLogs(userId, queryParams) {
+  return _queryLogs({ user: userId }, queryParams, 10);
+}
+
+async function getUserActivityLogs(userId, queryParams) {
+  return _queryLogs({ user: userId }, queryParams, 10);
+}
+
+async function getAllActivityLogs(queryParams) {
+  return _queryLogs({}, queryParams, 20);
+}
+
 module.exports = {
   activityLogger,
   logActivity,
   ACTIVITY_TYPES,
+  getOwnActivityLogs,
+  getUserActivityLogs,
+  getAllActivityLogs,
 };
