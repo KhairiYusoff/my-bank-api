@@ -10,7 +10,10 @@ exports.createStaff = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -27,7 +30,10 @@ exports.updateStaff = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -44,7 +50,10 @@ exports.updateCustomer = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -54,7 +63,10 @@ exports.deleteStaff = async (req, res) => {
     return success(res, { message: "Staff (banker) deleted successfully." });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -64,6 +76,9 @@ exports.deleteCustomer = async (req, res) => {
     return success(res, { message: "Customer deleted successfully." });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };

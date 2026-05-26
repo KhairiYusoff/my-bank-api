@@ -77,7 +77,10 @@ exports.createExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Create expense error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -121,7 +124,10 @@ exports.getExpenses = async (req, res) => {
     });
   } catch (err) {
     console.error("Get expenses error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -137,7 +143,10 @@ exports.getExpenseById = async (req, res) => {
     });
   } catch (err) {
     console.error("Get expense error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -208,7 +217,10 @@ exports.updateExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Update expense error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -223,7 +235,10 @@ exports.deleteExpense = async (req, res) => {
     });
   } catch (err) {
     console.error("Delete expense error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -250,7 +265,10 @@ exports.getMonthlyAnalytics = async (req, res) => {
     });
   } catch (err) {
     console.error("Get monthly analytics error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -279,7 +297,10 @@ exports.getYearlyAnalytics = async (req, res) => {
     });
   } catch (err) {
     console.error("Get yearly analytics error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -296,7 +317,10 @@ exports.getDashboardStats = async (req, res) => {
     });
   } catch (err) {
     console.error("Get dashboard stats error:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 

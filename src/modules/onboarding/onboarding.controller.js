@@ -14,9 +14,14 @@ exports.apply = async (req, res) => {
 
   const { name, email, phoneNumber } = req.body;
   try {
-    const result = await onboardingService.applyForAccount({ name, email, phoneNumber });
+    const result = await onboardingService.applyForAccount({
+      name,
+      email,
+      phoneNumber,
+    });
     return success(res, {
-      message: "Application submitted successfully. A bank representative will contact you.",
+      message:
+        "Application submitted successfully. A bank representative will contact you.",
       data: result,
       statusCode: 201,
     });
@@ -32,14 +37,20 @@ exports.apply = async (req, res) => {
 
 exports.approveApplication = async (req, res) => {
   try {
-    const result = await onboardingService.approveApplication(req.params.userId);
+    const result = await onboardingService.approveApplication(
+      req.params.userId,
+    );
     return success(res, {
-      message: "Application approved. An email has been sent to the user to complete their profile.",
+      message:
+        "Application approved. An email has been sent to the user to complete their profile.",
       data: result,
     });
   } catch (err) {
     console.error("Error approving application:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -84,7 +95,8 @@ exports.completeProfile = async (req, res) => {
       nextOfKin,
     });
     return success(res, {
-      message: "Your profile has been completed successfully. It is now pending final verification.",
+      message:
+        "Your profile has been completed successfully. It is now pending final verification.",
     });
   } catch (err) {
     console.error("Error completing profile:", err.message);
@@ -100,21 +112,28 @@ exports.verifyCustomer = async (req, res) => {
   try {
     await onboardingService.verifyCustomer(req.params.userId);
     return success(res, {
-      message: "Customer has been successfully verified and their account is now active.",
+      message:
+        "Customer has been successfully verified and their account is now active.",
     });
   } catch (err) {
     console.error("Error verifying customer:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
 exports.getPendingApplications = async (req, res) => {
   try {
-    const { applications, meta } = await onboardingService.getPendingApplications(req.query);
+    const { applications, meta } =
+      await onboardingService.getPendingApplications(req.query);
     return success(res, { data: applications, meta });
   } catch (err) {
     console.error("Error fetching pending applications:", err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
-

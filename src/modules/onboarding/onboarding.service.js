@@ -2,7 +2,9 @@ const jwt = require("jsonwebtoken");
 const { sendEmail } = require("../../shared/utils/email");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
-const { notifyNewApplication } = require("../../shared/services/websocket.service");
+const {
+  notifyNewApplication,
+} = require("../../shared/services/websocket.service");
 
 // ─── Email / URL helpers ──────────────────────────────────────────────────────
 
@@ -104,8 +106,14 @@ exports.approveApplication = async (userId) => {
   }
 
   user.applicationStatus = "approved";
-  const { url: completeProfileUrl } = exports.buildProfileCompletionUrl(user._id);
-  await exports.sendApprovalEmail({ email: user.email, name: user.name, completeProfileUrl });
+  const { url: completeProfileUrl } = exports.buildProfileCompletionUrl(
+    user._id,
+  );
+  await exports.sendApprovalEmail({
+    email: user.email,
+    name: user.name,
+    completeProfileUrl,
+  });
   await user.save();
 
   return { userId: user._id, completeProfileUrl };
@@ -136,7 +144,9 @@ exports.completeProfile = async (userId, profileData) => {
     }
     if (mongoErr.code === 11000) {
       const field = Object.keys(mongoErr.keyPattern)[0];
-      const err = new Error(`This ${field} is already in use by another account.`);
+      const err = new Error(
+        `This ${field} is already in use by another account.`,
+      );
       err.statusCode = 400;
       throw err;
     }
@@ -152,7 +162,9 @@ exports.verifyCustomer = async (userId) => {
     throw err;
   }
   if (!user.isProfileComplete) {
-    const err = new Error("Cannot verify. The user has not completed their profile yet.");
+    const err = new Error(
+      "Cannot verify. The user has not completed their profile yet.",
+    );
     err.statusCode = 400;
     throw err;
   }
@@ -166,7 +178,11 @@ exports.verifyCustomer = async (userId) => {
   user.applicationStatus = "completed";
   await user.save();
 
-  const accountTypeMap = { savings: "Savings", checking: "Checking", business: "Business" };
+  const accountTypeMap = {
+    savings: "Savings",
+    checking: "Checking",
+    business: "Business",
+  };
   await Account.create({
     user: user._id,
     accountNumber: `MYB${Date.now()}`,
@@ -230,7 +246,9 @@ exports.getPendingApplications = async (query) => {
   }
 
   let applications = await User.find(filter)
-    .select("name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete")
+    .select(
+      "name email phoneNumber identityNumber createdAt applicationStatus isProfileComplete",
+    )
     .sort({ [sortBy]: order === "asc" ? 1 : -1 })
     .skip(skip)
     .limit(numericLimit)
@@ -253,7 +271,6 @@ exports.getPendingApplications = async (query) => {
     },
   };
 };
-
 
 /**
  * Generate a short-lived JWT and build the frontend URL for profile completion.

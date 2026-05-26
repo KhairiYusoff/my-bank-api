@@ -163,7 +163,11 @@ const logActivity = async (req, res, action, details = "") => {
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
     // For some activities like CUSTOMER_APPLICATION, userId might be null if user doesn't exist
-    if (!userId && action !== "CUSTOMER_APPLICATION" && action !== "LOGIN_FAILED") {
+    if (
+      !userId &&
+      action !== "CUSTOMER_APPLICATION" &&
+      action !== "LOGIN_FAILED"
+    ) {
       console.error(`Could not determine user ID for activity: ${action}`);
       return;
     }

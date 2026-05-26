@@ -19,7 +19,10 @@ exports.transferFunds = async (req, res) => {
     return success(res, { message: "Transfer successful", data: result });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -42,7 +45,10 @@ exports.getAccountTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -55,7 +61,10 @@ exports.getAllTransactions = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -70,6 +79,9 @@ exports.getTransactionDetails = async (req, res) => {
     return success(res, { data: transaction });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };

@@ -9,11 +9,11 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ## Now — Phase 3 AI Features
 
-| # | Task | Status |
-|---|------|--------|
-| 3A | RAG setup — knowledge base integration in my-bank-api | ⬜ TODO |
-| 3B | AI chatbot UI — my-bank-customer | ⬜ TODO |
-| 3C | Financial insights — spending breakdown with AI narrative | ⬜ TODO |
+| #   | Task                                                      | Status  |
+| --- | --------------------------------------------------------- | ------- |
+| 3A  | RAG setup — knowledge base integration in my-bank-api     | ⬜ TODO |
+| 3B  | AI chatbot UI — my-bank-customer                          | ⬜ TODO |
+| 3C  | Financial insights — spending breakdown with AI narrative | ⬜ TODO |
 
 ---
 
@@ -21,12 +21,12 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ### Phase 2 — Architecture Completion (May 25, 2026) ✅
 
-| # | Task |
-|---|------|
-| 2D | Replaced all 6 local `handleError` copies with shared `error()` utility |
-| 2A | Created `auth.service.js` — extracted login, logout, refreshToken |
-| 2B | Expanded `onboarding.service.js` — extracted apply, completeProfile, verifyCustomer, getPendingApplications |
-| 2C | Expanded `audit.service.js` — extracted 3 read functions with shared `_queryLogs` builder |
+| #   | Task                                                                                                        |
+| --- | ----------------------------------------------------------------------------------------------------------- |
+| 2D  | Replaced all 6 local `handleError` copies with shared `error()` utility                                     |
+| 2A  | Created `auth.service.js` — extracted login, logout, refreshToken                                           |
+| 2B  | Expanded `onboarding.service.js` — extracted apply, completeProfile, verifyCustomer, getPendingApplications |
+| 2C  | Expanded `audit.service.js` — extracted 3 read functions with shared `_queryLogs` builder                   |
 
 ### Phase 1 — Codebase Hardening (May 13–19, 2026) ✅
 

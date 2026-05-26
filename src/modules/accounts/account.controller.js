@@ -23,10 +23,17 @@ exports.createAccount = async (req, res) => {
       overdraftLimit,
       minimumBalance,
     });
-    return success(res, { message: "Account created", data: account, statusCode: 201 });
+    return success(res, {
+      message: "Account created",
+      data: account,
+      statusCode: 201,
+    });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -40,7 +47,10 @@ exports.getAccounts = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -54,7 +64,10 @@ exports.getAllAccounts = async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -68,7 +81,10 @@ exports.getBalance = async (req, res) => {
     return success(res, { message: "Balance fetched", data });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -78,7 +94,10 @@ exports.deleteAccount = async (req, res) => {
     return success(res, { message: "Account closed successfully." });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -98,7 +117,10 @@ exports.deposit = async (req, res) => {
     return success(res, { message: "Deposit successful", data: result });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -118,7 +140,10 @@ exports.withdraw = async (req, res) => {
     return success(res, { message: "Withdrawal successful", data: result });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
 
@@ -137,6 +162,9 @@ exports.airdrop = async (req, res) => {
     return success(res, { message: "Airdrop successful", data: result });
   } catch (err) {
     console.error(err.message);
-    return error(res, { message: err.message || "Internal server error", statusCode: err.statusCode || 500 });
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
   }
 };
