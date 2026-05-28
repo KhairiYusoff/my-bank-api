@@ -42,3 +42,14 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 - AI scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`
 - `notifications` module has no service layer — thin proxy, low priority, not blocking P3
+
+---
+
+## Performance Optimization Backlog
+
+Items identified during architecture audit (May 28, 2026). Not blocking any current phase.
+
+| #   | Item                                                                                                                          | Impact | Status  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------- | ------ | ------- |
+| P1  | `authorizeRoles` fires a redundant `User.findById` on every protected request — `req.user` is already set by `authMiddleware` | Medium | ⬜ TODO |
+| P2  | Route auto-loader — `server.js` manually imports every route module; a dynamic loader would scale better at 20+ modules       | Low    | ⬜ TODO |
