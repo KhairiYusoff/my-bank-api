@@ -147,17 +147,18 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 
 ### Work items
 
+- [x] Wire `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId` — ✅ May 29
+- [x] Wire `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId` — ✅ May 29
+- [x] Wire `GET /transactions/:transactionId` — detail dialog in admin TransactionsList — ✅ May 29
 - [ ] Wire `GET /accounts/` in customer app (account list on dashboard)
 - [ ] Wire `GET /accounts/balance/:accountNumber` or confirm replaced by full account fetch
 - [ ] Build banker account management UI in admin portal — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
-- [ ] Build admin user management actions — `DELETE /admin/staff/:staffId`, `DELETE /admin/customer/:customerId`, `PUT /admin/staff/:staffId`, `PUT /admin/customer/:customerId`
-- [ ] Wire `GET /transactions/:transactionId` — transaction detail modal in both portals
 - [ ] Wire `DELETE /users/me` — account self-deletion flow in customer app
 - [ ] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — use as filter options in expense UI
 - [ ] Wire `GET /expenses/dashboard/stats` — expense summary widget
 - [ ] `POST /ai/chat` — deferred to Phase 4
 
-### 3A — Admin Portal gap closure (current focus)
+### 3A — Admin Portal gap closure ✅ (May 29, 2026)
 
 Priority order based on impact:
 
@@ -172,7 +173,7 @@ Priority order based on impact:
 4. **Account management** — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
    - Banker creates/closes accounts from admin portal
 
-### 3B — Customer app gap closure
+### 3B — Customer app gap closure 🔵 (current focus)
 
 1. **Account list** — `GET /accounts/` (dashboard account selector)
 2. **Transaction detail** — `GET /transactions/:transactionId`
