@@ -200,6 +200,58 @@ Scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.
 
 ---
 
-## Phase 5+ — TBD
+## Phase 5 — Transaction Detail Enrichment 🔴 (Backlog)
 
-Future scope to be defined after Phase 4 ships.
+**Goal:** Transaction details must be meaningfully different from the list view — on par with Maybank2u / CIMB Clicks standard. Identified May 29, 2026 after BA review found the detail dialog showed identical data to the list.
+
+### Context
+
+The Phase 1 refactor replaced `fromAccountNumber`/`toAccountNumber` string fields with a single `account: ObjectId` ref. This lost counterpart information for transfers. A customer seeing "Transfer — RM500" with no recipient info is a UX failure and a dispute risk.
+
+### 5A — Schema enrichment (my-bank-api)
+
+Changes to `Transaction` model and `transferFunds` service:
+
+| Field | Type | Description | Priority |
+|---|---|---|---|
+| `reference` | `String` | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. Needed for disputes and receipts | 🔴 MVP |
+| `counterpartAccount` | `String` | The other account number — recipient if you sent, sender if you received | 🔴 MVP |
+| `counterpartName` | `String` | Masked name of counterpart e.g. `Ahmad K****` — User lookup at write time | 🔴 MVP |
+| `balanceAfter` | `Number` | Account balance snapshot after transaction completes — computed at write time | 🔴 MVP |
+| `fee` | `Number` | Transaction fee charged. Zero for now but structure for future pricing | 🟡 Nice-to-have |
+| `category` | `String` | Auto-tagged: `salary`, `utilities`, `transfer`, `bonus`. Enables expense linkage | 🟡 Nice-to-have |
+| `processingTime` | `{ submittedAt, completedAt }` | For pending/failed transactions — shows how long processing took | 🟡 Nice-to-have |
+| `deviceInfo` | `String` | Originating device/IP — security context for dispute investigation | 🟡 Nice-to-have |
+
+### 5B — API response enrichment (my-bank-api)
+
+- `POST /transactions/transfer` — populate `counterpartAccount`, `counterpartName`, `reference`, `balanceAfter` at write time for **both** from/to transaction records
+- `GET /transactions/account/:accountNumber` — include all new fields in list response
+- `GET /transactions/:transactionId` — full detail response with all enriched fields
+
+### 5C — Transaction detail UI (my-bank-customer)
+
+Replace current detail dialog (mirrors the list) with receipt-style view:
+
+**MVP (unlocks with 5A):**
+- Reference number — styled prominently, this is what customers quote for disputes
+- Transfer direction: "You sent to **Ahmad K\*\*\*\***" / "You received from **Siti R\*\*\*\***"
+- Counterpart account number (masked: `MYB****5236`)
+- Amount + balance after: `RM500.00 sent → Balance: RM2,450.00`
+- Status with submitted/completed timestamps
+- Fee breakdown (even if RM0.00 — builds trust)
+
+**Nice-to-have:**
+- Share / download as PDF receipt button
+- "Report an issue" CTA that pre-fills a dispute form with the reference number
+- Auto-category badge linked to the Expenses module
+
+### 5D — Transaction detail UI (my-bank-admin-portal)
+
+Admin/banker view shows everything unmasked — counterpart full name, account, IP, device info for fraud investigation.
+
+---
+
+## Phase 6+ — TBD
+
+Future scope to be defined after Phase 5 ships.

@@ -9,13 +9,13 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ## Now — Phase 3B: Customer App Gap Closure
 
-| #   | Task                                                                        | Status      |
-| --- | --------------------------------------------------------------------------- | ----------- |
-| 3B1 | Wire `GET /accounts/` — already consumed in Dashboard + hooks               | ✅ Done      |
-| 3B2 | Wire `GET /transactions/:transactionId` — not needed in customer app (list view sufficient) | ✅ Done |
+| #   | Task                                                                                   | Status  |
+| --- | -------------------------------------------------------------------------------------- | ------- |
+| 3B1 | Wire `GET /accounts/` — already consumed in Dashboard + hooks                          | ✅ Done |
+| 3B2 | Wire `GET /transactions/:transactionId` — transaction detail modal in customer app     | ⬜ TODO |
 | 3B3 | Wire `GET /expenses/categories` + `/payment-methods` — consumed in `useExpenseActions` | ✅ Done |
-| 3B4 | Wire `GET /expenses/dashboard/stats` — consumed in `useAnalytics`           | ✅ Done      |
-| 3B5 | Wire `DELETE /users/me` — account self-deletion flow                        | ⬜ TODO     |
+| 3B4 | Wire `GET /expenses/dashboard/stats` — consumed in `useAnalytics`                      | ✅ Done |
+| 3B5 | Wire `DELETE /users/me` — account self-deletion flow                                   | ⬜ TODO |
 
 ---
 
@@ -23,13 +23,13 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ### Phase 3A — Admin Portal Gap Closure (May 29, 2026) ✅
 
-| #   | Task                                                                             |
-| --- | -------------------------------------------------------------------------------- |
+| #   | Task                                                                                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 3A1 | P0 fix: `GET /transactions/account/:accountNumber` returning empty — wrong query field (`accountNumber` vs `account._id`) in `transaction.service.js` |
-| 3A2 | Wired `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId` — inline role/status edit + delete confirm in `StaffPage` |
-| 3A3 | Wired `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId` — inline status edit + delete confirm in `UsersList` |
-| 3A4 | Wired `GET /transactions/:transactionId` — detail dialog in `TransactionsList` |
-| 3A5 | Added `StyledTableCell` + `StyledTableRow` missing exports to `TableStyles.tsx` |
+| 3A2 | Wired `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId` — inline role/status edit + delete confirm in `StaffPage`                          |
+| 3A3 | Wired `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId` — inline status edit + delete confirm in `UsersList`                   |
+| 3A4 | Wired `GET /transactions/:transactionId` — detail dialog in `TransactionsList`                                                                        |
+| 3A5 | Added `StyledTableCell` + `StyledTableRow` missing exports to `TableStyles.tsx`                                                                       |
 
 ---
 
@@ -58,6 +58,23 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 - AI scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`
 - `notifications` module has no service layer — thin proxy, low priority, not blocking P3
+- `DELETE /users/me` — intentionally unwired. Banking apps don't allow self-deletion due to compliance/data retention obligations. Route via banker workflow when needed.
+
+---
+
+## Phase 5 Backlog — Transaction Detail Enrichment
+
+| #   | Task | Priority |
+| --- | ---- | -------- |
+| 5A1 | Add `reference`, `counterpartAccount`, `counterpartName`, `balanceAfter` to `Transaction` schema | 🔴 MVP |
+| 5A2 | Populate new fields in `transferFunds` service for both from/to records | 🔴 MVP |
+| 5A3 | Include new fields in `getAccountTransactions` + `getTransactionDetails` responses | 🔴 MVP |
+| 5B1 | Receipt-style transaction detail dialog in customer app | 🔴 MVP |
+| 5B2 | Unmasked detail view in admin portal for fraud investigation | 🔴 MVP |
+| 5C1 | Add `fee`, `category`, `processingTime` fields to schema | 🟡 Nice-to-have |
+| 5C2 | Share / download as PDF receipt in customer app | 🟡 Nice-to-have |
+| 5C3 | "Report an issue" CTA pre-filled with reference number | 🟡 Nice-to-have |
+| 5C4 | `deviceInfo` / IP logging on transaction write | 🟡 Nice-to-have |
 
 ---
 
