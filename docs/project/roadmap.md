@@ -78,11 +78,9 @@ Audit (May 22, 2026) found 4 remaining gaps:
 
 ---
 
-## Phase 3 — Client Coverage Audit & Gap Closure 🔵 (Current)
+## Phase 3 — Client Coverage Audit & Gap Closure ✅ (Complete)
 
 **Reprioritised May 29, 2026** — core banking must be fully wired before AI features. Triggered by P0 bug: `GET /transactions/account/:accountNumber` silently returning empty data for all users due to schema mismatch introduced in Phase 1 refactor.
-
-**Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only.
 
 **Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only. Discovered May 29, 2026 after `GET /transactions/account/:accountNumber` returned empty data for all users — root cause was a schema mismatch introduced in the Phase 1 refactor that went undetected because uncalled fields return silently empty results.
 
@@ -106,8 +104,8 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 | `GET /users/staff`                         | admin        | ✅                                                |
 | `POST /accounts/create`                    | —            | ❌ **unused** (banker feature, no UI)             |
 | `DELETE /accounts/:accountNumber`          | —            | ❌ **unused** (banker feature, no UI)             |
-| `GET /accounts/`                           | —            | ❌ **unused** (customer list accounts, not wired) |
-| `GET /accounts/balance/:accountNumber`     | —            | ❌ **unused**                                     |
+| `GET /accounts/`                           | customer     | ✅                                                |
+| `GET /accounts/balance/:accountNumber`     | customer     | ✅                                                |
 | `GET /accounts/all`                        | admin        | ✅                                                |
 | `POST /accounts/deposit`                   | customer     | ✅                                                |
 | `POST /accounts/withdraw`                  | customer     | ✅                                                |
@@ -115,7 +113,7 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 | `POST /transactions/transfer`              | customer     | ✅                                                |
 | `GET /transactions/account/:accountNumber` | customer     | ✅ (fixed May 29)                                 |
 | `GET /transactions/all`                    | admin        | ✅                                                |
-| `GET /transactions/:transactionId`         | —            | ❌ **unused**                                     |
+| `GET /transactions/:transactionId`         | admin        | ✅                                                |
 | `POST /expenses`                           | customer     | ✅                                                |
 | `GET /expenses`                            | customer     | ✅                                                |
 | `GET /expenses/:expenseId`                 | customer     | ✅                                                |
@@ -123,9 +121,9 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 | `DELETE /expenses/:expenseId`              | customer     | ✅                                                |
 | `GET /expenses/analytics/monthly`          | customer     | ✅                                                |
 | `GET /expenses/analytics/yearly`           | customer     | ✅                                                |
-| `GET /expenses/categories`                 | —            | ❌ **unused**                                     |
-| `GET /expenses/payment-methods`            | —            | ❌ **unused**                                     |
-| `GET /expenses/dashboard/stats`            | —            | ❌ **unused**                                     |
+| `GET /expenses/categories`                 | customer     | ✅                                                |
+| `GET /expenses/payment-methods`            | customer     | ✅                                                |
+| `GET /expenses/dashboard/stats`            | customer     | ✅                                                |
 | `POST /ai/chat`                            | —            | ❌ **unused** (Phase 3 work in progress)          |
 | `GET /ai/insights`                         | customer     | ✅                                                |
 | `GET /audit/me`                            | admin        | ✅                                                |
@@ -137,10 +135,10 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 | `POST /onboarding/approve/:userId`         | admin        | ✅                                                |
 | `POST /onboarding/verify/:userId`          | admin        | ✅                                                |
 | `POST /admin/create-staff`                 | admin        | ✅                                                |
-| `DELETE /admin/staff/:staffId`             | —            | ❌ **unused** (no UI)                             |
-| `DELETE /admin/customer/:customerId`       | —            | ❌ **unused** (no UI)                             |
-| `PUT /admin/staff/:staffId`                | —            | ❌ **unused** (no UI)                             |
-| `PUT /admin/customer/:customerId`          | —            | ❌ **unused** (no UI)                             |
+| `DELETE /admin/staff/:staffId`             | admin        | ✅                                                |
+| `DELETE /admin/customer/:customerId`       | admin        | ✅                                                |
+| `PUT /admin/staff/:staffId`                | admin        | ✅                                                |
+| `PUT /admin/customer/:customerId`          | admin        | ✅                                                |
 | `GET /notifications/`                      | customer     | ✅                                                |
 | `PATCH /notifications/:id`                 | customer     | ✅                                                |
 | `DELETE /notifications/:id`                | customer     | ✅                                                |
@@ -150,13 +148,13 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 - [x] Wire `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId` — ✅ May 29
 - [x] Wire `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId` — ✅ May 29
 - [x] Wire `GET /transactions/:transactionId` — detail dialog in admin TransactionsList — ✅ May 29
-- [ ] Wire `GET /accounts/` in customer app (account list on dashboard)
-- [ ] Wire `GET /accounts/balance/:accountNumber` or confirm replaced by full account fetch
+- [x] Wire `GET /accounts/` — ✅ May 29
+- [x] Wire `GET /accounts/balance/:accountNumber` — ✅ May 29
 - [ ] Build banker account management UI in admin portal — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
-- [ ] Wire `DELETE /users/me` — account self-deletion flow in customer app
-- [ ] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — use as filter options in expense UI
-- [ ] Wire `GET /expenses/dashboard/stats` — expense summary widget
-- [ ] `POST /ai/chat` — deferred to Phase 4
+- [ ] Wire `DELETE /users/me` — intentionally deferred (banking compliance, no self-deletion)
+- [x] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — ✅ May 29
+- [x] Wire `GET /expenses/dashboard/stats` — ✅ May 29
+- [ ] `POST /ai/chat` — deferred to Phase 11
 
 ### 3A — Admin Portal gap closure ✅ (May 29, 2026)
 

@@ -1,18 +1,19 @@
 # Tracker
 
-**Last Updated:** May 29, 2026
-**Current Phase:** Phase 3 → Documentation complete, Phase 5 is next code phase
+**Last Updated:** May 30, 2026
+**Current Phase:** Phase 3 complete — Phase 5 is next code phase
 
 See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ---
 
-## Now — Phase 3B: Customer App (remaining items)
+## Now — Phase 5: Transaction Detail Enrichment
 
-| #   | Task                                                                                   | Status                                              |
-| --- | -------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| 3B2 | Wire `GET /transactions/:transactionId` — transaction detail in customer app           | ⬜ TODO (blocked by Phase 5 — no enriched data yet) |
-| 3B5 | `DELETE /users/me` — **intentionally deferred** (banking compliance, no self-deletion) | 🚫 Won't do                                         |
+Read the story before writing any code: [US-5001 — Transaction Receipt](../user-stories/phase-5/US-5001-transaction-receipt.md)
+
+Sub-tasks in order: **BE1 → BE2 → BE3 → BE4 → BE5 → BE6 → FE1 → FE2**
+
+> `3B2` (wire transaction detail in customer app) is part of US-5001-FE1 — do not implement separately.
 
 ---
 
@@ -25,7 +26,7 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 | D1  | Created `docs/product/business-rules.md` — account types, limits, fees, lifecycle, interest, reference format |
 | D2  | Rewrote `docs/product/problem.md` — new vision, correct scope, AI on-hold                                     |
 | D3  | Rewrote `docs/product/user-stories.md` — full set from scratch (auth through AI)                              |
-| D4  | Updated `docs/product/requirements.md` — ticked all built items, added F9–F13 for new phases                  |
+| D4  | ~~`docs/product/requirements.md`~~ — **deleted** (replaced by `business-rules.md` + user-stories index)       |
 | D5  | Updated `docs/project/roadmap.md` — Phase 4 AI marked ON-HOLD, Phases 6–12 added                              |
 | D6  | Updated `docs/project/tracker.md` — current state                                                             |
 
@@ -68,16 +69,18 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 5 Backlog — Transaction Detail Enrichment (Next Code Phase)
 
-| #   | Task                                                                                                        | Priority |
-| --- | ----------------------------------------------------------------------------------------------------------- | -------- |
-| 5A1 | Add `reference`, `counterpartAccount`, `counterpartName`, `balanceAfter` to `Transaction` schema            | 🔴 MVP   |
-| 5A2 | Populate new fields in `transferFunds` service for both from/to records                                     | 🔴 MVP   |
-| 5A3 | Populate `reference`, `balanceAfter`, `fee: 0` in 3 deposit/withdraw/airdrop blocks in `account.service.js` | 🔴 MVP   |
-| 5A4 | Include new fields in `getAccountTransactions` + `getTransactionDetails` responses                          | 🔴 MVP   |
-| 5B1 | Receipt-style transaction detail dialog in customer app                                                     | 🔴 MVP   |
-| 5B2 | Unmasked detail view in admin portal                                                                        | 🔴 MVP   |
-| 5C1 | Add `fee`, `category`, `processingTime`, `deviceInfo` fields                                                | 🟡 Nice  |
-| 5C2 | PDF receipt download in customer app                                                                        | 🟡 Nice  |
+Full story + AC: [US-5001-transaction-receipt.md](../user-stories/phase-5/US-5001-transaction-receipt.md)
+
+| Sub-task | Task | Priority |
+| --- | --- | --- |
+| US-5001-BE1 | Add 5 new fields to `Transaction` schema (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`) + Counter collection for reference sequences | 🔴 MVP |
+| US-5001-BE2 | Populate all fields in `transferFunds` (both from/to records) | 🔴 MVP |
+| US-5001-BE3 | Populate `reference`, `balanceAfter`, `fee: 0` in deposit, withdraw, airdrop | 🔴 MVP |
+| US-5001-BE4 | Return new fields in `getAccountTransactions` + `getTransactionById` responses | 🔴 MVP |
+| US-5001-BE5 | Apply masking logic in customer-facing response (counterpart name + account number) | 🔴 MVP |
+| US-5001-BE6 | Write automated tests for reference uniqueness, masking, balanceAfter correctness | 🔴 MVP |
+| US-5001-FE1 | Receipt-style transaction detail dialog in customer app | 🔴 MVP |
+| US-5001-FE2 | Unmasked transaction detail view in admin portal | 🔴 MVP |
 
 ---
 

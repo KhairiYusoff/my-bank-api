@@ -90,11 +90,8 @@ Full rules → [architecture/constraints.md](architecture/constraints.md)
 
 See [project/tracker.md](project/tracker.md) — always up to date.
 
-**Phase 5 (Transaction Enrichment)** is next. Stories written and ready:
-- [US-T5](user-stories/phase-5/US-T5-transaction-receipt.md) — Transaction receipt
-- [US-T6](user-stories/phase-5/US-T6-reference-number.md) — Reference number
-- [US-T7](user-stories/phase-5/US-T7-counterpart-visibility.md) — Counterpart visibility
-- [US-T8](user-stories/phase-5/US-T8-balance-after.md) — Balance after transaction
+**Phase 5 (Transaction Enrichment)** is next. Story written and ready:
+- [US-5001](user-stories/phase-5/US-5001.md) — Transaction detail receipt (reference number, counterpart, balance after)
 
 ---
 
