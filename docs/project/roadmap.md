@@ -88,60 +88,60 @@ Audit (May 22, 2026) found 4 remaining gaps:
 
 Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-admin-portal):
 
-| Endpoint                                   | Method       | Status                                            |
-| ------------------------------------------ | ------------ | ------------------------------------------------- |
-| `POST /auth/login`                         | both clients | ✅                                                |
-| `POST /auth/logout`                        | both clients | ✅                                                |
-| `POST /auth/refresh-token`                 | admin        | ✅                                                |
-| `GET /auth/check-token`                    | customer     | ✅                                                |
-| `GET /users/me`                            | both clients | ✅                                                |
-| `PUT /users/me`                            | both clients | ✅                                                |
-| `PUT /users/me/password`                   | both clients | ✅                                                |
-| `PUT /users/me/preferences`                | admin        | ✅                                                |
-| `POST /users/me/reset-password`            | customer     | ✅                                                |
-| `DELETE /users/me`                         | —            | ❌ **unused**                                     |
-| `GET /users/customers`                     | admin        | ✅                                                |
-| `GET /users/staff`                         | admin        | ✅                                                |
-| `POST /accounts/create`                    | —            | ❌ **unused** (banker feature, no UI)             |
-| `DELETE /accounts/:accountNumber`          | —            | ❌ **unused** (banker feature, no UI)             |
-| `GET /accounts/`                           | customer     | ✅                                                |
-| `GET /accounts/balance/:accountNumber`     | customer     | ✅                                                |
-| `GET /accounts/all`                        | admin        | ✅                                                |
-| `POST /accounts/deposit`                   | customer     | ✅                                                |
-| `POST /accounts/withdraw`                  | customer     | ✅                                                |
-| `POST /accounts/airdrop`                   | admin        | ✅                                                |
-| `POST /transactions/transfer`              | customer     | ✅                                                |
-| `GET /transactions/account/:accountNumber` | customer     | ✅ (fixed May 29)                                 |
-| `GET /transactions/all`                    | admin        | ✅                                                |
-| `GET /transactions/:transactionId`         | admin        | ✅                                                |
-| `POST /expenses`                           | customer     | ✅                                                |
-| `GET /expenses`                            | customer     | ✅                                                |
-| `GET /expenses/:expenseId`                 | customer     | ✅                                                |
-| `PUT /expenses/:expenseId`                 | customer     | ✅                                                |
-| `DELETE /expenses/:expenseId`              | customer     | ✅                                                |
-| `GET /expenses/analytics/monthly`          | customer     | ✅                                                |
-| `GET /expenses/analytics/yearly`           | customer     | ✅                                                |
-| `GET /expenses/categories`                 | customer     | ✅                                                |
-| `GET /expenses/payment-methods`            | customer     | ✅                                                |
-| `GET /expenses/dashboard/stats`            | customer     | ✅                                                |
-| `POST /ai/chat`                            | —            | ❌ **unused** (Phase 3 work in progress)          |
-| `GET /ai/insights`                         | customer     | ✅                                                |
-| `GET /audit/me`                            | admin        | ✅                                                |
-| `GET /audit/user/:userId`                  | admin        | ✅                                                |
-| `GET /audit/all`                           | admin        | ✅                                                |
-| `POST /onboarding/apply`                   | customer     | ✅                                                |
-| `PUT /onboarding/complete-profile`         | customer     | ✅                                                |
-| `GET /onboarding/pending`                  | admin        | ✅                                                |
-| `POST /onboarding/approve/:userId`         | admin        | ✅                                                |
-| `POST /onboarding/verify/:userId`          | admin        | ✅                                                |
-| `POST /admin/create-staff`                 | admin        | ✅                                                |
-| `DELETE /admin/staff/:staffId`             | admin        | ✅                                                |
-| `DELETE /admin/customer/:customerId`       | admin        | ✅                                                |
-| `PUT /admin/staff/:staffId`                | admin        | ✅                                                |
-| `PUT /admin/customer/:customerId`          | admin        | ✅                                                |
-| `GET /notifications/`                      | customer     | ✅                                                |
-| `PATCH /notifications/:id`                 | customer     | ✅                                                |
-| `DELETE /notifications/:id`                | customer     | ✅                                                |
+| Endpoint                                   | Method       | Status                                   |
+| ------------------------------------------ | ------------ | ---------------------------------------- |
+| `POST /auth/login`                         | both clients | ✅                                       |
+| `POST /auth/logout`                        | both clients | ✅                                       |
+| `POST /auth/refresh-token`                 | admin        | ✅                                       |
+| `GET /auth/check-token`                    | customer     | ✅                                       |
+| `GET /users/me`                            | both clients | ✅                                       |
+| `PUT /users/me`                            | both clients | ✅                                       |
+| `PUT /users/me/password`                   | both clients | ✅                                       |
+| `PUT /users/me/preferences`                | admin        | ✅                                       |
+| `POST /users/me/reset-password`            | customer     | ✅                                       |
+| `DELETE /users/me`                         | —            | ❌ **unused**                            |
+| `GET /users/customers`                     | admin        | ✅                                       |
+| `GET /users/staff`                         | admin        | ✅                                       |
+| `POST /accounts/create`                    | —            | ❌ **unused** (banker feature, no UI)    |
+| `DELETE /accounts/:accountNumber`          | —            | ❌ **unused** (banker feature, no UI)    |
+| `GET /accounts/`                           | customer     | ✅                                       |
+| `GET /accounts/balance/:accountNumber`     | customer     | ✅                                       |
+| `GET /accounts/all`                        | admin        | ✅                                       |
+| `POST /accounts/deposit`                   | customer     | ✅                                       |
+| `POST /accounts/withdraw`                  | customer     | ✅                                       |
+| `POST /accounts/airdrop`                   | admin        | ✅                                       |
+| `POST /transactions/transfer`              | customer     | ✅                                       |
+| `GET /transactions/account/:accountNumber` | customer     | ✅ (fixed May 29)                        |
+| `GET /transactions/all`                    | admin        | ✅                                       |
+| `GET /transactions/:transactionId`         | admin        | ✅                                       |
+| `POST /expenses`                           | customer     | ✅                                       |
+| `GET /expenses`                            | customer     | ✅                                       |
+| `GET /expenses/:expenseId`                 | customer     | ✅                                       |
+| `PUT /expenses/:expenseId`                 | customer     | ✅                                       |
+| `DELETE /expenses/:expenseId`              | customer     | ✅                                       |
+| `GET /expenses/analytics/monthly`          | customer     | ✅                                       |
+| `GET /expenses/analytics/yearly`           | customer     | ✅                                       |
+| `GET /expenses/categories`                 | customer     | ✅                                       |
+| `GET /expenses/payment-methods`            | customer     | ✅                                       |
+| `GET /expenses/dashboard/stats`            | customer     | ✅                                       |
+| `POST /ai/chat`                            | —            | ❌ **unused** (Phase 3 work in progress) |
+| `GET /ai/insights`                         | customer     | ✅                                       |
+| `GET /audit/me`                            | admin        | ✅                                       |
+| `GET /audit/user/:userId`                  | admin        | ✅                                       |
+| `GET /audit/all`                           | admin        | ✅                                       |
+| `POST /onboarding/apply`                   | customer     | ✅                                       |
+| `PUT /onboarding/complete-profile`         | customer     | ✅                                       |
+| `GET /onboarding/pending`                  | admin        | ✅                                       |
+| `POST /onboarding/approve/:userId`         | admin        | ✅                                       |
+| `POST /onboarding/verify/:userId`          | admin        | ✅                                       |
+| `POST /admin/create-staff`                 | admin        | ✅                                       |
+| `DELETE /admin/staff/:staffId`             | admin        | ✅                                       |
+| `DELETE /admin/customer/:customerId`       | admin        | ✅                                       |
+| `PUT /admin/staff/:staffId`                | admin        | ✅                                       |
+| `PUT /admin/customer/:customerId`          | admin        | ✅                                       |
+| `GET /notifications/`                      | customer     | ✅                                       |
+| `PATCH /notifications/:id`                 | customer     | ✅                                       |
+| `DELETE /notifications/:id`                | customer     | ✅                                       |
 
 ### Work items
 

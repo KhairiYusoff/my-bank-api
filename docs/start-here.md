@@ -8,14 +8,14 @@
 
 Before touching any code or writing any story, read these files:
 
-| # | File | Why |
-| - | ---- | --- |
-| 1 | [docs/project/tracker.md](project/tracker.md) | Current phase, what's done, what's next |
-| 2 | [docs/product/business-rules.md](product/business-rules.md) | Account rules, limits, fees, lifecycle — the law |
-| 3 | [docs/architecture/constraints.md](architecture/constraints.md) | Code patterns you must follow — non-negotiable |
-| 4 | [docs/architecture/architecture.md](architecture/architecture.md) | Module structure, data flow |
-| 5 | [docs/product/user-stories.md](product/user-stories.md) | All story IDs + status + links to detailed story files |
-| 6 | Relevant story file in `docs/user-stories/phase-N/` | AC for the specific story you're building |
+| #   | File                                                              | Why                                                    |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------------ |
+| 1   | [docs/project/tracker.md](project/tracker.md)                     | Current phase, what's done, what's next                |
+| 2   | [docs/product/business-rules.md](product/business-rules.md)       | Account rules, limits, fees, lifecycle — the law       |
+| 3   | [docs/architecture/constraints.md](architecture/constraints.md)   | Code patterns you must follow — non-negotiable         |
+| 4   | [docs/architecture/architecture.md](architecture/architecture.md) | Module structure, data flow                            |
+| 5   | [docs/product/user-stories.md](product/user-stories.md)           | All story IDs + status + links to detailed story files |
+| 6   | Relevant story file in `docs/user-stories/phase-N/`               | AC for the specific story you're building              |
 
 **Rule:** If a story file exists for the feature → read it fully before writing a single line of code. The AC in the story file is the definition of done.
 
@@ -23,20 +23,20 @@ Before touching any code or writing any story, read these files:
 
 ## Quick Links
 
-| Need | Go to |
-| ---- | ----- |
-| What are we building? | [product/problem.md](product/problem.md) |
-| What phase is current? | [project/tracker.md](project/tracker.md) |
-| Full phase roadmap | [project/roadmap.md](project/roadmap.md) |
-| Business rules & limits | [product/business-rules.md](product/business-rules.md) |
-| All user stories | [product/user-stories.md](product/user-stories.md) |
-| Phase 5 stories | [user-stories/phase-5/](user-stories/phase-5/) |
-| Code patterns (mandatory) | [architecture/constraints.md](architecture/constraints.md) |
-| System design | [architecture/architecture.md](architecture/architecture.md) |
-| DB schema | [engineering/models/schema-overview.md](engineering/models/schema-overview.md) |
-| Auth flow | [engineering/security/authentication.md](engineering/security/authentication.md) |
-| Role permissions | [engineering/security/authorization.md](engineering/security/authorization.md) |
-| Tech choices | [architecture/tech-stack.md](architecture/tech-stack.md) |
+| Need                      | Go to                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| What are we building?     | [product/problem.md](product/problem.md)                                         |
+| What phase is current?    | [project/tracker.md](project/tracker.md)                                         |
+| Full phase roadmap        | [project/roadmap.md](project/roadmap.md)                                         |
+| Business rules & limits   | [product/business-rules.md](product/business-rules.md)                           |
+| All user stories          | [product/user-stories.md](product/user-stories.md)                               |
+| Phase 5 stories           | [user-stories/phase-5/](user-stories/phase-5/)                                   |
+| Code patterns (mandatory) | [architecture/constraints.md](architecture/constraints.md)                       |
+| System design             | [architecture/architecture.md](architecture/architecture.md)                     |
+| DB schema                 | [engineering/models/schema-overview.md](engineering/models/schema-overview.md)   |
+| Auth flow                 | [engineering/security/authentication.md](engineering/security/authentication.md) |
+| Role permissions          | [engineering/security/authorization.md](engineering/security/authorization.md)   |
+| Tech choices              | [architecture/tech-stack.md](architecture/tech-stack.md)                         |
 
 ---
 
@@ -91,6 +91,7 @@ Full rules → [architecture/constraints.md](architecture/constraints.md)
 See [project/tracker.md](project/tracker.md) — always up to date.
 
 **Phase 5 (Transaction Enrichment)** is next. Story written and ready:
+
 - [US-5001](user-stories/phase-5/US-5001.md) — Transaction detail receipt (reference number, counterpart, balance after)
 
 ---

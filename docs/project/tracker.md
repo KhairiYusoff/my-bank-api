@@ -71,16 +71,16 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 Full story + AC: [US-5001-transaction-receipt.md](../user-stories/phase-5/US-5001-transaction-receipt.md)
 
-| Sub-task | Task | Priority |
-| --- | --- | --- |
-| US-5001-BE1 | Add 5 new fields to `Transaction` schema (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`) + Counter collection for reference sequences | 🔴 MVP |
-| US-5001-BE2 | Populate all fields in `transferFunds` (both from/to records) | 🔴 MVP |
-| US-5001-BE3 | Populate `reference`, `balanceAfter`, `fee: 0` in deposit, withdraw, airdrop | 🔴 MVP |
-| US-5001-BE4 | Return new fields in `getAccountTransactions` + `getTransactionById` responses | 🔴 MVP |
-| US-5001-BE5 | Apply masking logic in customer-facing response (counterpart name + account number) | 🔴 MVP |
-| US-5001-BE6 | Write automated tests for reference uniqueness, masking, balanceAfter correctness | 🔴 MVP |
-| US-5001-FE1 | Receipt-style transaction detail dialog in customer app | 🔴 MVP |
-| US-5001-FE2 | Unmasked transaction detail view in admin portal | 🔴 MVP |
+| Sub-task    | Task                                                                                                                                                                | Priority |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| US-5001-BE1 | Add 5 new fields to `Transaction` schema (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`) + Counter collection for reference sequences | 🔴 MVP   |
+| US-5001-BE2 | Populate all fields in `transferFunds` (both from/to records)                                                                                                       | 🔴 MVP   |
+| US-5001-BE3 | Populate `reference`, `balanceAfter`, `fee: 0` in deposit, withdraw, airdrop                                                                                        | 🔴 MVP   |
+| US-5001-BE4 | Return new fields in `getAccountTransactions` + `getTransactionById` responses                                                                                      | 🔴 MVP   |
+| US-5001-BE5 | Apply masking logic in customer-facing response (counterpart name + account number)                                                                                 | 🔴 MVP   |
+| US-5001-BE6 | Write automated tests for reference uniqueness, masking, balanceAfter correctness                                                                                   | 🔴 MVP   |
+| US-5001-FE1 | Receipt-style transaction detail dialog in customer app                                                                                                             | 🔴 MVP   |
+| US-5001-FE2 | Unmasked transaction detail view in admin portal                                                                                                                    | 🔴 MVP   |
 
 ---
 
