@@ -113,18 +113,20 @@ class TransactionService {
     limit = 10,
     sort = "desc",
   ) {
-    // Build query
-    const query = { accountNumber };
+    // Resolve account _id from accountNumber
+    const accountFilter =
+      user.role === "customer"
+        ? { accountNumber, user: user.id }
+        : { accountNumber };
 
-    // For customers, only show their own accounts
-    if (user.role === "customer") {
-      const account = await Account.findOne({ accountNumber, user: user.id });
-      if (!account) {
-        const err = new Error("Account not found or access denied");
-        err.statusCode = 404;
-        throw err;
-      }
+    const account = await Account.findOne(accountFilter);
+    if (!account) {
+      const err = new Error("Account not found or access denied");
+      err.statusCode = 404;
+      throw err;
     }
+
+    const query = { account: account._id };
 
     // Pagination
     const numericPage = Math.max(parseInt(page, 10), 1);
