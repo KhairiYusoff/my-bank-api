@@ -20,45 +20,57 @@
 
 ## What We're Building
 
-**MyBank** — A full-stack banking platform with:
+**MyBank** — A full-stack Malaysian digital banking simulation, built to real-world banking standards:
 
-- **Customer Portal** (React, Vite) — Account management, transactions, watchlist, profile
-- **Admin Portal** (React, Vite) — Application approval, user management, staff management, audit trails
-- **Core API** (Node.js, Express) — All banking logic, modular architecture
-- **Notification Service** (Node.js, Express) — Decoupled event notifications
-- **AI Assistant** (Phase 1-4) — Chat Q&A, spend insights, agentic advisor, proactive nudges
+- **Customer Portal** (React, Vite) — Multi-account management, transfers, transaction receipts, statements, beneficiaries, expense tracking, AI financial assistant
+- **Admin Portal** (React, Vite) — Application approval, user/staff management, account operations, audit trails, transaction oversight
+- **Core API** (Node.js, Express) — Full banking logic: account types with differentiated rules, transaction limits, fee engine, interest crediting, account lifecycle, atomic money operations
+- **Notification Service** (Node.js, Express) — Decoupled event notifications via WebSocket
+- **AI Assistant** (Phase 11+) — Contextual financial chat with user data awareness, persistent across navigation
 
 ---
 
-## Scope (MVP — Current)
+## Scope (Current — Full Banking System)
 
-### Features ✅
+### Features ✅ Built
 
-| Feature                   | Scope                                                              | Status   |
-| ------------------------- | ------------------------------------------------------------------ | -------- |
-| **Auth**                  | Customer login, JWT tokens, httpOnly cookies                       | ✅ Built |
-| **Onboarding**            | Digital application, KYC verification, profile completion          | ✅ Built |
-| **Accounts**              | Create, view, balance, account types (Savings/Checking/Business)   | ✅ Built |
-| **Transactions**          | Transfer between accounts, view history, pagination                | ✅ Built |
-| **Deposits/Withdrawals**  | Banker deposits money, customer withdraws from own accounts        | ✅ Built |
-| **Airdrop**               | Admin credits accounts (promotional/testing)                       | ✅ Built |
-| **Expenses**              | Track and categorize user expenses                                 | ✅ Built |
-| **Admin Functions**       | Approve applications, verify customers, manage users, manage staff | ✅ Built |
-| **Audit Logging**         | All HIGH-severity actions logged (login, transfer, approval)       | ✅ Built |
-| **Watchlist** (Customers) | Save/unsave accounts, persist via localStorage                     | ✅ Built |
-| **Watchlist** (Admin)     | Manage flagged users, flagged transactions                         | ✅ Built |
+| Feature | Scope | Status |
+|---|---|---|
+| **Auth** | Login, JWT tokens, httpOnly cookies, refresh | ✅ Built |
+| **Onboarding** | Digital application, KYC verification, profile completion | ✅ Built |
+| **Accounts** | Create, view, balance, account types (Savings/Current/Business) | ✅ Built |
+| **Transactions** | Transfer between accounts, view history, pagination | ✅ Built |
+| **Deposits/Withdrawals** | Banker deposits, customer withdraws | ✅ Built |
+| **Airdrop** | Admin credits accounts (promo/testing) | ✅ Built |
+| **Expenses** | Track and categorize user expenses | ✅ Built |
+| **Admin Functions** | Approve applications, manage users/staff, audit trails | ✅ Built |
+| **Audit Logging** | All HIGH-severity actions logged | ✅ Built |
+| **Notifications** | Real-time WebSocket notifications | ✅ Built |
 
-### Out of Scope (MVP)
+### In Progress / Planned (Core Banking)
 
-- ❌ Mobile app (web-first only)
-- ❌ Credit scoring
-- ❌ Loan products
-- ❌ Investment products
-- ❌ P2P transfers (only bank-initiated)
-- ❌ Bill payments
-- ❌ Cryptocurrency
-- ❌ Comments / social features
-- ❌ AI features (Phase 1 onwards)
+| Feature | Phase |
+|---|---|
+| Transaction enrichment — reference, counterpart, balanceAfter | Phase 5 |
+| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 6 |
+| Fixed Deposit — lock period, maturity, interest, cron crediting | Phase 7 |
+| Dormancy cron + full account lifecycle enforcement | Phase 8 |
+| Monthly statements — summary endpoint + PDF | Phase 9 |
+| Beneficiary management | Phase 10 |
+| AI enhancement — chat persistency, contextual responses | Phase 11 |
+| AI Phase 2 — proactive nudges, agentic advisor | Phase 12 |
+
+### Intentionally Out of Scope
+
+- ❌ Mobile app (web-responsive only)
+- ❌ Interbank transfers (FPX, IBG, DuitNow) — same-bank only
+- ❌ Real KYC verification (Jumio etc.)
+- ❌ Real payment gateway (Stripe/Razorpay)
+- ❌ Credit scoring / loan products
+- ❌ Investment products (Unit Trusts, ASB) — future after FD foundation
+- ❌ Bill payments — future
+- ❌ 2FA — future
+- ❌ `DELETE /users/me` — banking apps do not allow self-deletion (compliance/data retention)
 
 ---
 
@@ -84,10 +96,6 @@ Not building payment processing, subscription, or monetization yet. This is a pr
 
 ---
 
-## Next Phase (Phase 1 AI — May 2026)
-
-Product Q&A chatbot powered by Groq LLM + markdown product docs (no vector DB yet). See [AI-ROADMAP](../AI-ROADMAP.md).
-
 ---
 
-**Last Updated:** May 8, 2026
+**Last Updated:** May 29, 2026

@@ -186,21 +186,15 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 4 — AI Features 🔴 (Backlog)
+## Phase 4 — AI Features ⏸️ (ON HOLD)
 
-**Goal:** Production-grade AI features in the banking context.
+**Paused indefinitely.** Core banking must reach Phase 10 (Beneficiary Management) before AI features are prioritised. Existing scaffolding (`ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`) is preserved but no new AI work until gate is cleared.
 
-Scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`.
-
-- [ ] RAG setup — knowledge base integration in my-bank-api
-- [ ] AI chatbot UI — my-bank-customer (`POST /ai/chat`)
-- [ ] Financial insights — spending breakdown with AI narrative
-
-**Gate:** Phase 3 must be fully closed before Phase 4 starts.
+**Gate:** Phases 5–10 must ship before Phase 11 starts.
 
 ---
 
-## Phase 5 — Transaction Detail Enrichment 🔴 (Backlog)
+## Phase 5 — Transaction Detail Enrichment 🔴 (Next Up)
 
 **Goal:** Transaction details must be meaningfully different from the list view — on par with Maybank2u / CIMB Clicks standard. Identified May 29, 2026 after BA review found the detail dialog showed identical data to the list.
 
@@ -213,38 +207,31 @@ The Phase 1 refactor replaced `fromAccountNumber`/`toAccountNumber` string field
 Changes to `Transaction` model and `transferFunds` service:
 
 | Field | Type | Description | Priority |
-|---|---|---|---|
-| `reference` | `String` | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. Needed for disputes and receipts | 🔴 MVP |
-| `counterpartAccount` | `String` | The other account number — recipient if you sent, sender if you received | 🔴 MVP |
-| `counterpartName` | `String` | Masked name of counterpart e.g. `Ahmad K****` — User lookup at write time | 🔴 MVP |
-| `balanceAfter` | `Number` | Account balance snapshot after transaction completes — computed at write time | 🔴 MVP |
-| `fee` | `Number` | Transaction fee charged. Zero for now but structure for future pricing | 🟡 Nice-to-have |
-| `category` | `String` | Auto-tagged: `salary`, `utilities`, `transfer`, `bonus`. Enables expense linkage | 🟡 Nice-to-have |
-| `processingTime` | `{ submittedAt, completedAt }` | For pending/failed transactions — shows how long processing took | 🟡 Nice-to-have |
-| `deviceInfo` | `String` | Originating device/IP — security context for dispute investigation | 🟡 Nice-to-have |
+| --- | --- | --- | --- |
+| `reference` | `String` | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. | 🔴 MVP |
+| `counterpartAccount` | `String` | The other account number — recipient if sent, sender if received | 🔴 MVP |
+| `counterpartName` | `String` | Masked name of counterpart e.g. `Ahmad K****` | 🔴 MVP |
+| `balanceAfter` | `Number` | Account balance snapshot after transaction completes | 🔴 MVP |
+| `fee` | `Number` | Fee charged (default 0). Reserved for fee engine in Phase 6 | 🔴 MVP |
+| `category` | `String` | Auto-derived from type: transfer/deposit/withdraw/fee | 🟡 Nice |
+| `processingTime` | `{ submittedAt, completedAt }` | Timestamps for submission and completion | 🟡 Nice |
+| `deviceInfo` | `{ ip, userAgent }` | Source IP + user agent — admin/fraud view only | 🟡 Nice |
 
-### 5B — API response enrichment (my-bank-api)
+All new fields must have defaults (null/0) so existing documents don't break.
 
-- `POST /transactions/transfer` — populate `counterpartAccount`, `counterpartName`, `reference`, `balanceAfter` at write time for **both** from/to transaction records
-- `GET /transactions/account/:accountNumber` — include all new fields in list response
-- `GET /transactions/:transactionId` — full detail response with all enriched fields
+### 5B — account.service.js enrichment
+
+Update 3 `new Transaction({...})` blocks in `account.service.js` (deposit, withdraw, airdrop) to populate `reference`, `balanceAfter`, `fee: 0`, `category`.
 
 ### 5C — Transaction detail UI (my-bank-customer)
 
-Replace current detail dialog (mirrors the list) with receipt-style view:
+Full-detail receipt view per transaction:
 
-**MVP (unlocks with 5A):**
-- Reference number — styled prominently, this is what customers quote for disputes
-- Transfer direction: "You sent to **Ahmad K\*\*\*\***" / "You received from **Siti R\*\*\*\***"
-- Counterpart account number (masked: `MYB****5236`)
+- Reference number: `TXN-20260529-00142`
+- Counterpart name and masked account number
 - Amount + balance after: `RM500.00 sent → Balance: RM2,450.00`
 - Status with submitted/completed timestamps
-- Fee breakdown (even if RM0.00 — builds trust)
-
-**Nice-to-have:**
-- Share / download as PDF receipt button
-- "Report an issue" CTA that pre-fills a dispute form with the reference number
-- Auto-category badge linked to the Expenses module
+- Fee breakdown (even if RM0.00)
 
 ### 5D — Transaction detail UI (my-bank-admin-portal)
 
@@ -252,6 +239,126 @@ Admin/banker view shows everything unmasked — counterpart full name, account, 
 
 ---
 
-## Phase 6+ — TBD
+## Phase 6 — Account Type Differentiation 🔴 (Backlog)
 
-Future scope to be defined after Phase 5 ships.
+**Goal:** Enforce differentiated rules per account type in code. Currently all accounts behave identically regardless of type.
+
+### Work items
+
+- [ ] Enforce min balance on account creation per type
+- [ ] Enforce daily transfer limits per account type (Savings: RM10k, Current: RM20k, Business: RM50k)
+- [ ] Enforce max single transfer per account type
+- [ ] Enforce savings monthly withdrawal counter (max 4 — reset on 1st of month)
+- [ ] Enforce overdraft limits for Current/Business (banker-set, default 0)
+- [ ] FD accounts: block all transfers
+- [ ] Dormant accounts: block all transactions
+- [ ] Monthly maintenance fee cron (1st of month, skip if balance ≥ threshold)
+- [ ] Savings interest cron (last day of month, credit based on balance tier)
+- [ ] Add `overdraftLimit` field to `Account` model
+- [ ] Add `monthlyWithdrawalCount` + `lastWithdrawalMonthReset` to `Account` model for Savings cap
+
+**Gate:** Phase 5 must ship first (balance-after field required for fee transactions).
+
+---
+
+## Phase 7 — Fixed Deposit Module 🔴 (Backlog)
+
+**Goal:** Full Fixed Deposit product — lock period, maturity, interest crediting, early withdrawal, auto-renewal.
+
+### Work items
+
+- [ ] New FD model fields: `principal`, `lockPeriod`, `maturityDate`, `interestRate`, `linkedAccount`, `autoRenew`, `status: active|matured|withdrawn`
+- [ ] FD creation endpoint — validates min RM1,000, lock period (1/3/6/12 months), deducts from source account
+- [ ] Maturity cron (daily at 02:00): marks FD as `matured`, sends notification
+- [ ] Interest crediting on maturity: credit `principal + interest` to linked account
+- [ ] Auto-renewal: if no action within 7 days of maturity, renew for same period at current rate
+- [ ] Early withdrawal endpoint: return principal only, forfeit interest
+- [ ] FD detail page in customer portal: maturity date, expected interest, lock period
+- [ ] FD notification: 7 days before maturity + on maturity day
+
+---
+
+## Phase 8 — Dormancy Cron & Account Lifecycle 🔴 (Backlog)
+
+**Goal:** Full account lifecycle enforcement — dormancy, suspension, closure.
+
+### Work items
+
+- [ ] Dormancy cron (daily at 02:00): mark accounts dormant after 12 months no activity
+- [ ] Dormant accounts: block all transactions (transfer, deposit, withdraw)
+- [ ] Dormancy fee cron: charge RM10/year on dormancy anniversary
+- [ ] Reactivation endpoint: banker action — `PUT /accounts/:accountNumber/reactivate`
+- [ ] Account suspension: admin action — `PUT /accounts/:accountNumber/suspend`
+- [ ] Account closure flow: customer requests → banker approves → zero balance required
+- [ ] Closed accounts hidden from customer portal, preserved in DB
+- [ ] Notify customer when account becomes dormant (T-30 days warning)
+- [ ] Status audit trail: all status changes logged with actor + timestamp
+
+---
+
+## Phase 9 — Monthly Statements 🔴 (Backlog)
+
+**Goal:** On-demand monthly statement endpoint. PDF generation in Phase 9B.
+
+### Work items
+
+**9A — Statement endpoint**
+- [ ] `GET /accounts/:accountNumber/statement?month=5&year=2026`
+- [ ] Response: `{ openingBalance, closingBalance, totalCredits, totalDebits, transactionCount, transactions[] }`
+- [ ] Restrict to account owner (customer) or admin/banker
+- [ ] Statement UI in customer portal — monthly selector, summary header, transaction list
+
+**9B — PDF generation** (later)
+- [ ] Server-side PDF via `pdfkit` or `puppeteer`
+- [ ] `GET /accounts/:accountNumber/statement/pdf?month=5&year=2026` — streams PDF
+- [ ] Download button in statement UI
+
+---
+
+## Phase 10 — Beneficiary Management 🔴 (Backlog)
+
+**Goal:** Customer can save frequent recipients for quick transfers.
+
+### Work items
+
+- [ ] Add `beneficiaries: [{ nickname, accountNumber, addedAt }]` to `User` model (max 20)
+- [ ] `GET /users/me/beneficiaries` — list saved beneficiaries
+- [ ] `POST /users/me/beneficiaries` — add new beneficiary (no verification, fails at transfer time if invalid)
+- [ ] `PUT /users/me/beneficiaries/:id` — update nickname
+- [ ] `DELETE /users/me/beneficiaries/:id` — remove beneficiary
+- [ ] Transfer form: beneficiary selector dropdown pre-fills account number field
+- [ ] Beneficiary list page in customer portal
+
+---
+
+## Phase 11 — AI Enhancement 🔴 (Backlog)
+
+**Gate:** Phases 5–10 must ship first.
+
+**Goal:** Wire the existing AI chat endpoint with proper client-side persistency and contextual personalisation. The AI scaffolding already exists — this phase makes it production-grade.
+
+### Work items
+
+- [ ] Wire `POST /ai/chat` in customer portal
+- [ ] Chat history stored in Redux — survives navigation, cleared on logout/refresh
+- [ ] Inject user's account balances + recent transactions as context in each request
+- [ ] Remove generic "this is not financial advice" disclaimers from default responses
+- [ ] AI responses personalised to user's actual data (not generic)
+- [ ] Chat UI: message thread, input box, loading state, error state
+- [ ] System prompt updated to reflect contextual banking assistant persona
+
+---
+
+## Phase 12 — AI Phase 2 🔴 (Backlog)
+
+**Gate:** Phase 11 must ship first.
+
+**Goal:** Proactive, agentic AI capabilities.
+
+### Work items
+
+- [ ] Proactive nudges — AI-generated alerts (e.g. "Your balance is low", "Unusual spend in Food this month")
+- [ ] Spend insights — AI narrative on monthly spending breakdown
+- [ ] Agentic advisor — multi-turn goal-oriented conversations (e.g. "help me save RM500 this month")
+- [ ] Notification integration — proactive nudges delivered via notification service
+
