@@ -31,7 +31,7 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 ## All User Stories
 
 | ID       | Summary                                                                    | Phase | Repo                 | Status | Story File                                       |
-| -------- | -------------------------------------------------------------------------- | ----- | -------------------- | ------ | ------------------------------------------------ |
+| -------- | -------------------------------------------------------------------------- | ----- | -------------------- | ------ | ------------------------------------------------ | --- | ------- | -------------------------------------------------------------- | --- | -------------------------------------- | --- | ------------------------------------------------ | --- | ------- | ---------------------------------------------------------------------- | --- | ----------- | --- | --- |
 | US-0001  | Customer logs in with email + password                                     | 0     | my-bank-api          | ✅     | —                                                |
 | US-0002  | Session persists across page refreshes                                     | 0     | my-bank-customer     | ✅     | —                                                |
 | US-0003  | Customer resets password via email                                         | 0     | my-bank-api          | ✅     | —                                                |
@@ -58,8 +58,9 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 | US-3004  | Admin updates or deactivates staff account                                 | 3     | my-bank-admin-portal | ✅     | —                                                |
 | US-5001  | Transaction model enrichment — new fields, Counter, masking, API responses | 5     | my-bank-api          | 📝     | [US-5001.md](../user-stories/phase-5/US-5001.md) |
 | US-5002  | Transaction receipt view — customer portal                                 | 5     | my-bank-customer     | 📝     | [US-5002.md](../user-stories/phase-5/US-5002.md) |
-| US-5003  | Transaction detail view — admin portal (unmasked)                          | 5     | my-bank-admin-portal | 📝     | [US-5003.md](../user-stories/phase-5/US-5003.md) |
-| US-6001  | Account type rules enforced (daily limits, withdrawal caps, overdraft)     | 6     | my-bank-api          | ⬜     | —                                                |
+| US-5003  | Transaction detail view — admin portal (unmasked)                          | 5     | my-bank-admin-portal                   | 📝     | [US-5003.md](../user-stories/phase-5/US-5003.md) |
+| US-5004  | Currency display standardised — all amounts show `RM X,XXX.XX`             | 5     | my-bank-customer, my-bank-admin-portal | 📝     | [US-5004.md](../user-stories/phase-5/US-5004.md) |
+| US-6001  | Account type rules enforced (daily limits, withdrawal caps, overdraft)     | 6     | my-bank-api                            | ⬜     | —                                                |
 | US-6002  | Savings monthly withdrawal cap enforced (max 4/month)                      | 6     | my-bank-api          | ⬜     | —                                                |
 | US-6003  | Banker sets overdraft limit on Current/Business account                    | 6     | my-bank-admin-portal | ⬜     | —                                                |
 | US-6004  | Transfer blocked if daily limit exceeded                                   | 6     | my-bank-api          | ⬜     | —                                                |

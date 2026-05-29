@@ -198,11 +198,11 @@ Audit (May 29, 2026) found most items already wired:
 
 **Stories (implement in order):**
 
-| Story | Repo | Scope |
-| --- | --- | --- |
-| US-5001 | `my-bank-api` | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
-| US-5002 | `my-bank-customer` | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records |
-| US-5003 | `my-bank-admin-portal` | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration |
+| Story   | Repo                   | Scope                                                                                                                                                                                                                                                         |
+| ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-5001 | `my-bank-api`          | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
+| US-5002 | `my-bank-customer`     | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records                                                                                                                                                                 |
+| US-5003 | `my-bank-admin-portal` | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration                                                                                                                                                                               |
 
 **Gate:** US-5001 must be deployed before US-5002 or US-5003 can be started.
 

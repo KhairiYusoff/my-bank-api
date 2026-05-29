@@ -71,11 +71,11 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 5 Backlog — Transaction Enrichment (Next Code Phase)
 
-| Story | Repo | Summary | Status |
-| --- | --- | --- | --- |
-| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api` | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜ |
-| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer` | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records | ⬜ |
-| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal` | Unmasked detail panel with deviceInfo, processingTime, duration | ⬜ |
+| Story                                         | Repo                   | Summary                                                                                                            | Status |
+| --------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`          | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜     |
+| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`     | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ⬜     |
+| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal` | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ⬜     |
 
 ---
 
