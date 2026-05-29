@@ -82,7 +82,7 @@ Audit (May 22, 2026) found 4 remaining gaps:
 
 **Reprioritised May 29, 2026** — core banking must be fully wired before AI features. Triggered by P0 bug: `GET /transactions/account/:accountNumber` silently returning empty data for all users due to schema mismatch introduced in Phase 1 refactor.
 
-**Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only. Discovered May 29, 2026 after `GET /transactions/account/:accountNumber` returned empty data for all users — root cause was a schema mismatch introduced in the Phase 1 refactor that went undetected because uncalled fields return silently empty results.
+**Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only.
 
 ### Audit findings (May 29, 2026)
 
@@ -150,11 +150,11 @@ Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-a
 - [x] Wire `GET /transactions/:transactionId` — detail dialog in admin TransactionsList — ✅ May 29
 - [x] Wire `GET /accounts/` — ✅ May 29
 - [x] Wire `GET /accounts/balance/:accountNumber` — ✅ May 29
-- [ ] Build banker account management UI in admin portal — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
-- [ ] Wire `DELETE /users/me` — intentionally deferred (banking compliance, no self-deletion)
+- [x] Build banker account management UI — deferred: `POST /accounts/create` + `DELETE /accounts/:accountNumber` moved to Phase 6 (requires account type rules)
+- [x] Wire `DELETE /users/me` — intentionally deferred (banking compliance, no self-deletion)
 - [x] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — ✅ May 29
 - [x] Wire `GET /expenses/dashboard/stats` — ✅ May 29
-- [ ] `POST /ai/chat` — deferred to Phase 11
+- [x] `POST /ai/chat` — deferred to Phase 11
 
 ### 3A — Admin Portal gap closure ✅ (May 29, 2026)
 
@@ -192,48 +192,19 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 5 — Transaction Detail Enrichment 🔴 (Next Up)
+## Phase 5 — Transaction Enrichment 🔴 (Next Up)
 
-**Goal:** Transaction details must be meaningfully different from the list view — on par with Maybank2u / CIMB Clicks standard. Identified May 29, 2026 after BA review found the detail dialog showed identical data to the list.
+**Goal:** Every transaction record captures complete contextual data at write time — reference number, counterpart, running balance, channel, device, and timing — so customer portals can render full receipts and the system has a fraud-ready audit trail from day one.
 
-### Context
+**Stories (implement in order):**
 
-The Phase 1 refactor replaced `fromAccountNumber`/`toAccountNumber` string fields with a single `account: ObjectId` ref. This lost counterpart information for transfers. A customer seeing "Transfer — RM500" with no recipient info is a UX failure and a dispute risk.
+| Story | Repo | Scope |
+| --- | --- | --- |
+| US-5001 | `my-bank-api` | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
+| US-5002 | `my-bank-customer` | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records |
+| US-5003 | `my-bank-admin-portal` | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration |
 
-### 5A — Schema enrichment (my-bank-api)
-
-Changes to `Transaction` model and `transferFunds` service:
-
-| Field                | Type                           | Description                                                                | Priority |
-| -------------------- | ------------------------------ | -------------------------------------------------------------------------- | -------- |
-| `reference`          | `String`                       | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. | 🔴 MVP   |
-| `counterpartAccount` | `String`                       | The other account number — recipient if sent, sender if received           | 🔴 MVP   |
-| `counterpartName`    | `String`                       | Masked name of counterpart e.g. `Ahmad K****`                              | 🔴 MVP   |
-| `balanceAfter`       | `Number`                       | Account balance snapshot after transaction completes                       | 🔴 MVP   |
-| `fee`                | `Number`                       | Fee charged (default 0). Reserved for fee engine in Phase 6                | 🔴 MVP   |
-| `category`           | `String`                       | Auto-derived from type: transfer/deposit/withdraw/fee                      | 🟡 Nice  |
-| `processingTime`     | `{ submittedAt, completedAt }` | Timestamps for submission and completion                                   | 🟡 Nice  |
-| `deviceInfo`         | `{ ip, userAgent }`            | Source IP + user agent — admin/fraud view only                             | 🟡 Nice  |
-
-All new fields must have defaults (null/0) so existing documents don't break.
-
-### 5B — account.service.js enrichment
-
-Update 3 `new Transaction({...})` blocks in `account.service.js` (deposit, withdraw, airdrop) to populate `reference`, `balanceAfter`, `fee: 0`, `category`.
-
-### 5C — Transaction detail UI (my-bank-customer)
-
-Full-detail receipt view per transaction:
-
-- Reference number: `TXN-20260529-00142`
-- Counterpart name and masked account number
-- Amount + balance after: `RM500.00 sent → Balance: RM2,450.00`
-- Status with submitted/completed timestamps
-- Fee breakdown (even if RM0.00)
-
-### 5D — Transaction detail UI (my-bank-admin-portal)
-
-Admin/banker view shows everything unmasked — counterpart full name, account, IP, device info for fraud investigation.
+**Gate:** US-5001 must be deployed before US-5002 or US-5003 can be started.
 
 ---
 

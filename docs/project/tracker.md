@@ -7,13 +7,15 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ---
 
-## Now — Phase 5: Transaction Detail Enrichment
+## Now — Phase 5: Transaction Enrichment
 
-Read the story before writing any code: [US-5001 — Transaction Receipt](../user-stories/phase-5/US-5001-transaction-receipt.md)
+Three stories, implement in dependency order:
 
-Sub-tasks in order: **BE1 → BE2 → BE3 → BE4 → BE5 → BE6 → FE1 → FE2**
+1. [US-5001](../user-stories/phase-5/US-5001.md) — `my-bank-api` — Transaction model + API (do this first)
+2. [US-5002](../user-stories/phase-5/US-5002.md) — `my-bank-customer` — Receipt drawer (depends on US-5001)
+3. [US-5003](../user-stories/phase-5/US-5003.md) — `my-bank-admin-portal` — Unmasked detail panel (depends on US-5001)
 
-> `3B2` (wire transaction detail in customer app) is part of US-5001-FE1 — do not implement separately.
+> Read the full AC in each story file before writing any code.
 
 ---
 
@@ -67,20 +69,13 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ---
 
-## Phase 5 Backlog — Transaction Detail Enrichment (Next Code Phase)
+## Phase 5 Backlog — Transaction Enrichment (Next Code Phase)
 
-Full story + AC: [US-5001-transaction-receipt.md](../user-stories/phase-5/US-5001-transaction-receipt.md)
-
-| Sub-task    | Task                                                                                                                                                                | Priority |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| US-5001-BE1 | Add 5 new fields to `Transaction` schema (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`) + Counter collection for reference sequences | 🔴 MVP   |
-| US-5001-BE2 | Populate all fields in `transferFunds` (both from/to records)                                                                                                       | 🔴 MVP   |
-| US-5001-BE3 | Populate `reference`, `balanceAfter`, `fee: 0` in deposit, withdraw, airdrop                                                                                        | 🔴 MVP   |
-| US-5001-BE4 | Return new fields in `getAccountTransactions` + `getTransactionById` responses                                                                                      | 🔴 MVP   |
-| US-5001-BE5 | Apply masking logic in customer-facing response (counterpart name + account number)                                                                                 | 🔴 MVP   |
-| US-5001-BE6 | Write automated tests for reference uniqueness, masking, balanceAfter correctness                                                                                   | 🔴 MVP   |
-| US-5001-FE1 | Receipt-style transaction detail dialog in customer app                                                                                                             | 🔴 MVP   |
-| US-5001-FE2 | Unmasked transaction detail view in admin portal                                                                                                                    | 🔴 MVP   |
+| Story | Repo | Summary | Status |
+| --- | --- | --- | --- |
+| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api` | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜ |
+| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer` | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records | ⬜ |
+| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal` | Unmasked detail panel with deviceInfo, processingTime, duration | ⬜ |
 
 ---
 
