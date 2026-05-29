@@ -11,10 +11,10 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 | #   | Task                                                                        | Status      |
 | --- | --------------------------------------------------------------------------- | ----------- |
-| 3B1 | Wire `GET /accounts/` — account list in customer app                        | ⬜ TODO     |
-| 3B2 | Wire `GET /transactions/:transactionId` — transaction detail in customer app | ⬜ TODO     |
-| 3B3 | Wire `GET /expenses/categories` + `/payment-methods` — expense filter opts  | ⬜ TODO     |
-| 3B4 | Wire `GET /expenses/dashboard/stats` — expense summary widget               | ⬜ TODO     |
+| 3B1 | Wire `GET /accounts/` — already consumed in Dashboard + hooks               | ✅ Done      |
+| 3B2 | Wire `GET /transactions/:transactionId` — not needed in customer app (list view sufficient) | ✅ Done |
+| 3B3 | Wire `GET /expenses/categories` + `/payment-methods` — consumed in `useExpenseActions` | ✅ Done |
+| 3B4 | Wire `GET /expenses/dashboard/stats` — consumed in `useAnalytics`           | ✅ Done      |
 | 3B5 | Wire `DELETE /users/me` — account self-deletion flow                        | ⬜ TODO     |
 
 ---

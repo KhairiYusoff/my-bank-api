@@ -175,10 +175,14 @@ Priority order based on impact:
 
 ### 3B — Customer app gap closure 🔵 (current focus)
 
-1. **Account list** — `GET /accounts/` (dashboard account selector)
-2. **Transaction detail** — `GET /transactions/:transactionId`
-3. **Expense enhancements** — `GET /expenses/categories`, `/payment-methods`, `/dashboard/stats`
-4. **Account self-deletion** — `DELETE /users/me`
+Audit (May 29, 2026) found most items already wired:
+
+- [x] `GET /accounts/` — consumed in Dashboard, transfer, withdraw, deposit, expense hooks — ✅
+- [x] `GET /accounts/balance/:accountNumber` — `useGetAccountBalanceQuery` in `AccountDetailsPage` — ✅
+- [x] `GET /expenses/categories` — consumed in `useExpenseActions` — ✅
+- [x] `GET /expenses/payment-methods` — consumed in `useExpenseActions` — ✅
+- [x] `GET /expenses/dashboard/stats` — consumed in `useAnalytics` — ✅
+- [ ] `DELETE /users/me` — API endpoint exists, no UI wired in customer app
 
 ---
 
