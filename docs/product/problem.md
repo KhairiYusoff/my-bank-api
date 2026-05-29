@@ -34,31 +34,31 @@
 
 ### Features ✅ Built
 
-| Feature | Scope | Status |
-|---|---|---|
-| **Auth** | Login, JWT tokens, httpOnly cookies, refresh | ✅ Built |
-| **Onboarding** | Digital application, KYC verification, profile completion | ✅ Built |
-| **Accounts** | Create, view, balance, account types (Savings/Current/Business) | ✅ Built |
-| **Transactions** | Transfer between accounts, view history, pagination | ✅ Built |
-| **Deposits/Withdrawals** | Banker deposits, customer withdraws | ✅ Built |
-| **Airdrop** | Admin credits accounts (promo/testing) | ✅ Built |
-| **Expenses** | Track and categorize user expenses | ✅ Built |
-| **Admin Functions** | Approve applications, manage users/staff, audit trails | ✅ Built |
-| **Audit Logging** | All HIGH-severity actions logged | ✅ Built |
-| **Notifications** | Real-time WebSocket notifications | ✅ Built |
+| Feature                  | Scope                                                           | Status   |
+| ------------------------ | --------------------------------------------------------------- | -------- |
+| **Auth**                 | Login, JWT tokens, httpOnly cookies, refresh                    | ✅ Built |
+| **Onboarding**           | Digital application, KYC verification, profile completion       | ✅ Built |
+| **Accounts**             | Create, view, balance, account types (Savings/Current/Business) | ✅ Built |
+| **Transactions**         | Transfer between accounts, view history, pagination             | ✅ Built |
+| **Deposits/Withdrawals** | Banker deposits, customer withdraws                             | ✅ Built |
+| **Airdrop**              | Admin credits accounts (promo/testing)                          | ✅ Built |
+| **Expenses**             | Track and categorize user expenses                              | ✅ Built |
+| **Admin Functions**      | Approve applications, manage users/staff, audit trails          | ✅ Built |
+| **Audit Logging**        | All HIGH-severity actions logged                                | ✅ Built |
+| **Notifications**        | Real-time WebSocket notifications                               | ✅ Built |
 
 ### In Progress / Planned (Core Banking)
 
-| Feature | Phase |
-|---|---|
-| Transaction enrichment — reference, counterpart, balanceAfter | Phase 5 |
-| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 6 |
-| Fixed Deposit — lock period, maturity, interest, cron crediting | Phase 7 |
-| Dormancy cron + full account lifecycle enforcement | Phase 8 |
-| Monthly statements — summary endpoint + PDF | Phase 9 |
-| Beneficiary management | Phase 10 |
-| AI enhancement — chat persistency, contextual responses | Phase 11 |
-| AI Phase 2 — proactive nudges, agentic advisor | Phase 12 |
+| Feature                                                                | Phase    |
+| ---------------------------------------------------------------------- | -------- |
+| Transaction enrichment — reference, counterpart, balanceAfter          | Phase 5  |
+| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 6  |
+| Fixed Deposit — lock period, maturity, interest, cron crediting        | Phase 7  |
+| Dormancy cron + full account lifecycle enforcement                     | Phase 8  |
+| Monthly statements — summary endpoint + PDF                            | Phase 9  |
+| Beneficiary management                                                 | Phase 10 |
+| AI enhancement — chat persistency, contextual responses                | Phase 11 |
+| AI Phase 2 — proactive nudges, agentic advisor                         | Phase 12 |
 
 ### Intentionally Out of Scope
 

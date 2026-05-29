@@ -175,4 +175,3 @@
 **US-ADM3:** As an admin, I want to view all audit logs filtered by user, action, and date so that I can investigate any incident.
 
 **US-ADM4:** As a banker, I want to view a customer's full activity log so that I can assist them with queries or identify suspicious behaviour.
-

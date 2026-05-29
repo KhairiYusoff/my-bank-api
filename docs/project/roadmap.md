@@ -206,16 +206,16 @@ The Phase 1 refactor replaced `fromAccountNumber`/`toAccountNumber` string field
 
 Changes to `Transaction` model and `transferFunds` service:
 
-| Field | Type | Description | Priority |
-| --- | --- | --- | --- |
-| `reference` | `String` | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. | 🔴 MVP |
-| `counterpartAccount` | `String` | The other account number — recipient if sent, sender if received | 🔴 MVP |
-| `counterpartName` | `String` | Masked name of counterpart e.g. `Ahmad K****` | 🔴 MVP |
-| `balanceAfter` | `Number` | Account balance snapshot after transaction completes | 🔴 MVP |
-| `fee` | `Number` | Fee charged (default 0). Reserved for fee engine in Phase 6 | 🔴 MVP |
-| `category` | `String` | Auto-derived from type: transfer/deposit/withdraw/fee | 🟡 Nice |
-| `processingTime` | `{ submittedAt, completedAt }` | Timestamps for submission and completion | 🟡 Nice |
-| `deviceInfo` | `{ ip, userAgent }` | Source IP + user agent — admin/fraud view only | 🟡 Nice |
+| Field                | Type                           | Description                                                                | Priority |
+| -------------------- | ------------------------------ | -------------------------------------------------------------------------- | -------- |
+| `reference`          | `String`                       | Human-readable ID e.g. `TXN-20260529-00142`. Auto-generated at write time. | 🔴 MVP   |
+| `counterpartAccount` | `String`                       | The other account number — recipient if sent, sender if received           | 🔴 MVP   |
+| `counterpartName`    | `String`                       | Masked name of counterpart e.g. `Ahmad K****`                              | 🔴 MVP   |
+| `balanceAfter`       | `Number`                       | Account balance snapshot after transaction completes                       | 🔴 MVP   |
+| `fee`                | `Number`                       | Fee charged (default 0). Reserved for fee engine in Phase 6                | 🔴 MVP   |
+| `category`           | `String`                       | Auto-derived from type: transfer/deposit/withdraw/fee                      | 🟡 Nice  |
+| `processingTime`     | `{ submittedAt, completedAt }` | Timestamps for submission and completion                                   | 🟡 Nice  |
+| `deviceInfo`         | `{ ip, userAgent }`            | Source IP + user agent — admin/fraud view only                             | 🟡 Nice  |
 
 All new fields must have defaults (null/0) so existing documents don't break.
 
@@ -303,12 +303,14 @@ Admin/banker view shows everything unmasked — counterpart full name, account, 
 ### Work items
 
 **9A — Statement endpoint**
+
 - [ ] `GET /accounts/:accountNumber/statement?month=5&year=2026`
 - [ ] Response: `{ openingBalance, closingBalance, totalCredits, totalDebits, transactionCount, transactions[] }`
 - [ ] Restrict to account owner (customer) or admin/banker
 - [ ] Statement UI in customer portal — monthly selector, summary header, transaction list
 
 **9B — PDF generation** (later)
+
 - [ ] Server-side PDF via `pdfkit` or `puppeteer`
 - [ ] `GET /accounts/:accountNumber/statement/pdf?month=5&year=2026` — streams PDF
 - [ ] Download button in statement UI
@@ -361,4 +363,3 @@ Admin/banker view shows everything unmasked — counterpart full name, account, 
 - [ ] Spend insights — AI narrative on monthly spending breakdown
 - [ ] Agentic advisor — multi-turn goal-oriented conversations (e.g. "help me save RM500 this month")
 - [ ] Notification integration — proactive nudges delivered via notification service
-

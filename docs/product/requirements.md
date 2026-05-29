@@ -215,17 +215,17 @@ Acceptance criteria per module. Ticked = built and verified. See `business-rules
 
 ## Non-Functional Requirements
 
-| Requirement | Target | Measurement |
-|---|---|---|
-| **API Response Time** | < 500ms for 95th percentile | Server logs |
-| **Page Load Time** | < 2s (cached) | Lighthouse |
-| **Uptime** | 99.5% | Vercel SLA |
-| **Security** | No SQL injection, XSS, CSRF | OWASP Top 10 |
-| **Authentication** | JWT + httpOnly (no localStorage) | Code review |
-| **Authorization** | Role-based (customer, banker, admin) | RBAC matrix |
-| **Audit Trail** | 100% of HIGH-severity actions | AuditLog count |
-| **Atomicity** | All money ops atomic (MongoDB session) | Test suite |
-| **Mobile** | Responsive at 375px+ | Device testing |
+| Requirement           | Target                                 | Measurement    |
+| --------------------- | -------------------------------------- | -------------- |
+| **API Response Time** | < 500ms for 95th percentile            | Server logs    |
+| **Page Load Time**    | < 2s (cached)                          | Lighthouse     |
+| **Uptime**            | 99.5%                                  | Vercel SLA     |
+| **Security**          | No SQL injection, XSS, CSRF            | OWASP Top 10   |
+| **Authentication**    | JWT + httpOnly (no localStorage)       | Code review    |
+| **Authorization**     | Role-based (customer, banker, admin)   | RBAC matrix    |
+| **Audit Trail**       | 100% of HIGH-severity actions          | AuditLog count |
+| **Atomicity**         | All money ops atomic (MongoDB session) | Test suite     |
+| **Mobile**            | Responsive at 375px+                   | Device testing |
 
 ---
 
@@ -238,7 +238,6 @@ Acceptance criteria per module. Ticked = built and verified. See `business-rules
 - ❌ Interbank transfers (FPX, IBG, DuitNow)
 - ❌ Credit scoring / loan products
 - ❌ `DELETE /users/me` — banking apps do not allow self-deletion (compliance)
-
 
 ---
 
