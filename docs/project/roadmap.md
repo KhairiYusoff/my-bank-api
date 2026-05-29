@@ -78,20 +78,123 @@ Audit (May 22, 2026) found 4 remaining gaps:
 
 ---
 
-## Phase 3 — AI Features 🔵 (Current)
+## Phase 3 — Client Coverage Audit & Gap Closure 🔵 (Current)
+
+**Reprioritised May 29, 2026** — core banking must be fully wired before AI features. Triggered by P0 bug: `GET /transactions/account/:accountNumber` silently returning empty data for all users due to schema mismatch introduced in Phase 1 refactor.
+
+**Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only.
+
+**Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only. Discovered May 29, 2026 after `GET /transactions/account/:accountNumber` returned empty data for all users — root cause was a schema mismatch introduced in the Phase 1 refactor that went undetected because uncalled fields return silently empty results.
+
+### Audit findings (May 29, 2026)
+
+Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-admin-portal):
+
+| Endpoint                                   | Method       | Status                                            |
+| ------------------------------------------ | ------------ | ------------------------------------------------- |
+| `POST /auth/login`                         | both clients | ✅                                                |
+| `POST /auth/logout`                        | both clients | ✅                                                |
+| `POST /auth/refresh-token`                 | admin        | ✅                                                |
+| `GET /auth/check-token`                    | customer     | ✅                                                |
+| `GET /users/me`                            | both clients | ✅                                                |
+| `PUT /users/me`                            | both clients | ✅                                                |
+| `PUT /users/me/password`                   | both clients | ✅                                                |
+| `PUT /users/me/preferences`                | admin        | ✅                                                |
+| `POST /users/me/reset-password`            | customer     | ✅                                                |
+| `DELETE /users/me`                         | —            | ❌ **unused**                                     |
+| `GET /users/customers`                     | admin        | ✅                                                |
+| `GET /users/staff`                         | admin        | ✅                                                |
+| `POST /accounts/create`                    | —            | ❌ **unused** (banker feature, no UI)             |
+| `DELETE /accounts/:accountNumber`          | —            | ❌ **unused** (banker feature, no UI)             |
+| `GET /accounts/`                           | —            | ❌ **unused** (customer list accounts, not wired) |
+| `GET /accounts/balance/:accountNumber`     | —            | ❌ **unused**                                     |
+| `GET /accounts/all`                        | admin        | ✅                                                |
+| `POST /accounts/deposit`                   | customer     | ✅                                                |
+| `POST /accounts/withdraw`                  | customer     | ✅                                                |
+| `POST /accounts/airdrop`                   | admin        | ✅                                                |
+| `POST /transactions/transfer`              | customer     | ✅                                                |
+| `GET /transactions/account/:accountNumber` | customer     | ✅ (fixed May 29)                                 |
+| `GET /transactions/all`                    | admin        | ✅                                                |
+| `GET /transactions/:transactionId`         | —            | ❌ **unused**                                     |
+| `POST /expenses`                           | customer     | ✅                                                |
+| `GET /expenses`                            | customer     | ✅                                                |
+| `GET /expenses/:expenseId`                 | customer     | ✅                                                |
+| `PUT /expenses/:expenseId`                 | customer     | ✅                                                |
+| `DELETE /expenses/:expenseId`              | customer     | ✅                                                |
+| `GET /expenses/analytics/monthly`          | customer     | ✅                                                |
+| `GET /expenses/analytics/yearly`           | customer     | ✅                                                |
+| `GET /expenses/categories`                 | —            | ❌ **unused**                                     |
+| `GET /expenses/payment-methods`            | —            | ❌ **unused**                                     |
+| `GET /expenses/dashboard/stats`            | —            | ❌ **unused**                                     |
+| `POST /ai/chat`                            | —            | ❌ **unused** (Phase 3 work in progress)          |
+| `GET /ai/insights`                         | customer     | ✅                                                |
+| `GET /audit/me`                            | admin        | ✅                                                |
+| `GET /audit/user/:userId`                  | admin        | ✅                                                |
+| `GET /audit/all`                           | admin        | ✅                                                |
+| `POST /onboarding/apply`                   | customer     | ✅                                                |
+| `PUT /onboarding/complete-profile`         | customer     | ✅                                                |
+| `GET /onboarding/pending`                  | admin        | ✅                                                |
+| `POST /onboarding/approve/:userId`         | admin        | ✅                                                |
+| `POST /onboarding/verify/:userId`          | admin        | ✅                                                |
+| `POST /admin/create-staff`                 | admin        | ✅                                                |
+| `DELETE /admin/staff/:staffId`             | —            | ❌ **unused** (no UI)                             |
+| `DELETE /admin/customer/:customerId`       | —            | ❌ **unused** (no UI)                             |
+| `PUT /admin/staff/:staffId`                | —            | ❌ **unused** (no UI)                             |
+| `PUT /admin/customer/:customerId`          | —            | ❌ **unused** (no UI)                             |
+| `GET /notifications/`                      | customer     | ✅                                                |
+| `PATCH /notifications/:id`                 | customer     | ✅                                                |
+| `DELETE /notifications/:id`                | customer     | ✅                                                |
+
+### Work items
+
+- [ ] Wire `GET /accounts/` in customer app (account list on dashboard)
+- [ ] Wire `GET /accounts/balance/:accountNumber` or confirm replaced by full account fetch
+- [ ] Build banker account management UI in admin portal — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
+- [ ] Build admin user management actions — `DELETE /admin/staff/:staffId`, `DELETE /admin/customer/:customerId`, `PUT /admin/staff/:staffId`, `PUT /admin/customer/:customerId`
+- [ ] Wire `GET /transactions/:transactionId` — transaction detail modal in both portals
+- [ ] Wire `DELETE /users/me` — account self-deletion flow in customer app
+- [ ] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — use as filter options in expense UI
+- [ ] Wire `GET /expenses/dashboard/stats` — expense summary widget
+- [ ] `POST /ai/chat` — deferred to Phase 4
+
+### 3A — Admin Portal gap closure (current focus)
+
+Priority order based on impact:
+
+1. **Staff management actions** — `PUT /admin/staff/:staffId`, `DELETE /admin/staff/:staffId`
+   - Edit staff details (name, role, status)
+   - Deactivate / remove staff
+2. **Customer management actions** — `PUT /admin/customer/:customerId`, `DELETE /admin/customer/:customerId`
+   - Edit customer details
+   - Deactivate / remove customer account
+3. **Transaction detail modal** — `GET /transactions/:transactionId`
+   - Drill into a transaction from the transactions list
+4. **Account management** — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
+   - Banker creates/closes accounts from admin portal
+
+### 3B — Customer app gap closure
+
+1. **Account list** — `GET /accounts/` (dashboard account selector)
+2. **Transaction detail** — `GET /transactions/:transactionId`
+3. **Expense enhancements** — `GET /expenses/categories`, `/payment-methods`, `/dashboard/stats`
+4. **Account self-deletion** — `DELETE /users/me`
+
+---
+
+## Phase 4 — AI Features 🔴 (Backlog)
 
 **Goal:** Production-grade AI features in the banking context.
 
 Scaffolding already exists: `ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`.
 
 - [ ] RAG setup — knowledge base integration in my-bank-api
-- [ ] AI chatbot UI — my-bank-customer
+- [ ] AI chatbot UI — my-bank-customer (`POST /ai/chat`)
 - [ ] Financial insights — spending breakdown with AI narrative
 
-**Gate:** Phase 2 closed on May 25, 2026. Phase 3 is now active.
+**Gate:** Phase 3 must be fully closed before Phase 4 starts.
 
 ---
 
-## Phase 4+ — TBD
+## Phase 5+ — TBD
 
-Future scope to be defined after Phase 3 ships.
+Future scope to be defined after Phase 4 ships.
