@@ -52,13 +52,14 @@
 | Feature                                                                | Phase    |
 | ---------------------------------------------------------------------- | -------- |
 | Transaction enrichment — reference, counterpart, balanceAfter          | Phase 5  |
-| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 6  |
-| Fixed Deposit — lock period, maturity, interest, cron crediting        | Phase 7  |
-| Dormancy cron + full account lifecycle enforcement                     | Phase 8  |
-| Monthly statements — summary endpoint + PDF                            | Phase 9  |
-| Beneficiary management                                                 | Phase 10 |
-| AI enhancement — chat persistency, contextual responses                | Phase 11 |
-| AI Phase 2 — proactive nudges, agentic advisor                         | Phase 12 |
+| Admin detail pages — customer and staff profile pages                  | Phase 6  |
+| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 7  |
+| Role expansion — auditor role, staff first-login, role-based nav       | Phase 8  |
+| Fixed Deposit — lock period, maturity, interest, cron crediting        | Phase 9  |
+| Dormancy cron + full account lifecycle enforcement                     | Phase 10 |
+| Monthly statements — summary endpoint + PDF                            | Phase 11 |
+| Beneficiary management                                                 | Phase 12 |
+| AI enhancement — chat persistency, contextual responses                | Phase 13 |
 
 ### Intentionally Out of Scope
 

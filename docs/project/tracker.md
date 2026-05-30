@@ -1,9 +1,9 @@
 # Tracker
 
+> **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
+
 **Last Updated:** May 30, 2026
 **Current Phase:** Phase 3 complete — Phase 5 is next code phase
-
-See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ---
 
@@ -24,41 +24,15 @@ Four stories, implement in dependency order:
 
 ### Documentation Rewrite (May 29, 2026) ✅
 
-| #   | Task                                                                                                          |
-| --- | ------------------------------------------------------------------------------------------------------------- |
-| D1  | Created `docs/product/business-rules.md` — account types, limits, fees, lifecycle, interest, reference format |
-| D2  | Rewrote `docs/product/problem.md` — new vision, correct scope, AI on-hold                                     |
-| D3  | Rewrote `docs/product/user-stories.md` — full set from scratch (auth through AI)                              |
-| D4  | ~~`docs/product/requirements.md`~~ — **deleted** (replaced by `business-rules.md` + user-stories index)       |
-| D5  | Updated `docs/project/roadmap.md` — Phase 4 AI marked ON-HOLD, Phases 6–12 added                              |
-| D6  | Updated `docs/project/tracker.md` — current state                                                             |
+All D1–D6 tasks done. See roadmap.md for detail.
 
-### Phase 3A — Admin Portal Gap Closure (May 29, 2026) ✅
+### Phase 3 — Client Coverage & Gap Closure (May 29, 2026) ✅
 
-| #   | Task                                                                                   |
-| --- | -------------------------------------------------------------------------------------- |
-| 3A1 | P0 fix: `GET /transactions/account/:accountNumber` returning empty — wrong query field |
-| 3A2 | Wired `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId`                     |
-| 3A3 | Wired `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId`         |
-| 3A4 | Wired `GET /transactions/:transactionId` — detail dialog in admin portal               |
-| 3A5 | Added `StyledTableCell` + `StyledTableRow` missing exports to `TableStyles.tsx`        |
-
-### Phase 3B (most items) — Customer App (May 29, 2026) ✅
-
-| #   | Task                                                                              |
-| --- | --------------------------------------------------------------------------------- |
-| 3B1 | `GET /accounts/` — already consumed in Dashboard + hooks                          |
-| 3B3 | `GET /expenses/categories` + `/payment-methods` — consumed in `useExpenseActions` |
-| 3B4 | `GET /expenses/dashboard/stats` — consumed in `useAnalytics`                      |
+All 3A and 3B tasks done. See roadmap.md for detail.
 
 ### Phase 2 — Architecture Completion (May 25, 2026) ✅
 
-| #   | Task                                                                                      |
-| --- | ----------------------------------------------------------------------------------------- |
-| 2D  | Replaced all 6 local `handleError` copies with shared `error()` utility                   |
-| 2A  | Created `auth.service.js` — extracted login, logout, refreshToken                         |
-| 2B  | Expanded `onboarding.service.js` — extracted all fat controller logic                     |
-| 2C  | Expanded `audit.service.js` — extracted 3 read functions with shared `_queryLogs` builder |
+All 2A–2D tasks done. See roadmap.md for detail.
 
 ### Phase 1 — Codebase Hardening (May 13–19, 2026) ✅
 
@@ -92,15 +66,16 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 7 Backlog — Account Type Differentiation
 
-| #   | Task                                                                                        |
-| --- | ------------------------------------------------------------------------------------------- |
-| 7A1 | Add `overdraftLimit`, `monthlyWithdrawalCount`, `lastWithdrawalMonthReset` to Account model |
-| 7A2 | Enforce daily transfer limits + single transfer cap per account type                        |
-| 7A3 | Enforce Savings monthly withdrawal counter (max 4/month)                                    |
-| 7A4 | Enforce overdraft for Current/Business                                                      |
-| 7A5 | Block all transfers on FD accounts                                                          |
-| 7A6 | Monthly maintenance fee cron                                                                |
-| 7A7 | Savings interest cron                                                                       |
+| Story   | Repo                   | Summary                                                                 | Status |
+| ------- | ---------------------- | ----------------------------------------------------------------------- | ------ |
+| US-7001 | `my-bank-api`          | Account type rules enforced (daily limits, withdrawal caps, overdraft)  | ⬜     |
+| US-7002 | `my-bank-api`          | Savings monthly withdrawal cap enforced (max 4/month)                   | ⬜     |
+| US-7003 | `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account                 | ⬜     |
+| US-7004 | `my-bank-api`          | Transfer blocked if daily limit exceeded                                | ⬜     |
+| US-7005 | `my-bank-customer`     | Customer sees account type rules and limits in portal                   | ⬜     |
+| US-7006 | `my-bank-api`          | Monthly maintenance fee deducted automatically                          | ⬜     |
+| US-7007 | `my-bank-api`          | Savings interest credited monthly                                       | ⬜     |
+| US-7008 | `notification-service` | Customer notified when balance falls below maintenance threshold         | ⬜     |
 
 ---
 
@@ -118,48 +93,59 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 9 Backlog — Fixed Deposit
 
-| #   | Task                                                                                          |
-| --- | --------------------------------------------------------------------------------------------- |
-| 9A1 | FD model: principal, lockPeriod, maturityDate, interestRate, linkedAccount, autoRenew, status |
-| 9A2 | FD creation endpoint                                                                          |
-| 9A3 | Maturity cron + interest credit                                                               |
-| 9A4 | Early withdrawal endpoint                                                                     |
-| 9A5 | Auto-renewal logic                                                                            |
-| 9A6 | FD detail page in customer portal                                                             |
-| 9A7 | FD maturity notifications (T-7 days + on day)                                                 |
+| Story   | Repo                   | Summary                                                    | Status |
+| ------- | ---------------------- | ---------------------------------------------------------- | ------ |
+| US-9001 | `my-bank-admin-portal` | Banker creates Fixed Deposit account for customer          | ⬜     |
+| US-9002 | `my-bank-customer`     | Customer views FD with maturity date and expected interest  | ⬜     |
+| US-9003 | `notification-service` | Customer notified 7 days before FD matures                 | ⬜     |
+| US-9004 | `my-bank-api`          | Customer withdraws FD at maturity (principal + interest)   | ⬜     |
+| US-9005 | `my-bank-api`          | Customer withdraws FD early (forfeits interest)            | ⬜     |
+| US-9006 | `my-bank-api`          | FD auto-renews if no action after maturity                 | ⬜     |
 
 ---
 
 ## Phase 10 Backlog — Dormancy & Lifecycle
 
-| #    | Task                                                |
-| ---- | --------------------------------------------------- |
-| 10A1 | Dormancy cron (daily, 12-month no-activity trigger) |
-| 10A2 | Block transactions on dormant accounts              |
-| 10A3 | Dormancy fee cron (RM10/year anniversary)           |
-| 10A4 | Reactivation endpoint                               |
-| 10A5 | Suspension endpoint                                 |
-| 10A6 | Account closure flow                                |
+| Story    | Repo                   | Summary                                                            | Status |
+| -------- | ---------------------- | ------------------------------------------------------------------ | ------ |
+| US-10001 | `my-bank-api`          | Account goes dormant after 12 months no activity (cron)            | ⬜     |
+| US-10002 | `my-bank-customer`     | Dormant account shows clear message with reactivation steps        | ⬜     |
+| US-10003 | `notification-service` | Customer notified at 11 months no activity (pre-dormancy warning)  | ⬜     |
+| US-10004 | `my-bank-admin-portal` | Banker reactivates dormant account                                 | ⬜     |
+| US-10005 | `my-bank-admin-portal` | Admin suspends a customer account                                  | ⬜     |
+| US-10006 | `my-bank-customer`     | Customer requests account closure                                  | ⬜     |
 
 ---
 
 ## Phase 11 Backlog — Statements
 
-| #    | Task                                                           |
-| ---- | -------------------------------------------------------------- |
-| 11A1 | `GET /accounts/:accountNumber/statement?month=&year=` endpoint |
-| 11A2 | Statement UI in customer portal                                |
-| 11B1 | PDF generation endpoint (later)                                |
+| Story    | Repo               | Summary                                                                             | Status |
+| -------- | ------------------ | ----------------------------------------------------------------------------------- | ------ |
+| US-11001 | `my-bank-customer` | Customer views monthly statement for any account                                    | ⬜     |
+| US-11002 | `my-bank-api`      | Statement shows opening/closing balance, credits, debits, transaction list          | ⬜     |
+| US-11003 | `my-bank-customer` | Customer downloads statement as PDF                                                 | ⬜     |
 
 ---
 
 ## Phase 12 Backlog — Beneficiaries
 
-| #    | Task                                  |
-| ---- | ------------------------------------- |
-| 12A1 | Add `beneficiaries[]` to User model   |
-| 12A2 | CRUD endpoints for beneficiaries      |
-| 12A3 | Beneficiary selector in transfer form |
+| Story    | Repo               | Summary                                                        | Status |
+| -------- | ------------------ | -------------------------------------------------------------- | ------ |
+| US-12001 | `my-bank-customer` | Customer saves a beneficiary with nickname                     | ⬜     |
+| US-12002 | `my-bank-customer` | Customer manages (add/edit/delete) beneficiaries               | ⬜     |
+| US-12003 | `my-bank-customer` | Transfer form pre-fills account number from saved beneficiary  | ⬜     |
+
+---
+
+## Phase 13 Backlog — AI Assistant
+
+| Story    | Repo               | Summary                                                            | Status |
+| -------- | ------------------ | ------------------------------------------------------------------ | ------ |
+| US-13001 | `my-bank-customer` | Customer asks AI questions about accounts and transactions         | ⬜     |
+| US-13002 | `my-bank-customer` | AI chat history persists across page navigation                    | ⬜     |
+| US-13003 | `my-bank-api`      | AI answers based on user's actual data, not generic                | ⬜     |
+| US-13004 | `my-bank-api`      | AI responds without unprompted disclaimers                         | ⬜     |
+| US-13005 | `my-bank-customer` | AI chat cleared on logout                                          | ⬜     |
 
 ---
 
