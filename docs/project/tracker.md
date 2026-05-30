@@ -83,12 +83,10 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 6 Backlog — Admin Detail Pages
 
-| Story  | Repo                                  | Summary                                                                                          | Status |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
-| US-6001 | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` endpoint + detail page in portal  | ⬜     |
-| US-6002 | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` endpoint + detail page in portal             | ⬜     |
-
-> Story files to be written before Phase 6 starts.
+| Story   | Repo                                  | Summary                                                                                          | Status |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page  | 📝     |
+| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page             | 📝     |
 
 ---
 
