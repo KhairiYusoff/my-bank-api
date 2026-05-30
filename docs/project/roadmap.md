@@ -188,7 +188,7 @@ Audit (May 29, 2026) found most items already wired:
 
 **Paused indefinitely.** Core banking must reach Phase 10 (Beneficiary Management) before AI features are prioritised. Existing scaffolding (`ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`) is preserved but no new AI work until gate is cleared.
 
-**Gate:** Phases 5–10 must ship before Phase 11 starts.
+**Gate:** Phases 5–12 must ship before Phase 13 starts.
 
 ---
 
@@ -203,12 +203,28 @@ Audit (May 29, 2026) found most items already wired:
 | US-5001 | `my-bank-api`          | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
 | US-5002 | `my-bank-customer`     | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records                                                                                                                                                                 |
 | US-5003 | `my-bank-admin-portal` | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration                                                                                                                                                                               |
+| US-5004 | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                                                                                                                                |
 
-**Gate:** US-5001 must be deployed before US-5002 or US-5003 can be started.
+**Gate:** US-5001 must be deployed before US-5002, US-5003, or US-5004 can be started.
 
 ---
 
-## Phase 6 — Account Type Differentiation 🔴 (Backlog)
+## Phase 6 — Admin Detail Pages 🔴 (Backlog)
+
+**Goal:** Replace the current Actions dropdown on Users/Staff list pages with a proper detail page per record. Enables admin and banker to view full customer KYC data and manage status/role from a dedicated page.
+
+**Stories (implement in order):**
+
+| Story   | Repo                                      | Scope                                                                                                                                                        |
+| ------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| US-6001 | `my-bank-api`, `my-bank-admin-portal`     | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection component, ChangeStatusModal reused             |
+| US-6002 | `my-bank-api`, `my-bank-admin-portal`     | `GET /admin/staff/:id` (admin only) + StaffDetailPage, new ChangeRoleModal with admin-promotion warning, reuses ProfileSection from US-6001                  |
+
+**Gate:** Phase 5 must ship first. US-6001 must be done before US-6002 (shares ProfileSection component).
+
+---
+
+## Phase 7 — Account Type Differentiation 🔴 (Backlog)
 
 **Goal:** Enforce differentiated rules per account type in code. Currently all accounts behave identically regardless of type.
 
@@ -226,11 +242,29 @@ Audit (May 29, 2026) found most items already wired:
 - [ ] Add `overdraftLimit` field to `Account` model
 - [ ] Add `monthlyWithdrawalCount` + `lastWithdrawalMonthReset` to `Account` model for Savings cap
 
-**Gate:** Phase 5 must ship first (balance-after field required for fee transactions).
+**Gate:** Phase 6 must ship first (balance-after field required for fee transactions).
 
 ---
 
-## Phase 7 — Fixed Deposit Module 🔴 (Backlog)
+## Phase 8 — Role Expansion (4 Roles) 🔴 (Backlog)
+
+**Goal:** Expand the admin portal to support 4 distinct roles — `admin`, `banker`, `auditor`, `customer`. Add `auditor` as a new read-only staff role, enforce a first-login flow for all staff, and restrict sidebar navigation per role.
+
+**Stories (implement in order):**
+
+| Story   | Repo                                      | Scope                                                                                                                                         |
+| ------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-8001 | `my-bank-api`                             | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md`                              |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal`     | Staff first-login flow — forced password change + basic profile setup before portal access                                                    |
+| US-8003 | `my-bank-admin-portal`                    | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                                                       |
+
+> Read `docs/engineering/security/authorization.md` before writing any code for this phase.
+
+**Gate:** Phase 6 (detail pages) must ship first — auditor needs to view detail pages.
+
+---
+
+## Phase 9 — Fixed Deposit Module 🔴 (Backlog)
 
 **Goal:** Full Fixed Deposit product — lock period, maturity, interest crediting, early withdrawal, auto-renewal.
 
@@ -247,7 +281,7 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 8 — Dormancy Cron & Account Lifecycle 🔴 (Backlog)
+## Phase 10 — Dormancy Cron & Account Lifecycle 🔴 (Backlog)
 
 **Goal:** Full account lifecycle enforcement — dormancy, suspension, closure.
 
@@ -265,7 +299,7 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 9 — Monthly Statements 🔴 (Backlog)
+## Phase 11 — Monthly Statements 🔴 (Backlog)
 
 **Goal:** On-demand monthly statement endpoint. PDF generation in Phase 9B.
 
@@ -286,7 +320,7 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 10 — Beneficiary Management 🔴 (Backlog)
+## Phase 12 — Beneficiary Management 🔴 (Backlog)
 
 **Goal:** Customer can save frequent recipients for quick transfers.
 
@@ -302,9 +336,9 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 11 — AI Enhancement 🔴 (Backlog)
+## Phase 13 — AI Enhancement 🔴 (Backlog)
 
-**Gate:** Phases 5–10 must ship first.
+**Gate:** Phases 5–12 must ship first.
 
 **Goal:** Wire the existing AI chat endpoint with proper client-side persistency and contextual personalisation. The AI scaffolding already exists — this phase makes it production-grade.
 
@@ -320,9 +354,9 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 12 — AI Phase 2 🔴 (Backlog)
+## Phase 14 — AI Phase 2 🔴 (Backlog)
 
-**Gate:** Phase 11 must ship first.
+**Gate:** Phase 13 must ship first.
 
 **Goal:** Proactive, agentic AI capabilities.
 
