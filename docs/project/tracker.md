@@ -85,8 +85,8 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 | Story   | Repo                                  | Summary                                                                                          | Status |
 | ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
-| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page  | 📝     |
-| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page             | 📝     |
+| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page  | 🟡     |
+| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page             | 🟡     |
 
 ---
 
