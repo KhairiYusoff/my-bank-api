@@ -6,12 +6,12 @@
 
 MyBank has **4 roles**:
 
-| Role         | Purpose            | Access Level                                                        | Platform              |
-| ------------ | ------------------ | ------------------------------------------------------------------- | --------------------- |
-| **customer** | End user           | Own accounts, own transactions, own expenses only                   | my-bank-customer      |
-| **banker**   | Branch staff       | Transactions on any account, onboarding approvals, view audit trail | my-bank-admin-portal  |
-| **auditor**  | Internal auditor   | Read-only — all data including unmasked detail, all audit logs      | my-bank-admin-portal  |
-| **admin**    | System admin       | Full access — staff management, user status, airdrop                | my-bank-admin-portal  |
+| Role         | Purpose          | Access Level                                                        | Platform             |
+| ------------ | ---------------- | ------------------------------------------------------------------- | -------------------- |
+| **customer** | End user         | Own accounts, own transactions, own expenses only                   | my-bank-customer     |
+| **banker**   | Branch staff     | Transactions on any account, onboarding approvals, view audit trail | my-bank-admin-portal |
+| **auditor**  | Internal auditor | Read-only — all data including unmasked detail, all audit logs      | my-bank-admin-portal |
+| **admin**    | System admin     | Full access — staff management, user status, airdrop                | my-bank-admin-portal |
 
 ### Why 4 and not 3
 
@@ -25,55 +25,55 @@ MyBank has **4 roles**:
 
 ## RBAC Matrix
 
-| Endpoint                              | customer             | banker   | auditor       | admin    |
-| ------------------------------------- | -------------------- | -------- | ------------- | -------- |
-| **Auth**                              |                      |          |               |          |
-| POST /auth/login                      | ✅                   | ✅       | ✅            | ✅       |
-| POST /auth/register                   | ✅                   | ❌       | ❌            | ❌       |
-| GET /auth/check-token                 | ✅                   | ✅       | ✅            | ✅       |
-| **Onboarding**                        |                      |          |               |          |
-| POST /onboarding/apply                | ✅ (unauthenticated) | ❌       | ❌            | ❌       |
-| PUT /onboarding/complete-profile      | ✅ (token-gated)     | ❌       | ❌            | ❌       |
-| GET /onboarding/pending               | ❌                   | ✅       | ✅ (read)     | ✅       |
-| POST /onboarding/approve/:userId      | ❌                   | ✅       | ❌            | ✅       |
-| POST /onboarding/verify/:userId       | ❌                   | ✅       | ❌            | ✅       |
-| **Accounts**                          |                      |          |               |          |
-| POST /accounts/create                 | ❌                   | ✅       | ❌            | ✅       |
-| DELETE /accounts/:accountNumber       | ✅ (own, balance=0)  | ✅ (any) | ❌            | ✅ (any) |
-| GET /accounts (own)                   | ✅                   | ❌       | ❌            | ❌       |
-| GET /accounts/all                     | ❌                   | ✅       | ✅            | ✅       |
-| POST /accounts/deposit                | ✅ (own)             | ✅ (any) | ❌            | ✅ (any) |
-| POST /accounts/withdraw               | ✅ (own)             | ✅ (any) | ❌            | ✅ (any) |
-| POST /accounts/airdrop                | ❌                   | ❌       | ❌            | ✅       |
-| **Transactions**                      |                      |          |               |          |
-| POST /transactions/transfer           | ✅ (from own)        | ✅ (any) | ❌            | ❌       |
-| GET /transactions/account/:number     | ✅ (own)             | ✅ (any) | ✅ (any)      | ✅ (any) |
-| GET /transactions/all                 | ❌                   | ✅       | ✅            | ✅       |
-| GET /transactions/:id (unmasked)      | ❌                   | ❌       | ✅            | ✅       |
-| **Users**                             |                      |          |               |          |
-| GET /users/me                         | ✅                   | ✅       | ✅            | ✅       |
-| PUT /users/me                         | ✅                   | ✅       | ✅            | ✅       |
-| GET /users/customers                  | ❌                   | ✅       | ✅            | ✅       |
-| GET /users/staff                      | ❌                   | ❌       | ✅            | ✅       |
-| GET /users/:id (detail)               | ❌                   | ❌       | ✅            | ✅       |
-| **Admin**                             |                      |          |               |          |
-| POST /admin/create-staff              | ❌                   | ❌       | ❌            | ✅       |
-| PUT /admin/staff/:staffId             | ❌                   | ❌       | ❌            | ✅       |
-| DELETE /admin/staff/:staffId          | ❌                   | ❌       | ❌            | ✅       |
-| PUT /admin/customer/:customerId       | ❌                   | ❌       | ❌            | ✅       |
-| DELETE /admin/customer/:customerId    | ❌                   | ❌       | ❌            | ✅       |
-| **Audit**                             |                      |          |               |          |
-| GET /audit/me                         | ✅                   | ✅       | ✅            | ✅       |
-| GET /audit/user/:userId               | ❌                   | ✅       | ✅            | ✅       |
-| GET /audit/all                        | ❌                   | ❌       | ✅            | ✅       |
-| **Expenses**                          |                      |          |               |          |
-| POST /expenses                        | ✅                   | ❌       | ❌            | ✅       |
-| GET /expenses (own)                   | ✅                   | ❌       | ❌            | ❌       |
-| GET /expenses (all)                   | ❌                   | ❌       | ✅            | ✅       |
-| PUT/DELETE /expenses/:id              | ✅ (own)             | ❌       | ❌            | ✅ (any) |
-| **AI** (Phase 13)                     |                      |          |               |          |
-| POST /ai/chat                         | ✅                   | ❌       | ❌            | ❌       |
-| GET /ai/insights                      | ✅                   | ❌       | ❌            | ✅       |
+| Endpoint                           | customer             | banker   | auditor   | admin    |
+| ---------------------------------- | -------------------- | -------- | --------- | -------- |
+| **Auth**                           |                      |          |           |          |
+| POST /auth/login                   | ✅                   | ✅       | ✅        | ✅       |
+| POST /auth/register                | ✅                   | ❌       | ❌        | ❌       |
+| GET /auth/check-token              | ✅                   | ✅       | ✅        | ✅       |
+| **Onboarding**                     |                      |          |           |          |
+| POST /onboarding/apply             | ✅ (unauthenticated) | ❌       | ❌        | ❌       |
+| PUT /onboarding/complete-profile   | ✅ (token-gated)     | ❌       | ❌        | ❌       |
+| GET /onboarding/pending            | ❌                   | ✅       | ✅ (read) | ✅       |
+| POST /onboarding/approve/:userId   | ❌                   | ✅       | ❌        | ✅       |
+| POST /onboarding/verify/:userId    | ❌                   | ✅       | ❌        | ✅       |
+| **Accounts**                       |                      |          |           |          |
+| POST /accounts/create              | ❌                   | ✅       | ❌        | ✅       |
+| DELETE /accounts/:accountNumber    | ✅ (own, balance=0)  | ✅ (any) | ❌        | ✅ (any) |
+| GET /accounts (own)                | ✅                   | ❌       | ❌        | ❌       |
+| GET /accounts/all                  | ❌                   | ✅       | ✅        | ✅       |
+| POST /accounts/deposit             | ✅ (own)             | ✅ (any) | ❌        | ✅ (any) |
+| POST /accounts/withdraw            | ✅ (own)             | ✅ (any) | ❌        | ✅ (any) |
+| POST /accounts/airdrop             | ❌                   | ❌       | ❌        | ✅       |
+| **Transactions**                   |                      |          |           |          |
+| POST /transactions/transfer        | ✅ (from own)        | ✅ (any) | ❌        | ❌       |
+| GET /transactions/account/:number  | ✅ (own)             | ✅ (any) | ✅ (any)  | ✅ (any) |
+| GET /transactions/all              | ❌                   | ✅       | ✅        | ✅       |
+| GET /transactions/:id (unmasked)   | ❌                   | ❌       | ✅        | ✅       |
+| **Users**                          |                      |          |           |          |
+| GET /users/me                      | ✅                   | ✅       | ✅        | ✅       |
+| PUT /users/me                      | ✅                   | ✅       | ✅        | ✅       |
+| GET /users/customers               | ❌                   | ✅       | ✅        | ✅       |
+| GET /users/staff                   | ❌                   | ❌       | ✅        | ✅       |
+| GET /users/:id (detail)            | ❌                   | ❌       | ✅        | ✅       |
+| **Admin**                          |                      |          |           |          |
+| POST /admin/create-staff           | ❌                   | ❌       | ❌        | ✅       |
+| PUT /admin/staff/:staffId          | ❌                   | ❌       | ❌        | ✅       |
+| DELETE /admin/staff/:staffId       | ❌                   | ❌       | ❌        | ✅       |
+| PUT /admin/customer/:customerId    | ❌                   | ❌       | ❌        | ✅       |
+| DELETE /admin/customer/:customerId | ❌                   | ❌       | ❌        | ✅       |
+| **Audit**                          |                      |          |           |          |
+| GET /audit/me                      | ✅                   | ✅       | ✅        | ✅       |
+| GET /audit/user/:userId            | ❌                   | ✅       | ✅        | ✅       |
+| GET /audit/all                     | ❌                   | ❌       | ✅        | ✅       |
+| **Expenses**                       |                      |          |           |          |
+| POST /expenses                     | ✅                   | ❌       | ❌        | ✅       |
+| GET /expenses (own)                | ✅                   | ❌       | ❌        | ❌       |
+| GET /expenses (all)                | ❌                   | ❌       | ✅        | ✅       |
+| PUT/DELETE /expenses/:id           | ✅ (own)             | ❌       | ❌        | ✅ (any) |
+| **AI** (Phase 13)                  |                      |          |           |          |
+| POST /ai/chat                      | ✅                   | ❌       | ❌        | ❌       |
+| GET /ai/insights                   | ✅                   | ❌       | ❌        | ✅       |
 
 ---
 
@@ -125,11 +125,13 @@ exports.getTransactionDetails = async (req, res) => {
 ## Scoping by Role
 
 ### Customer Scope
+
 - ✅ Own profile, own accounts, own transactions, own expenses
 - ❌ Cannot view other users' data
 - ❌ Cannot approve applications or manage staff
 
 ### Banker Scope
+
 - ✅ Deposit/withdraw/transfer on any account
 - ✅ Approve and verify customer onboarding applications
 - ✅ View all accounts, all transactions, all customers
@@ -139,12 +141,14 @@ exports.getTransactionDetails = async (req, res) => {
 - ❌ Cannot view full audit log across all users
 
 ### Auditor Scope
+
 - ✅ Read-only access to everything — all transactions (unmasked), all audit logs, all users
 - ✅ Can investigate any account or staff action
 - ❌ **Zero mutations** — cannot deposit, transfer, approve, create, update, or delete anything
 - Key CIA principle: auditor sees all but changes nothing — cannot cover tracks
 
 ### Admin Scope
+
 - ✅ Staff management — create, update role/status, delete
 - ✅ Customer management — update status, delete
 - ✅ Full audit log access

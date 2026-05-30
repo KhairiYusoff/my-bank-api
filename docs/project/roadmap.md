@@ -198,12 +198,12 @@ Audit (May 29, 2026) found most items already wired:
 
 **Stories (implement in order):**
 
-| Story   | Repo                   | Scope                                                                                                                                                                                                                                                         |
-| ------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-5001 | `my-bank-api`          | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
-| US-5002 | `my-bank-customer`     | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records                                                                                                                                                                 |
-| US-5003 | `my-bank-admin-portal` | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration                                                                                                                                                                               |
-| US-5004 | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                                                                                                                                |
+| Story   | Repo                                       | Scope                                                                                                                                                                                                                                                         |
+| ------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-5001 | `my-bank-api`                              | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
+| US-5002 | `my-bank-customer`                         | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records                                                                                                                                                                 |
+| US-5003 | `my-bank-admin-portal`                     | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration                                                                                                                                                                               |
+| US-5004 | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                                                                                                                                                                |
 
 **Gate:** US-5001 must be deployed before US-5002, US-5003, or US-5004 can be started.
 
@@ -215,10 +215,10 @@ Audit (May 29, 2026) found most items already wired:
 
 **Stories (implement in order):**
 
-| Story   | Repo                                      | Scope                                                                                                                                                        |
-| ------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| US-6001 | `my-bank-api`, `my-bank-admin-portal`     | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection component, ChangeStatusModal reused             |
-| US-6002 | `my-bank-api`, `my-bank-admin-portal`     | `GET /admin/staff/:id` (admin only) + StaffDetailPage, new ChangeRoleModal with admin-promotion warning, reuses ProfileSection from US-6001                  |
+| Story   | Repo                                  | Scope                                                                                                                                            |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| US-6001 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection component, ChangeStatusModal reused |
+| US-6002 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/staff/:id` (admin only) + StaffDetailPage, new ChangeRoleModal with admin-promotion warning, reuses ProfileSection from US-6001      |
 
 **Gate:** Phase 5 must ship first. US-6001 must be done before US-6002 (shares ProfileSection component).
 
@@ -252,11 +252,11 @@ Audit (May 29, 2026) found most items already wired:
 
 **Stories (implement in order):**
 
-| Story   | Repo                                      | Scope                                                                                                                                         |
-| ------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-8001 | `my-bank-api`                             | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md`                              |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal`     | Staff first-login flow — forced password change + basic profile setup before portal access                                                    |
-| US-8003 | `my-bank-admin-portal`                    | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                                                       |
+| Story   | Repo                                  | Scope                                                                                                            |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| US-8001 | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup before portal access                       |
+| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                          |
 
 > Read `docs/engineering/security/authorization.md` before writing any code for this phase.
 

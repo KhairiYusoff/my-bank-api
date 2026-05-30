@@ -46,43 +46,43 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 5 Backlog — Transaction Enrichment (Next Code Phase)
 
-| Story                                         | Repo                                   | Summary                                                                                                            | Status |
-| --------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
-| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`                          | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜     |
-| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`                     | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ⬜     |
-| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal`                 | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ⬜     |
-| [US-5004](../user-stories/phase-5/US-5004.md) | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                 | ⬜     |
+| Story                                         | Repo                                       | Summary                                                                                                            | Status |
+| --------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`                              | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜     |
+| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`                         | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ⬜     |
+| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal`                     | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ⬜     |
+| [US-5004](../user-stories/phase-5/US-5004.md) | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                     | ⬜     |
 
 ---
 
 ## Phase 6 Backlog — Admin Detail Pages
 
-| Story   | Repo                                  | Summary                                                                                          | Status |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
-| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page  | 🟡     |
-| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page             | 🟡     |
+| Story                                         | Repo                                  | Summary                                                                     | Status |
+| --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------- | ------ |
+| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page | 🟡     |
+| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page            | 🟡     |
 
 ---
 
 ## Phase 7 Backlog — Account Type Differentiation
 
-| Story   | Repo                   | Summary                                                                 | Status |
-| ------- | ---------------------- | ----------------------------------------------------------------------- | ------ |
-| US-7001 | `my-bank-api`          | Account type rules enforced (daily limits, withdrawal caps, overdraft)  | ⬜     |
-| US-7002 | `my-bank-api`          | Savings monthly withdrawal cap enforced (max 4/month)                   | ⬜     |
-| US-7003 | `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account                 | ⬜     |
-| US-7004 | `my-bank-api`          | Transfer blocked if daily limit exceeded                                | ⬜     |
-| US-7005 | `my-bank-customer`     | Customer sees account type rules and limits in portal                   | ⬜     |
-| US-7006 | `my-bank-api`          | Monthly maintenance fee deducted automatically                          | ⬜     |
-| US-7007 | `my-bank-api`          | Savings interest credited monthly                                       | ⬜     |
-| US-7008 | `notification-service` | Customer notified when balance falls below maintenance threshold         | ⬜     |
+| Story   | Repo                   | Summary                                                                | Status |
+| ------- | ---------------------- | ---------------------------------------------------------------------- | ------ |
+| US-7001 | `my-bank-api`          | Account type rules enforced (daily limits, withdrawal caps, overdraft) | ⬜     |
+| US-7002 | `my-bank-api`          | Savings monthly withdrawal cap enforced (max 4/month)                  | ⬜     |
+| US-7003 | `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account                | ⬜     |
+| US-7004 | `my-bank-api`          | Transfer blocked if daily limit exceeded                               | ⬜     |
+| US-7005 | `my-bank-customer`     | Customer sees account type rules and limits in portal                  | ⬜     |
+| US-7006 | `my-bank-api`          | Monthly maintenance fee deducted automatically                         | ⬜     |
+| US-7007 | `my-bank-api`          | Savings interest credited monthly                                      | ⬜     |
+| US-7008 | `notification-service` | Customer notified when balance falls below maintenance threshold       | ⬜     |
 
 ---
 
 ## Phase 8 Backlog — Role Expansion (4 Roles)
 
-| Story  | Repo                                  | Summary                                                                                          | Status |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| Story   | Repo                                  | Summary                                                                                          | Status |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
 | US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix | ⬜     |
 | US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                            | ⬜     |
 | US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role          | ⬜     |
@@ -96,7 +96,7 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 | Story   | Repo                   | Summary                                                    | Status |
 | ------- | ---------------------- | ---------------------------------------------------------- | ------ |
 | US-9001 | `my-bank-admin-portal` | Banker creates Fixed Deposit account for customer          | ⬜     |
-| US-9002 | `my-bank-customer`     | Customer views FD with maturity date and expected interest  | ⬜     |
+| US-9002 | `my-bank-customer`     | Customer views FD with maturity date and expected interest | ⬜     |
 | US-9003 | `notification-service` | Customer notified 7 days before FD matures                 | ⬜     |
 | US-9004 | `my-bank-api`          | Customer withdraws FD at maturity (principal + interest)   | ⬜     |
 | US-9005 | `my-bank-api`          | Customer withdraws FD early (forfeits interest)            | ⬜     |
@@ -106,46 +106,46 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 10 Backlog — Dormancy & Lifecycle
 
-| Story    | Repo                   | Summary                                                            | Status |
-| -------- | ---------------------- | ------------------------------------------------------------------ | ------ |
-| US-10001 | `my-bank-api`          | Account goes dormant after 12 months no activity (cron)            | ⬜     |
-| US-10002 | `my-bank-customer`     | Dormant account shows clear message with reactivation steps        | ⬜     |
-| US-10003 | `notification-service` | Customer notified at 11 months no activity (pre-dormancy warning)  | ⬜     |
-| US-10004 | `my-bank-admin-portal` | Banker reactivates dormant account                                 | ⬜     |
-| US-10005 | `my-bank-admin-portal` | Admin suspends a customer account                                  | ⬜     |
-| US-10006 | `my-bank-customer`     | Customer requests account closure                                  | ⬜     |
+| Story    | Repo                   | Summary                                                           | Status |
+| -------- | ---------------------- | ----------------------------------------------------------------- | ------ |
+| US-10001 | `my-bank-api`          | Account goes dormant after 12 months no activity (cron)           | ⬜     |
+| US-10002 | `my-bank-customer`     | Dormant account shows clear message with reactivation steps       | ⬜     |
+| US-10003 | `notification-service` | Customer notified at 11 months no activity (pre-dormancy warning) | ⬜     |
+| US-10004 | `my-bank-admin-portal` | Banker reactivates dormant account                                | ⬜     |
+| US-10005 | `my-bank-admin-portal` | Admin suspends a customer account                                 | ⬜     |
+| US-10006 | `my-bank-customer`     | Customer requests account closure                                 | ⬜     |
 
 ---
 
 ## Phase 11 Backlog — Statements
 
-| Story    | Repo               | Summary                                                                             | Status |
-| -------- | ------------------ | ----------------------------------------------------------------------------------- | ------ |
-| US-11001 | `my-bank-customer` | Customer views monthly statement for any account                                    | ⬜     |
-| US-11002 | `my-bank-api`      | Statement shows opening/closing balance, credits, debits, transaction list          | ⬜     |
-| US-11003 | `my-bank-customer` | Customer downloads statement as PDF                                                 | ⬜     |
+| Story    | Repo               | Summary                                                                    | Status |
+| -------- | ------------------ | -------------------------------------------------------------------------- | ------ |
+| US-11001 | `my-bank-customer` | Customer views monthly statement for any account                           | ⬜     |
+| US-11002 | `my-bank-api`      | Statement shows opening/closing balance, credits, debits, transaction list | ⬜     |
+| US-11003 | `my-bank-customer` | Customer downloads statement as PDF                                        | ⬜     |
 
 ---
 
 ## Phase 12 Backlog — Beneficiaries
 
-| Story    | Repo               | Summary                                                        | Status |
-| -------- | ------------------ | -------------------------------------------------------------- | ------ |
-| US-12001 | `my-bank-customer` | Customer saves a beneficiary with nickname                     | ⬜     |
-| US-12002 | `my-bank-customer` | Customer manages (add/edit/delete) beneficiaries               | ⬜     |
-| US-12003 | `my-bank-customer` | Transfer form pre-fills account number from saved beneficiary  | ⬜     |
+| Story    | Repo               | Summary                                                       | Status |
+| -------- | ------------------ | ------------------------------------------------------------- | ------ |
+| US-12001 | `my-bank-customer` | Customer saves a beneficiary with nickname                    | ⬜     |
+| US-12002 | `my-bank-customer` | Customer manages (add/edit/delete) beneficiaries              | ⬜     |
+| US-12003 | `my-bank-customer` | Transfer form pre-fills account number from saved beneficiary | ⬜     |
 
 ---
 
 ## Phase 13 Backlog — AI Assistant
 
-| Story    | Repo               | Summary                                                            | Status |
-| -------- | ------------------ | ------------------------------------------------------------------ | ------ |
-| US-13001 | `my-bank-customer` | Customer asks AI questions about accounts and transactions         | ⬜     |
-| US-13002 | `my-bank-customer` | AI chat history persists across page navigation                    | ⬜     |
-| US-13003 | `my-bank-api`      | AI answers based on user's actual data, not generic                | ⬜     |
-| US-13004 | `my-bank-api`      | AI responds without unprompted disclaimers                         | ⬜     |
-| US-13005 | `my-bank-customer` | AI chat cleared on logout                                          | ⬜     |
+| Story    | Repo               | Summary                                                    | Status |
+| -------- | ------------------ | ---------------------------------------------------------- | ------ |
+| US-13001 | `my-bank-customer` | Customer asks AI questions about accounts and transactions | ⬜     |
+| US-13002 | `my-bank-customer` | AI chat history persists across page navigation            | ⬜     |
+| US-13003 | `my-bank-api`      | AI answers based on user's actual data, not generic        | ⬜     |
+| US-13004 | `my-bank-api`      | AI responds without unprompted disclaimers                 | ⬜     |
+| US-13005 | `my-bank-customer` | AI chat cleared on logout                                  | ⬜     |
 
 ---
 
