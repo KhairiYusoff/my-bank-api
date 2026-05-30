@@ -9,11 +9,12 @@ See [roadmap.md](roadmap.md) for full project history and phase descriptions.
 
 ## Now — Phase 5: Transaction Enrichment
 
-Three stories, implement in dependency order:
+Four stories, implement in dependency order:
 
 1. [US-5001](../user-stories/phase-5/US-5001.md) — `my-bank-api` — Transaction model + API (do this first)
 2. [US-5002](../user-stories/phase-5/US-5002.md) — `my-bank-customer` — Receipt drawer (depends on US-5001)
 3. [US-5003](../user-stories/phase-5/US-5003.md) — `my-bank-admin-portal` — Unmasked detail panel (depends on US-5001)
+4. [US-5004](../user-stories/phase-5/US-5004.md) — both portals — Currency formatting `RM X,XXX.XX`
 
 > Read the full AC in each story file before writing any code.
 
@@ -71,72 +72,96 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 5 Backlog — Transaction Enrichment (Next Code Phase)
 
-| Story                                         | Repo                   | Summary                                                                                                            | Status |
-| --------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
-| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`          | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜     |
-| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`     | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ⬜     |
-| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal` | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ⬜     |
+| Story                                         | Repo                                   | Summary                                                                                                            | Status |
+| --------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`                          | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ⬜     |
+| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`                     | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ⬜     |
+| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal`                 | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ⬜     |
+| [US-5004](../user-stories/phase-5/US-5004.md) | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                 | ⬜     |
 
 ---
 
-## Phase 6 Backlog — Account Type Differentiation
+## Phase 6 Backlog — Admin Detail Pages
+
+| Story  | Repo                                  | Summary                                                                                          | Status |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| US-6001 | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` endpoint + detail page in portal  | ⬜     |
+| US-6002 | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` endpoint + detail page in portal             | ⬜     |
+
+> Story files to be written before Phase 6 starts.
+
+---
+
+## Phase 7 Backlog — Account Type Differentiation
 
 | #   | Task                                                                                        |
 | --- | ------------------------------------------------------------------------------------------- |
-| 6A1 | Add `overdraftLimit`, `monthlyWithdrawalCount`, `lastWithdrawalMonthReset` to Account model |
-| 6A2 | Enforce daily transfer limits + single transfer cap per account type                        |
-| 6A3 | Enforce Savings monthly withdrawal counter (max 4/month)                                    |
-| 6A4 | Enforce overdraft for Current/Business                                                      |
-| 6A5 | Block all transfers on FD accounts                                                          |
-| 6A6 | Monthly maintenance fee cron                                                                |
-| 6A7 | Savings interest cron                                                                       |
+| 7A1 | Add `overdraftLimit`, `monthlyWithdrawalCount`, `lastWithdrawalMonthReset` to Account model |
+| 7A2 | Enforce daily transfer limits + single transfer cap per account type                        |
+| 7A3 | Enforce Savings monthly withdrawal counter (max 4/month)                                    |
+| 7A4 | Enforce overdraft for Current/Business                                                      |
+| 7A5 | Block all transfers on FD accounts                                                          |
+| 7A6 | Monthly maintenance fee cron                                                                |
+| 7A7 | Savings interest cron                                                                       |
 
 ---
 
-## Phase 7 Backlog — Fixed Deposit
+## Phase 8 Backlog — Role Expansion (4 Roles)
+
+| Story  | Repo                                  | Summary                                                                                          | Status |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix | ⬜     |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                            | ⬜     |
+| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role          | ⬜     |
+
+> Read `docs/engineering/security/authorization.md` before writing any code for Phase 8.
+
+---
+
+## Phase 9 Backlog — Fixed Deposit
 
 | #   | Task                                                                                          |
 | --- | --------------------------------------------------------------------------------------------- |
-| 7A1 | FD model: principal, lockPeriod, maturityDate, interestRate, linkedAccount, autoRenew, status |
-| 7A2 | FD creation endpoint                                                                          |
-| 7A3 | Maturity cron + interest credit                                                               |
-| 7A4 | Early withdrawal endpoint                                                                     |
-| 7A5 | Auto-renewal logic                                                                            |
-| 7A6 | FD detail page in customer portal                                                             |
-| 7A7 | FD maturity notifications (T-7 days + on day)                                                 |
+| 9A1 | FD model: principal, lockPeriod, maturityDate, interestRate, linkedAccount, autoRenew, status |
+| 9A2 | FD creation endpoint                                                                          |
+| 9A3 | Maturity cron + interest credit                                                               |
+| 9A4 | Early withdrawal endpoint                                                                     |
+| 9A5 | Auto-renewal logic                                                                            |
+| 9A6 | FD detail page in customer portal                                                             |
+| 9A7 | FD maturity notifications (T-7 days + on day)                                                 |
 
 ---
 
-## Phase 8 Backlog — Dormancy & Lifecycle
+## Phase 10 Backlog — Dormancy & Lifecycle
 
-| #   | Task                                                |
-| --- | --------------------------------------------------- |
-| 8A1 | Dormancy cron (daily, 12-month no-activity trigger) |
-| 8A2 | Block transactions on dormant accounts              |
-| 8A3 | Dormancy fee cron (RM10/year anniversary)           |
-| 8A4 | Reactivation endpoint                               |
-| 8A5 | Suspension endpoint                                 |
-| 8A6 | Account closure flow                                |
-
----
-
-## Phase 9 Backlog — Statements
-
-| #   | Task                                                           |
-| --- | -------------------------------------------------------------- |
-| 9A1 | `GET /accounts/:accountNumber/statement?month=&year=` endpoint |
-| 9A2 | Statement UI in customer portal                                |
-| 9B1 | PDF generation endpoint (later)                                |
+| #    | Task                                                |
+| ---- | --------------------------------------------------- |
+| 10A1 | Dormancy cron (daily, 12-month no-activity trigger) |
+| 10A2 | Block transactions on dormant accounts              |
+| 10A3 | Dormancy fee cron (RM10/year anniversary)           |
+| 10A4 | Reactivation endpoint                               |
+| 10A5 | Suspension endpoint                                 |
+| 10A6 | Account closure flow                                |
 
 ---
 
-## Phase 10 Backlog — Beneficiaries
+## Phase 11 Backlog — Statements
+
+| #    | Task                                                           |
+| ---- | -------------------------------------------------------------- |
+| 11A1 | `GET /accounts/:accountNumber/statement?month=&year=` endpoint |
+| 11A2 | Statement UI in customer portal                                |
+| 11B1 | PDF generation endpoint (later)                                |
+
+---
+
+## Phase 12 Backlog — Beneficiaries
 
 | #    | Task                                  |
 | ---- | ------------------------------------- |
-| 10A1 | Add `beneficiaries[]` to User model   |
-| 10A2 | CRUD endpoints for beneficiaries      |
-| 10A3 | Beneficiary selector in transfer form |
+| 12A1 | Add `beneficiaries[]` to User model   |
+| 12A2 | CRUD endpoints for beneficiaries      |
+| 12A3 | Beneficiary selector in transfer form |
 
 ---
 

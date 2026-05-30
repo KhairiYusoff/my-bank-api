@@ -4,60 +4,76 @@
 
 ## Roles
 
-MyBank has **3 roles**:
+MyBank has **4 roles**:
 
-| Role         | Purpose      | Access Level                                         |
-| ------------ | ------------ | ---------------------------------------------------- |
-| **customer** | End user     | Own accounts + expenses only                         |
-| **banker**   | Bank staff   | Any account (deposit/withdraw), view audit logs      |
-| **admin**    | System admin | All operations (approve apps, manage users, airdrop) |
+| Role         | Purpose            | Access Level                                                        | Platform              |
+| ------------ | ------------------ | ------------------------------------------------------------------- | --------------------- |
+| **customer** | End user           | Own accounts, own transactions, own expenses only                   | my-bank-customer      |
+| **banker**   | Branch staff       | Transactions on any account, onboarding approvals, view audit trail | my-bank-admin-portal  |
+| **auditor**  | Internal auditor   | Read-only — all data including unmasked detail, all audit logs      | my-bank-admin-portal  |
+| **admin**    | System admin       | Full access — staff management, user status, airdrop                | my-bank-admin-portal  |
+
+### Why 4 and not 3
+
+`banker` and `admin` used to both approve applications and both had audit log access. This violates **separation of duties** — a core CIA principle for fraud detection. The new `auditor` role is read-only with no ability to mutate any data, meaning:
+
+- An auditor can investigate without being able to cover tracks
+- A banker cannot see the full audit log and therefore cannot hide their own actions from investigation
+- Admin manages people and system config but cannot run transactions
 
 ---
 
 ## RBAC Matrix
 
-| Endpoint                     | customer             | banker   | admin    |
-| ---------------------------- | -------------------- | -------- | -------- |
-| **Auth**                     |                      |          |          |
-| POST /auth/login             | ✅                   | ✅       | ✅       |
-| POST /auth/register          | ✅                   | ❌       | ❌       |
-| GET /auth/check-token        | ✅                   | ✅       | ✅       |
-| **Onboarding**               |                      |          |          |
-| POST /onboarding/apply       | ✅ (unauthenticated) | ❌       | ❌       |
-| PATCH /onboarding/verify     | ❌                   | ❌       | ✅       |
-| PATCH /onboarding/profile    | ✅ (own only)        | ❌       | ❌       |
-| **Accounts**                 |                      |          |          |
-| POST /accounts/create        | ❌                   | ❌       | ✅       |
-| GET /accounts                | ✅ (own)             | ✅ (all) | ✅ (all) |
-| GET /accounts/:id            | ✅ (own)             | ✅ (all) | ✅ (all) |
-| POST /accounts/deposit       | ✅ (own)             | ✅ (any) | ✅ (any) |
-| POST /accounts/withdraw      | ✅ (own)             | ✅ (any) | ✅ (any) |
-| POST /accounts/airdrop       | ❌                   | ❌       | ✅       |
-| DELETE /accounts/:id         | ✅ (own, balance=0)  | ❌       | ✅ (any) |
-| **Transactions**             |                      |          |          |
-| POST /transactions/transfer  | ✅ (from own)        | ❌       | ❌       |
-| GET /transactions/history    | ✅ (own)             | ✅ (all) | ✅ (all) |
-| **Admin**                    |                      |          |          |
-| GET /admin/applications      | ❌                   | ❌       | ✅       |
-| PATCH /admin/approve         | ❌                   | ❌       | ✅       |
-| PATCH /admin/reject          | ❌                   | ❌       | ✅       |
-| GET /admin/users             | ❌                   | ❌       | ✅       |
-| POST /admin/staff            | ❌                   | ❌       | ✅       |
-| **Audit**                    |                      |          |          |
-| GET /audit/logs              | ❌                   | ❌       | ✅       |
-| GET /audit/user-activity/:id | ❌                   | ❌       | ✅       |
-| **Expenses**                 |                      |          |          |
-| POST /expenses/create        | ✅                   | ❌       | ✅       |
-| GET /expenses                | ✅ (own)             | ❌       | ✅ (all) |
-| PUT /expenses/:id            | ✅ (own)             | ❌       | ✅ (any) |
-| DELETE /expenses/:id         | ✅ (own)             | ❌       | ✅ (any) |
-| **Users**                    |                      |          |          |
-| GET /users/profile           | ✅ (own)             | ✅ (own) | ✅ (own) |
-| PUT /users/profile           | ✅ (own)             | ✅ (own) | ✅ (own) |
-| GET /users/:id               | ❌                   | ❌       | ✅       |
-| **AI** (Phase 1+)            |                      |          |          |
-| POST /ai/ask                 | ✅                   | ✅       | ✅       |
-| POST /ai/insights            | ✅                   | ❌       | ✅       |
+| Endpoint                              | customer             | banker   | auditor       | admin    |
+| ------------------------------------- | -------------------- | -------- | ------------- | -------- |
+| **Auth**                              |                      |          |               |          |
+| POST /auth/login                      | ✅                   | ✅       | ✅            | ✅       |
+| POST /auth/register                   | ✅                   | ❌       | ❌            | ❌       |
+| GET /auth/check-token                 | ✅                   | ✅       | ✅            | ✅       |
+| **Onboarding**                        |                      |          |               |          |
+| POST /onboarding/apply                | ✅ (unauthenticated) | ❌       | ❌            | ❌       |
+| PUT /onboarding/complete-profile      | ✅ (token-gated)     | ❌       | ❌            | ❌       |
+| GET /onboarding/pending               | ❌                   | ✅       | ✅ (read)     | ✅       |
+| POST /onboarding/approve/:userId      | ❌                   | ✅       | ❌            | ✅       |
+| POST /onboarding/verify/:userId       | ❌                   | ✅       | ❌            | ✅       |
+| **Accounts**                          |                      |          |               |          |
+| POST /accounts/create                 | ❌                   | ✅       | ❌            | ✅       |
+| DELETE /accounts/:accountNumber       | ✅ (own, balance=0)  | ✅ (any) | ❌            | ✅ (any) |
+| GET /accounts (own)                   | ✅                   | ❌       | ❌            | ❌       |
+| GET /accounts/all                     | ❌                   | ✅       | ✅            | ✅       |
+| POST /accounts/deposit                | ✅ (own)             | ✅ (any) | ❌            | ✅ (any) |
+| POST /accounts/withdraw               | ✅ (own)             | ✅ (any) | ❌            | ✅ (any) |
+| POST /accounts/airdrop                | ❌                   | ❌       | ❌            | ✅       |
+| **Transactions**                      |                      |          |               |          |
+| POST /transactions/transfer           | ✅ (from own)        | ✅ (any) | ❌            | ❌       |
+| GET /transactions/account/:number     | ✅ (own)             | ✅ (any) | ✅ (any)      | ✅ (any) |
+| GET /transactions/all                 | ❌                   | ✅       | ✅            | ✅       |
+| GET /transactions/:id (unmasked)      | ❌                   | ❌       | ✅            | ✅       |
+| **Users**                             |                      |          |               |          |
+| GET /users/me                         | ✅                   | ✅       | ✅            | ✅       |
+| PUT /users/me                         | ✅                   | ✅       | ✅            | ✅       |
+| GET /users/customers                  | ❌                   | ✅       | ✅            | ✅       |
+| GET /users/staff                      | ❌                   | ❌       | ✅            | ✅       |
+| GET /users/:id (detail)               | ❌                   | ❌       | ✅            | ✅       |
+| **Admin**                             |                      |          |               |          |
+| POST /admin/create-staff              | ❌                   | ❌       | ❌            | ✅       |
+| PUT /admin/staff/:staffId             | ❌                   | ❌       | ❌            | ✅       |
+| DELETE /admin/staff/:staffId          | ❌                   | ❌       | ❌            | ✅       |
+| PUT /admin/customer/:customerId       | ❌                   | ❌       | ❌            | ✅       |
+| DELETE /admin/customer/:customerId    | ❌                   | ❌       | ❌            | ✅       |
+| **Audit**                             |                      |          |               |          |
+| GET /audit/me                         | ✅                   | ✅       | ✅            | ✅       |
+| GET /audit/user/:userId               | ❌                   | ✅       | ✅            | ✅       |
+| GET /audit/all                        | ❌                   | ❌       | ✅            | ✅       |
+| **Expenses**                          |                      |          |               |          |
+| POST /expenses                        | ✅                   | ❌       | ❌            | ✅       |
+| GET /expenses (own)                   | ✅                   | ❌       | ❌            | ❌       |
+| GET /expenses (all)                   | ❌                   | ❌       | ✅            | ✅       |
+| PUT/DELETE /expenses/:id              | ✅ (own)             | ❌       | ❌            | ✅ (any) |
+| **AI** (Phase 13)                     |                      |          |               |          |
+| POST /ai/chat                         | ✅                   | ❌       | ❌            | ❌       |
+| GET /ai/insights                      | ✅                   | ❌       | ❌            | ✅       |
 
 ---
 
@@ -68,19 +84,7 @@ MyBank has **3 roles**:
 **Example: Admin only**
 
 ```javascript
-// Middleware
-const requireAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
-    return error(res, {
-      message: "Forbidden: admin only",
-      statusCode: 403,
-    });
-  }
-  next();
-};
-
-// Route
-router.post("/admin/approve", requireAuth, requireAdmin, controller.approve);
+router.post("/create-staff", authorizeRoles("admin"), controller.createStaff);
 ```
 
 ---
@@ -92,10 +96,8 @@ router.post("/admin/approve", requireAuth, requireAdmin, controller.approve);
 ```javascript
 exports.getAccounts = async (req, res) => {
   if (req.user.role === "customer") {
-    // Customer: only own accounts
     const accounts = await Account.find({ user: req.user.id });
   } else {
-    // Banker/Admin: all accounts
     const accounts = await Account.find();
   }
   return success(res, { data: accounts });
@@ -104,50 +106,18 @@ exports.getAccounts = async (req, res) => {
 
 ---
 
-### Pattern 3: Ownership + Role Check (Multi-level)
+### Pattern 3: Read-Only Role Guard (Auditor)
 
-**Example: Customer can deposit to own account, banker to any**
+**Example: Auditor can read but never mutate**
 
 ```javascript
-exports.deposit = async (req, res) => {
-  const { accountNumber, amount } = req.body;
-
-  const query = { accountNumber };
-
-  // If customer, restrict to own account
-  if (req.user.role === "customer") {
-    query.user = req.user.id;
-  }
-  // If banker/admin, can access any account
-
-  const account = await Account.findOne(query);
-  if (!account) {
-    return error(res, {
-      message: "Account not found or access denied",
-      statusCode: 404,
-    });
-  }
-
-  // Proceed with deposit
-  // ...
+// In service — auditor reaches this point via authorizeRoles("auditor", "admin")
+// No mutation methods (save/update/delete) are ever called for auditor paths
+exports.getTransactionDetails = async (req, res) => {
+  const unmasked = ["auditor", "admin"].includes(req.user.role);
+  const txn = await transactionService.getById(req.params.id, { unmasked });
+  return success(res, { data: txn });
 };
-```
-
----
-
-### Pattern 4: Explicit Role Enum
-
-**Example: Only customer or banker (not admin)**
-
-```javascript
-const ALLOWED_ROLES = ["customer", "banker"];
-
-if (!ALLOWED_ROLES.includes(req.user.role)) {
-  return error(res, {
-    message: "Forbidden: invalid role",
-    statusCode: 403,
-  });
-}
 ```
 
 ---
@@ -155,42 +125,32 @@ if (!ALLOWED_ROLES.includes(req.user.role)) {
 ## Scoping by Role
 
 ### Customer Scope
-
-- ✅ Can view own profile, own accounts, own transactions, own expenses
+- ✅ Own profile, own accounts, own transactions, own expenses
 - ❌ Cannot view other users' data
 - ❌ Cannot approve applications or manage staff
 
 ### Banker Scope
+- ✅ Deposit/withdraw/transfer on any account
+- ✅ Approve and verify customer onboarding applications
+- ✅ View all accounts, all transactions, all customers
+- ✅ View activity log for specific users
+- ❌ Cannot see full unmasked transaction detail (auditor/admin only)
+- ❌ Cannot manage staff (admin only)
+- ❌ Cannot view full audit log across all users
 
-- ✅ Can view all accounts, all users, all transactions
-- ✅ Can deposit/withdraw on behalf of customers
-- ✅ Can view audit logs (future: filter by service)
-- ❌ Cannot approve applications (admin only)
-- ❌ Cannot manage staff
+### Auditor Scope
+- ✅ Read-only access to everything — all transactions (unmasked), all audit logs, all users
+- ✅ Can investigate any account or staff action
+- ❌ **Zero mutations** — cannot deposit, transfer, approve, create, update, or delete anything
+- Key CIA principle: auditor sees all but changes nothing — cannot cover tracks
 
 ### Admin Scope
-
-- ✅ Full access to everything
-- ✅ Can approve/reject applications
-- ✅ Can manage bankers and staff
-- ✅ Can airdrop money (testing)
-- ✅ Can view all audit logs
-
----
-
-## Special Cases
-
-### Unauthenticated Routes
-
-- `POST /auth/login` — No auth needed
-- `POST /auth/register` — No auth needed
-- `POST /onboarding/apply` — No auth needed (initial application)
-
-### Mixed Permissions
-
-- `POST /accounts/deposit` — Customer (own) OR banker (any) OR admin (any)
-- `GET /users/profile` — Customer (own) OR banker (own) OR admin (own)
-- `PUT /users/profile` — Customer (own) OR banker (own) OR admin (own)
+- ✅ Staff management — create, update role/status, delete
+- ✅ Customer management — update status, delete
+- ✅ Full audit log access
+- ✅ Airdrop (testing/demo)
+- ❌ Cannot run customer transactions (transfer/deposit/withdraw) — by design
+- Note: Admin is IT/system admin, not a branch manager. Transaction power belongs to `banker`.
 
 ---
 
@@ -207,28 +167,25 @@ if (!ALLOWED_ROLES.includes(req.user.role)) {
 
 ## Audit Trail
 
-**Every authorization check logged:**
+Every HIGH-severity action is logged via `activityLogger` middleware before the controller runs:
 
 ```javascript
-if (req.user.role !== "admin") {
-  console.error(`UNAUTHORIZED: ${req.user.id} tried to approve application`);
-  // Also logged to ActivityLog as failed action
-  return error(res, { statusCode: 403 });
-}
+router.post(
+  "/approve/:userId",
+  authorizeRoles("admin", "banker"),
+  activityLogger("APPROVE_APPLICATION", "Staff approved initial application"),
+  approveApplication,
+);
 ```
 
 ---
 
-## Future: Fine-Grained Permissions
+## Future: Fine-Grained Permissions (Phase 8+)
 
-If this grows, consider:
+When role expansion is implemented (Phase 8), `authorizeRoles()` calls across all routes will be updated to include `"auditor"` on all read-only endpoints. No new middleware pattern is needed — `authorizeRoles` already accepts multiple roles as args.
 
-- **Permissions per role** (e.g., "can_approve_customers", "can_view_audit_logs")
-- **Resource-level permissions** (e.g., banker can only manage accounts in their branch)
-- **Time-based permissions** (e.g., senior banker can override limits)
-
-For now, 3 static roles are sufficient.
+Further future (not planned): resource-level permissions per staff member (e.g., banker assigned to specific branch).
 
 ---
 
-**Last Updated:** May 8, 2026
+**Last Updated:** May 30, 2026
