@@ -154,7 +154,7 @@ class TransactionService {
         direction: "credit",
         description: `Transfer from ${fromAccountNumber}`,
         memo: memo || undefined,
-        reference: `${reference}-CR`,
+        reference,
         fee: 0,
         balanceBefore: toBalanceBefore,
         balanceAfter: toBalanceAfter,

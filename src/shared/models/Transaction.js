@@ -32,7 +32,6 @@ const TransactionSchema = new mongoose.Schema({
   },
   reference: {
     type: String,
-    unique: true,
     sparse: true,
   },
   memo: {
@@ -109,6 +108,10 @@ TransactionSchema.index({ amount: 1 });
 TransactionSchema.index({ date: -1 });
 TransactionSchema.index({ account: 1, date: -1 });
 TransactionSchema.index({ reference: 1 });
+TransactionSchema.index(
+  { account: 1, reference: 1 },
+  { unique: true, sparse: true },
+);
 TransactionSchema.index({ account: 1, counterpartAccount: 1 });
 TransactionSchema.index({ reversalOf: 1 }, { sparse: true });
 
