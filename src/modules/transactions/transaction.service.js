@@ -65,6 +65,13 @@ class TransactionService {
       ? maskName(counterpartUser.name)
       : "[Account Deleted]";
 
+    // Fetch sender name for credit leg (recipient sees sender as counterpart)
+    const senderUser = await User.findById(userId).select("name").lean();
+    const senderNameRaw = senderUser?.name ?? "[Account Deleted]";
+    const senderNameMasked = senderUser
+      ? maskName(senderUser.name)
+      : "[Account Deleted]";
+
     const reference = await getNextReference();
 
     const session = await mongoose.startSession();
@@ -155,8 +162,8 @@ class TransactionService {
         deviceInfo: { ip, userAgent },
         processingTime: { submittedAt, completedAt },
         counterpartAccount: fromAccountNumber,
-        counterpartNameRaw: undefined,
-        counterpartName: undefined,
+        counterpartNameRaw: senderNameRaw,
+        counterpartName: senderNameMasked,
         isNewRecipient: null,
         twoFactorVerified: null,
         riskFlags: [],
@@ -369,7 +376,7 @@ class TransactionService {
         const acc = obj.counterpartAccount;
         obj.counterpartAccount =
           acc.length > 4
-            ? `${acc.slice(0, 3)}****${acc.slice(-1)}`
+            ? `${acc.slice(0, 3)}****${acc.slice(-4)}`
             : `${acc[0]}****`;
       }
     } else {
