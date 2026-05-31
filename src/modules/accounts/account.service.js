@@ -9,8 +9,8 @@ const { getNextReference } = require("../../shared/utils/reference");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
-  admin: "branch",
-  customer: "customer",
+  admin: "system",
+  customer: "web",
 };
 
 class AccountService {
@@ -211,8 +211,9 @@ class AccountService {
     await Account.deleteOne({ accountNumber });
   }
 
-  async deposit(accountNumber, amount, userId, role, memo) {
-    const channel = ROLE_TO_CHANNEL[role] ?? "branch";
+  async deposit(accountNumber, amount, userId, role, memo, ip, userAgent) {
+    const submittedAt = new Date();
+    const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
 
     const query = { accountNumber };
@@ -231,7 +232,9 @@ class AccountService {
         throw err;
       }
 
+      const balanceBefore = account.balance;
       account.balance += amount;
+      const completedAt = new Date();
 
       transaction = new Transaction({
         account: account._id,
@@ -240,9 +243,21 @@ class AccountService {
         description: "Deposit",
         memo: memo || undefined,
         reference,
+        fee: 0,
+        balanceBefore,
         balanceAfter: account.balance,
         currency: account.currency ?? "MYR",
         channel,
+        deviceInfo: { ip, userAgent },
+        processingTime: { submittedAt, completedAt },
+        counterpartName: "MyBank",
+        counterpartNameRaw: "MyBank",
+        counterpartAccount: null,
+        isNewRecipient: null,
+        twoFactorVerified: null,
+        riskFlags: [],
+        isReversed: false,
+        reversalOf: null,
         performedBy: userId,
         status: "completed",
       });
@@ -280,8 +295,9 @@ class AccountService {
     return { account, transaction };
   }
 
-  async withdraw(accountNumber, amount, userId, role, memo) {
-    const channel = ROLE_TO_CHANNEL[role] ?? "branch";
+  async withdraw(accountNumber, amount, userId, role, memo, ip, userAgent) {
+    const submittedAt = new Date();
+    const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
 
     const query = { accountNumber };
@@ -306,7 +322,9 @@ class AccountService {
         throw err;
       }
 
+      const balanceBefore = account.balance;
       account.balance -= amount;
+      const completedAt = new Date();
 
       transaction = new Transaction({
         account: account._id,
@@ -315,9 +333,21 @@ class AccountService {
         description: "Withdrawal",
         memo: memo || undefined,
         reference,
+        fee: 0,
+        balanceBefore,
         balanceAfter: account.balance,
         currency: account.currency ?? "MYR",
         channel,
+        deviceInfo: { ip, userAgent },
+        processingTime: { submittedAt, completedAt },
+        counterpartName: "MyBank",
+        counterpartNameRaw: "MyBank",
+        counterpartAccount: null,
+        isNewRecipient: null,
+        twoFactorVerified: null,
+        riskFlags: [],
+        isReversed: false,
+        reversalOf: null,
         performedBy: userId,
         status: "completed",
       });
@@ -358,7 +388,9 @@ class AccountService {
     return { account, transaction };
   }
 
-  async airdrop(accountNumber, amount, memo, userId) {
+  async airdrop(accountNumber, amount, memo, userId, role, ip, userAgent) {
+    const submittedAt = new Date();
+    const channel = ROLE_TO_CHANNEL[role] ?? "system";
     const reference = await getNextReference();
 
     const session = await mongoose.startSession();
@@ -374,7 +406,9 @@ class AccountService {
         throw err;
       }
 
+      const balanceBefore = account.balance;
       account.balance += amount;
+      const completedAt = new Date();
 
       transaction = new Transaction({
         account: account._id,
@@ -383,9 +417,21 @@ class AccountService {
         description: "Airdrop",
         memo: memo || undefined,
         reference,
+        fee: 0,
+        balanceBefore,
         balanceAfter: account.balance,
         currency: account.currency ?? "MYR",
-        channel: "branch", // airdrop is always an admin/banker action
+        channel,
+        deviceInfo: { ip, userAgent },
+        processingTime: { submittedAt, completedAt },
+        counterpartName: "MyBank",
+        counterpartNameRaw: "MyBank",
+        counterpartAccount: null,
+        isNewRecipient: null,
+        twoFactorVerified: null,
+        riskFlags: [],
+        isReversed: false,
+        reversalOf: null,
         performedBy: userId,
         status: "completed",
       });

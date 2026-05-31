@@ -39,6 +39,13 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     maxlength: 255,
   },
+  fee: {
+    type: Number,
+    default: 0,
+  },
+  balanceBefore: {
+    type: Number,
+  },
   balanceAfter: {
     type: Number,
   },
@@ -48,13 +55,15 @@ const TransactionSchema = new mongoose.Schema({
   },
   channel: {
     type: String,
-    enum: ["branch", "customer", "mobile", "api"],
-  },
-  ip: {
-    type: String,
+    enum: ["web", "branch", "mobile", "api", "system"],
   },
   deviceInfo: {
-    type: String,
+    ip: { type: String },
+    userAgent: { type: String },
+  },
+  processingTime: {
+    submittedAt: { type: Date },
+    completedAt: { type: Date },
   },
   counterpartAccount: {
     type: String,
@@ -73,6 +82,23 @@ const TransactionSchema = new mongoose.Schema({
     type: String,
     enum: ["debit", "credit"],
   },
+  twoFactorVerified: {
+    type: Boolean,
+    default: null,
+  },
+  riskFlags: {
+    type: Array,
+    default: [],
+  },
+  isReversed: {
+    type: Boolean,
+    default: false,
+  },
+  reversalOf: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Transaction",
+    default: null,
+  },
 });
 
 TransactionSchema.index({ account: 1 });
@@ -84,5 +110,6 @@ TransactionSchema.index({ date: -1 });
 TransactionSchema.index({ account: 1, date: -1 });
 TransactionSchema.index({ reference: 1 });
 TransactionSchema.index({ account: 1, counterpartAccount: 1 });
+TransactionSchema.index({ reversalOf: 1 }, { sparse: true });
 
 module.exports = mongoose.model("Transaction", TransactionSchema);

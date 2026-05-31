@@ -113,6 +113,8 @@ exports.deposit = async (req, res) => {
       req.user.id,
       req.user.role,
       memo,
+      req.ip,
+      req.headers["user-agent"],
     );
     return success(res, { message: "Deposit successful", data: result });
   } catch (err) {
@@ -136,6 +138,8 @@ exports.withdraw = async (req, res) => {
       req.user.id,
       req.user.role,
       memo,
+      req.ip,
+      req.headers["user-agent"],
     );
     return success(res, { message: "Withdrawal successful", data: result });
   } catch (err) {
@@ -158,6 +162,9 @@ exports.airdrop = async (req, res) => {
       amount,
       memo,
       req.user.id,
+      req.user.role,
+      req.ip,
+      req.headers["user-agent"],
     );
     return success(res, { message: "Airdrop successful", data: result });
   } catch (err) {

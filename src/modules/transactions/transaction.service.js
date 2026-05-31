@@ -10,8 +10,8 @@ const { maskName } = require("../../shared/utils/maskName");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
-  admin: "branch",
-  customer: "customer",
+  admin: "system",
+  customer: "web",
 };
 
 class TransactionService {
@@ -23,9 +23,10 @@ class TransactionService {
     userId,
     role,
     ip,
-    deviceInfo,
+    userAgent,
   ) {
-    const channel = ROLE_TO_CHANNEL[role] ?? "customer";
+    const submittedAt = new Date();
+    const channel = ROLE_TO_CHANNEL[role] ?? "web";
 
     const fromAccountCheck = await Account.findOne({
       accountNumber: fromAccountNumber,
@@ -102,12 +103,15 @@ class TransactionService {
       }
 
       // Update balances
+      const fromBalanceBefore = fromAccount.balance;
+      const toBalanceBefore = toAccount.balance;
       fromAccount.balance -= amount;
       toAccount.balance += amount;
       fromBalanceAfter = fromAccount.balance;
       toBalanceAfter = toAccount.balance;
 
       const currency = fromAccount.currency ?? "MYR";
+      const completedAt = new Date();
 
       fromTransaction = new Transaction({
         account: fromAccount._id,
@@ -117,15 +121,21 @@ class TransactionService {
         description: `Transfer to ${toAccountNumber}`,
         memo: memo || undefined,
         reference,
+        fee: 0,
+        balanceBefore: fromBalanceBefore,
         balanceAfter: fromBalanceAfter,
         currency,
         channel,
-        ip,
-        deviceInfo,
+        deviceInfo: { ip, userAgent },
+        processingTime: { submittedAt, completedAt },
         counterpartAccount: toAccountNumber,
         counterpartNameRaw,
         counterpartName,
         isNewRecipient,
+        twoFactorVerified: null,
+        riskFlags: [],
+        isReversed: false,
+        reversalOf: null,
         performedBy: userId,
         status: "completed",
       });
@@ -137,15 +147,21 @@ class TransactionService {
         direction: "credit",
         description: `Transfer from ${fromAccountNumber}`,
         reference: `${reference}-CR`,
+        fee: 0,
+        balanceBefore: toBalanceBefore,
         balanceAfter: toBalanceAfter,
         currency: toAccount.currency ?? "MYR",
         channel,
-        ip,
-        deviceInfo,
+        deviceInfo: { ip, userAgent },
+        processingTime: { submittedAt, completedAt },
         counterpartAccount: fromAccountNumber,
         counterpartNameRaw: undefined,
         counterpartName: undefined,
-        isNewRecipient: false,
+        isNewRecipient: null,
+        twoFactorVerified: null,
+        riskFlags: [],
+        isReversed: false,
+        reversalOf: null,
         performedBy: userId,
         status: "completed",
       });
@@ -348,8 +364,14 @@ class TransactionService {
 
     if (isCustomer) {
       delete obj.deviceInfo;
-      delete obj.ip;
       delete obj.counterpartNameRaw;
+      if (obj.counterpartAccount) {
+        const acc = obj.counterpartAccount;
+        obj.counterpartAccount =
+          acc.length > 4
+            ? `${acc.slice(0, 3)}****${acc.slice(-1)}`
+            : `${acc[0]}****`;
+      }
     } else {
       obj.counterpartName = obj.counterpartNameRaw ?? obj.counterpartName;
       delete obj.counterpartNameRaw;
