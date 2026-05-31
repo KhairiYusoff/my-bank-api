@@ -5,107 +5,185 @@ const mongoose = require("mongoose");
 const {
   sendNotification,
 } = require("../../shared/services/notification.service");
+const { getNextReference } = require("../../shared/utils/reference");
+const { maskName } = require("../../shared/utils/maskName");
 
-/**
- * Service layer for transaction operations
- * Separates business logic from HTTP concerns
- */
+const ROLE_TO_CHANNEL = {
+  banker: "branch",
+  admin: "branch",
+  customer: "customer",
+};
 
 class TransactionService {
-  /**
-   * Transfer funds between accounts
-   * @param {string} fromAccountNumber
-   * @param {string} toAccountNumber
-   * @param {number} amount
-   * @param {string} description
-   * @param {string} userId
-   * @returns {object} Transaction result
-   */
   async transferFunds(
     fromAccountNumber,
     toAccountNumber,
     amount,
-    description,
+    memo,
     userId,
+    role,
+    ip,
+    deviceInfo,
   ) {
-    // 1. Find accounts
-    const fromAccount = await Account.findOne({
-      accountNumber: fromAccountNumber,
-      user: userId, // Only allow transfers from own accounts
-    });
-    const toAccount = await Account.findOne({ accountNumber: toAccountNumber });
+    const channel = ROLE_TO_CHANNEL[role] ?? "customer";
 
-    if (!fromAccount || !toAccount) {
-      const err = new Error("Account not found");
+    const fromAccountCheck = await Account.findOne({
+      accountNumber: fromAccountNumber,
+      user: userId,
+    }).select("_id");
+    if (!fromAccountCheck) {
+      const err = new Error("Account not found or access denied");
       err.statusCode = 404;
       throw err;
     }
 
-    if (fromAccount.balance < amount) {
-      const err = new Error("Insufficient funds");
-      err.statusCode = 400;
+    // 2. Check if this is the first ever transfer to this recipient (before session)
+    const priorTransfer = await Transaction.findOne({
+      account: fromAccountCheck._id,
+      counterpartAccount: toAccountNumber,
+    })
+      .select("_id")
+      .lean();
+    const isNewRecipient = !priorTransfer;
+
+    const toAccountForName = await Account.findOne({
+      accountNumber: toAccountNumber,
+    })
+      .select("user")
+      .lean();
+    if (!toAccountForName) {
+      const err = new Error("Recipient account not found");
+      err.statusCode = 404;
       throw err;
     }
+    const counterpartUser = await User.findById(toAccountForName.user)
+      .select("name")
+      .lean();
+    const counterpartNameRaw = counterpartUser?.name ?? "[Account Deleted]";
+    const counterpartName = counterpartUser
+      ? maskName(counterpartUser.name)
+      : "[Account Deleted]";
 
-    // 2. Create transaction records (one for each account)
-    const fromTransaction = new Transaction({
-      account: fromAccount._id,
-      amount: -amount,
-      type: "transfer",
-      description: `Transfer to ${toAccountNumber}`,
-      performedBy: userId,
-      status: "completed",
-    });
+    const reference = await getNextReference();
 
-    const toTransaction = new Transaction({
-      account: toAccount._id,
-      amount: amount,
-      type: "transfer",
-      description: `Transfer from ${fromAccountNumber}`,
-      performedBy: userId,
-      status: "completed",
-    });
-
-    // 3. Update account balances
-    fromAccount.balance -= amount;
-    toAccount.balance += amount;
-
-    // 4. Save everything in a transaction
     const session = await mongoose.startSession();
     session.startTransaction();
 
+    let fromTransaction;
+    let toTransaction;
+    let fromBalanceAfter;
+    let toBalanceAfter;
+
     try {
+      // Re-fetch accounts inside session for consistent balance reads
+      const fromAccount = await Account.findOne({
+        accountNumber: fromAccountNumber,
+        user: userId,
+      }).session(session);
+      if (!fromAccount) {
+        const err = new Error("Account not found or access denied");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      const toAccount = await Account.findOne({
+        accountNumber: toAccountNumber,
+      }).session(session);
+      if (!toAccount) {
+        const err = new Error("Recipient account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      if (fromAccount.balance < amount) {
+        const err = new Error("Insufficient funds");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      // Update balances
+      fromAccount.balance -= amount;
+      toAccount.balance += amount;
+      fromBalanceAfter = fromAccount.balance;
+      toBalanceAfter = toAccount.balance;
+
+      const currency = fromAccount.currency ?? "MYR";
+
+      fromTransaction = new Transaction({
+        account: fromAccount._id,
+        amount,
+        type: "transfer",
+        direction: "debit",
+        description: `Transfer to ${toAccountNumber}`,
+        memo: memo || undefined,
+        reference,
+        balanceAfter: fromBalanceAfter,
+        currency,
+        channel,
+        ip,
+        deviceInfo,
+        counterpartAccount: toAccountNumber,
+        counterpartNameRaw,
+        counterpartName,
+        isNewRecipient,
+        performedBy: userId,
+        status: "completed",
+      });
+
+      toTransaction = new Transaction({
+        account: toAccount._id,
+        amount,
+        type: "transfer",
+        direction: "credit",
+        description: `Transfer from ${fromAccountNumber}`,
+        reference: `${reference}-CR`,
+        balanceAfter: toBalanceAfter,
+        currency: toAccount.currency ?? "MYR",
+        channel,
+        ip,
+        deviceInfo,
+        counterpartAccount: fromAccountNumber,
+        counterpartNameRaw: undefined,
+        counterpartName: undefined,
+        isNewRecipient: false,
+        performedBy: userId,
+        status: "completed",
+      });
+
       await fromTransaction.save({ session });
       await toTransaction.save({ session });
       await fromAccount.save({ session });
       await toAccount.save({ session });
+
       await session.commitTransaction();
     } catch (err) {
       await session.abortTransaction();
-      throw new Error("Transaction failed");
+      throw err;
     } finally {
       session.endSession();
     }
 
-    // 5. Send notifications (non-blocking)
     this._sendTransferNotification(
-      fromAccount,
-      toAccount,
+      fromAccountNumber,
+      toAccountNumber,
       amount,
       fromTransaction._id,
+    ).catch((e) =>
+      console.error("Failed to send transfer notification:", e.message),
     );
 
     return {
-      success: true,
-      transactions: [fromTransaction, toTransaction],
-      fromAccount,
-      toAccount,
+      reference,
+      amount,
+      balanceAfter: fromBalanceAfter,
+      counterpartAccount: toAccountNumber,
+      counterpartName,
+      counterpartNameRaw,
+      date: fromTransaction.date,
+      fromTransactionId: fromTransaction._id,
     };
   }
 
-  /**
-   * Get account transactions with pagination
-   */
   async getAccountTransactions(
     accountNumber,
     user,
@@ -113,7 +191,6 @@ class TransactionService {
     limit = 10,
     sort = "desc",
   ) {
-    // Resolve account _id from accountNumber
     const accountFilter =
       user.role === "customer"
         ? { accountNumber, user: user.id }
@@ -127,16 +204,11 @@ class TransactionService {
     }
 
     const query = { account: account._id };
-
-    // Pagination
     const numericPage = Math.max(parseInt(page, 10), 1);
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
-
-    // Sort direction
     const sortDirection = sort === "desc" ? -1 : 1;
 
-    // Execute query
     const transactions = await Transaction.find(query)
       .populate("account", "accountNumber")
       .populate("performedBy", "name role")
@@ -146,8 +218,13 @@ class TransactionService {
 
     const total = await Transaction.countDocuments(query);
 
+    const isCustomer = user.role === "customer";
+    const shaped = transactions.map((tx) =>
+      this._shapeTxForRole(tx, isCustomer),
+    );
+
     return {
-      transactions,
+      transactions: shaped,
       meta: {
         total,
         page: numericPage,
@@ -157,25 +234,19 @@ class TransactionService {
     };
   }
 
-  /**
-   * Get transaction details with permission check
-   */
   async getTransactionDetails(transactionId, user) {
     const transaction = await Transaction.findById(transactionId);
-
     if (!transaction) {
       const err = new Error("Transaction not found");
       err.statusCode = 404;
       throw err;
     }
 
-    // For customers, verify they own the account associated with the transaction
     if (user.role === "customer") {
       const account = await Account.findOne({
         _id: transaction.account,
         user: user.id,
       });
-
       if (!account) {
         const err = new Error("Transaction not found");
         err.statusCode = 404;
@@ -183,72 +254,11 @@ class TransactionService {
       }
     }
 
-    // Return fully populated transaction
-    return await Transaction.findById(transactionId)
+    const full = await Transaction.findById(transactionId)
       .populate("account", "accountNumber user")
       .populate("performedBy", "name role");
-  }
 
-  /**
-   * Private method to send transfer notification
-   */
-  async _sendTransferNotification(
-    fromAccount,
-    toAccount,
-    amount,
-    transactionId,
-  ) {
-    try {
-      // Notify sender (User A)
-      await sendNotification({
-        type: "transfer",
-        title: "Transfer Completed",
-        message: `A transfer of RM${amount} has been made from your account ${fromAccount.accountNumber} to ${toAccount.accountNumber}.`,
-        link: `/transactions/${transactionId}`,
-        recipient: {
-          role: "customer",
-          userId: fromAccount.user.toString(),
-        },
-        source: {
-          service: "my-bank-api",
-          id: transactionId.toString(),
-        },
-        data: {
-          amount,
-          fromAccountNumber: fromAccount.accountNumber,
-          toAccountNumber: toAccount.accountNumber,
-          transactionId: transactionId.toString(),
-        },
-        read: false,
-        delivered: false,
-      });
-
-      // Notify recipient (User B)
-      await sendNotification({
-        type: "transfer",
-        title: "Money Received",
-        message: `You have received RM${amount} from account ${fromAccount.accountNumber} to your account ${toAccount.accountNumber}.`,
-        link: `/transactions/${transactionId}`,
-        recipient: {
-          role: "customer",
-          userId: toAccount.user.toString(),
-        },
-        source: {
-          service: "my-bank-api",
-          id: transactionId.toString(),
-        },
-        data: {
-          amount,
-          fromAccountNumber: fromAccount.accountNumber,
-          toAccountNumber: toAccount.accountNumber,
-          transactionId: transactionId.toString(),
-        },
-        read: false,
-        delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send transfer notification:", notifyErr.message);
-    }
+    return this._shapeTxForRole(full, user.role === "customer");
   }
 
   async getAllTransactions({
@@ -331,6 +341,75 @@ class TransactionService {
         pages: Math.ceil(total / numericLimit),
       },
     };
+  }
+
+  _shapeTxForRole(tx, isCustomer) {
+    const obj = tx.toObject ? tx.toObject() : { ...tx };
+
+    if (isCustomer) {
+      delete obj.deviceInfo;
+      delete obj.ip;
+      delete obj.counterpartNameRaw;
+    } else {
+      obj.counterpartName = obj.counterpartNameRaw ?? obj.counterpartName;
+      delete obj.counterpartNameRaw;
+    }
+
+    return obj;
+  }
+
+  async _sendTransferNotification(
+    fromAccountNumber,
+    toAccountNumber,
+    amount,
+    transactionId,
+  ) {
+    try {
+      const [fromAccount, toAccount] = await Promise.all([
+        Account.findOne({ accountNumber: fromAccountNumber }).select("user"),
+        Account.findOne({ accountNumber: toAccountNumber }).select("user"),
+      ]);
+
+      if (fromAccount) {
+        await sendNotification({
+          type: "transfer",
+          title: "Transfer Completed",
+          message: `A transfer of RM${amount} has been made from your account ${fromAccountNumber} to ${toAccountNumber}.`,
+          link: `/transactions/${transactionId}`,
+          recipient: { role: "customer", userId: fromAccount.user.toString() },
+          source: { service: "my-bank-api", id: transactionId.toString() },
+          data: {
+            amount,
+            fromAccountNumber,
+            toAccountNumber,
+            transactionId: transactionId.toString(),
+          },
+          read: false,
+          delivered: false,
+        });
+      }
+
+      if (toAccount) {
+        await sendNotification({
+          type: "transfer",
+          title: "Money Received",
+          message: `You have received RM${amount} from account ${fromAccountNumber} to your account ${toAccountNumber}.`,
+          link: `/transactions/${transactionId}`,
+          recipient: { role: "customer", userId: toAccount.user.toString() },
+          source: { service: "my-bank-api", id: transactionId.toString() },
+          data: {
+            amount,
+            fromAccountNumber,
+            toAccountNumber,
+            transactionId: transactionId.toString(),
+          },
+          read: false,
+          delivered: false,
+        });
+      }
+    } catch (notifyErr) {
+      console.error("Failed to send transfer notification:", notifyErr.message);
+    }
   }
 }
 

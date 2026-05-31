@@ -102,7 +102,7 @@ exports.deleteAccount = async (req, res) => {
 };
 
 exports.deposit = async (req, res) => {
-  const { accountNumber, amount, description } = req.body;
+  const { accountNumber, amount, memo } = req.body;
   const amountError = checkAmount(res, amount, "deposit");
   if (amountError) return amountError;
 
@@ -110,9 +110,9 @@ exports.deposit = async (req, res) => {
     const result = await accountService.deposit(
       accountNumber,
       amount,
-      description,
       req.user.id,
       req.user.role,
+      memo,
     );
     return success(res, { message: "Deposit successful", data: result });
   } catch (err) {
@@ -125,7 +125,7 @@ exports.deposit = async (req, res) => {
 };
 
 exports.withdraw = async (req, res) => {
-  const { accountNumber, amount, description } = req.body;
+  const { accountNumber, amount, memo } = req.body;
   const amountError = checkAmount(res, amount, "withdraw");
   if (amountError) return amountError;
 
@@ -133,9 +133,9 @@ exports.withdraw = async (req, res) => {
     const result = await accountService.withdraw(
       accountNumber,
       amount,
-      description,
       req.user.id,
       req.user.role,
+      memo,
     );
     return success(res, { message: "Withdrawal successful", data: result });
   } catch (err) {
@@ -148,7 +148,7 @@ exports.withdraw = async (req, res) => {
 };
 
 exports.airdrop = async (req, res) => {
-  const { accountNumber, amount, description } = req.body;
+  const { accountNumber, amount, memo } = req.body;
   const amountError = checkAmount(res, amount, "airdrop");
   if (amountError) return amountError;
 
@@ -156,7 +156,7 @@ exports.airdrop = async (req, res) => {
     const result = await accountService.airdrop(
       accountNumber,
       amount,
-      description,
+      memo,
       req.user.id,
     );
     return success(res, { message: "Airdrop successful", data: result });

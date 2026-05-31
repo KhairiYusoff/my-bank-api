@@ -5,6 +5,13 @@ const mongoose = require("mongoose");
 const {
   sendNotification,
 } = require("../../shared/services/notification.service");
+const { getNextReference } = require("../../shared/utils/reference");
+
+const ROLE_TO_CHANNEL = {
+  banker: "branch",
+  admin: "branch",
+  customer: "customer",
+};
 
 class AccountService {
   async createAccount(userId, accountData) {
@@ -204,31 +211,42 @@ class AccountService {
     await Account.deleteOne({ accountNumber });
   }
 
-  async deposit(accountNumber, amount, description, userId, role) {
+  async deposit(accountNumber, amount, userId, role, memo) {
+    const channel = ROLE_TO_CHANNEL[role] ?? "branch";
+    const reference = await getNextReference();
+
     const query = { accountNumber };
     if (role === "customer") query.user = userId;
 
-    const account = await Account.findOne(query);
-    if (!account) {
-      const err = new Error("Account not found or access denied");
-      err.statusCode = 404;
-      throw err;
-    }
-
-    const transaction = new Transaction({
-      account: account._id,
-      amount,
-      type: "deposit",
-      description: description || "Deposit",
-      performedBy: userId,
-      status: "completed",
-    });
-
-    account.balance += amount;
-
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    let account;
+    let transaction;
     try {
+      account = await Account.findOne(query).session(session);
+      if (!account) {
+        const err = new Error("Account not found or access denied");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      account.balance += amount;
+
+      transaction = new Transaction({
+        account: account._id,
+        amount,
+        type: "deposit",
+        description: "Deposit",
+        memo: memo || undefined,
+        reference,
+        balanceAfter: account.balance,
+        currency: account.currency ?? "MYR",
+        channel,
+        performedBy: userId,
+        status: "completed",
+      });
+
       await transaction.save({ session });
       await account.save({ session });
       await session.commitTransaction();
@@ -262,37 +280,48 @@ class AccountService {
     return { account, transaction };
   }
 
-  async withdraw(accountNumber, amount, description, userId, role) {
+  async withdraw(accountNumber, amount, userId, role, memo) {
+    const channel = ROLE_TO_CHANNEL[role] ?? "branch";
+    const reference = await getNextReference();
+
     const query = { accountNumber };
     if (role === "customer") query.user = userId;
 
-    const account = await Account.findOne(query);
-    if (!account) {
-      const err = new Error("Account not found");
-      err.statusCode = 404;
-      throw err;
-    }
-
-    if (account.balance < amount) {
-      const err = new Error("Insufficient funds");
-      err.statusCode = 400;
-      throw err;
-    }
-
-    const transaction = new Transaction({
-      account: account._id,
-      amount,
-      type: "withdrawal",
-      description: description || "Withdrawal",
-      performedBy: userId,
-      status: "completed",
-    });
-
-    account.balance -= amount;
-
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    let account;
+    let transaction;
     try {
+      account = await Account.findOne(query).session(session);
+      if (!account) {
+        const err = new Error("Account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      if (account.balance < amount) {
+        const err = new Error("Insufficient funds");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      account.balance -= amount;
+
+      transaction = new Transaction({
+        account: account._id,
+        amount,
+        type: "withdrawal",
+        description: "Withdrawal",
+        memo: memo || undefined,
+        reference,
+        balanceAfter: account.balance,
+        currency: account.currency ?? "MYR",
+        channel,
+        performedBy: userId,
+        status: "completed",
+      });
+
       await transaction.save({ session });
       await account.save({ session });
       await session.commitTransaction();
@@ -329,28 +358,38 @@ class AccountService {
     return { account, transaction };
   }
 
-  async airdrop(accountNumber, amount, description, userId) {
-    const account = await Account.findOne({ accountNumber });
-    if (!account) {
-      const err = new Error("Account not found");
-      err.statusCode = 404;
-      throw err;
-    }
-
-    const transaction = new Transaction({
-      account: account._id,
-      amount,
-      type: "airdrop",
-      description: description || "Airdrop",
-      performedBy: userId,
-      status: "completed",
-    });
-
-    account.balance += amount;
+  async airdrop(accountNumber, amount, memo, userId) {
+    const reference = await getNextReference();
 
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    let account;
+    let transaction;
     try {
+      account = await Account.findOne({ accountNumber }).session(session);
+      if (!account) {
+        const err = new Error("Account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      account.balance += amount;
+
+      transaction = new Transaction({
+        account: account._id,
+        amount,
+        type: "airdrop",
+        description: "Airdrop",
+        memo: memo || undefined,
+        reference,
+        balanceAfter: account.balance,
+        currency: account.currency ?? "MYR",
+        channel: "branch", // airdrop is always an admin/banker action
+        performedBy: userId,
+        status: "completed",
+      });
+
       await transaction.save({ session });
       await account.save({ session });
       await session.commitTransaction();
@@ -365,7 +404,7 @@ class AccountService {
       await sendNotification({
         type: "airdrop",
         title: "Airdrop Received",
-        message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}. ${description ? `Description: ${description}` : ""}`,
+        message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}.`,
         link: `/accounts/${account.accountNumber}`,
         recipient: { role: "customer", userId: account.user.toString() },
         source: { service: "my-bank-api", id: transaction._id.toString() },
@@ -373,7 +412,6 @@ class AccountService {
           amount,
           accountNumber: account.accountNumber,
           transactionId: transaction._id.toString(),
-          description: description || "Airdrop",
         },
         read: false,
         delivered: false,

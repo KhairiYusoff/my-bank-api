@@ -3,7 +3,7 @@ const { checkAmount } = require("../../shared/utils/validation.helpers");
 const transactionService = require("./transaction.service");
 
 exports.transferFunds = async (req, res) => {
-  const { fromAccountNumber, toAccountNumber, amount, description } = req.body;
+  const { fromAccountNumber, toAccountNumber, amount, memo } = req.body;
 
   const amountError = checkAmount(res, amount, "transfer");
   if (amountError) return amountError;
@@ -13,10 +13,25 @@ exports.transferFunds = async (req, res) => {
       fromAccountNumber,
       toAccountNumber,
       amount,
-      description,
+      memo,
       req.user.id,
+      req.user.role,
+      req.ip,
+      req.headers["user-agent"],
     );
-    return success(res, { message: "Transfer successful", data: result });
+
+    // Explicit response shape — customers see masked counterpart details
+    return success(res, {
+      message: "Transfer successful",
+      data: {
+        reference: result.reference,
+        amount: result.amount,
+        balanceAfter: result.balanceAfter,
+        counterpartAccount: result.counterpartAccount,
+        counterpartName: result.counterpartName,
+        date: result.date,
+      },
+    });
   } catch (err) {
     console.error(err.message);
     return error(res, {
