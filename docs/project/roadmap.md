@@ -192,7 +192,7 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 5 — Transaction Enrichment 🔴 (Next Up)
+## Phase 5 — Transaction Enrichment ✅ (Jun 1, 2026)
 
 **Goal:** Every transaction record captures complete contextual data at write time — reference number, counterpart, running balance, channel, device, and timing — so customer portals can render full receipts and the system has a fraud-ready audit trail from day one.
 
@@ -209,7 +209,7 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 6 — Admin Detail Pages 🔴 (Backlog)
+## Phase 6 — Admin Detail Pages � (In Progress)
 
 **Goal:** Replace the current Actions dropdown on Users/Staff list pages with a proper detail page per record. Enables admin and banker to view full customer KYC data and manage status/role from a dedicated page.
 
@@ -219,6 +219,7 @@ Audit (May 29, 2026) found most items already wired:
 | ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | US-6001 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection component, ChangeStatusModal reused |
 | US-6002 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/staff/:id` (admin only) + StaffDetailPage, new ChangeRoleModal with admin-promotion warning, reuses ProfileSection from US-6001      |
+| US-6003 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/accounts/:accountNumber` (admin + banker) + AccountDetailPage with Account Info, Financials, Account Holder sections, ChangeStatusModal reused |
 
 **Gate:** Phase 5 must ship first. US-6001 must be done before US-6002 (shares ProfileSection component).
 

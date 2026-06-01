@@ -2,7 +2,7 @@
 
 > This file is the index only. Detailed stories with AC live in `docs/user-stories/phase-N/` — **new features only (Phase 5+)**. Built features have no story file; the code and `business-rules.md` are the source of truth.
 
-**Last Updated:** May 30, 2026
+**Last Updated:** Jun 1, 2026
 
 ---
 
@@ -56,12 +56,13 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 | US-3002  | Customer views paginated transaction history                                 | 3     | my-bank-customer                       | ✅     | —                                                |
 | US-3003  | Admin views all transactions across all accounts                             | 3     | my-bank-admin-portal                   | ✅     | —                                                |
 | US-3004  | Admin updates or deactivates staff account                                   | 3     | my-bank-admin-portal                   | ✅     | —                                                |
-| US-5001  | Transaction model enrichment — new fields, Counter, masking, API responses   | 5     | my-bank-api                            | 🟡     | [US-5001.md](../user-stories/phase-5/US-5001.md) |
-| US-5002  | Transaction receipt view — customer portal                                   | 5     | my-bank-customer                       | 🟡     | [US-5002.md](../user-stories/phase-5/US-5002.md) |
-| US-5003  | Transaction detail view — admin portal (unmasked)                            | 5     | my-bank-admin-portal                   | 🟡     | [US-5003.md](../user-stories/phase-5/US-5003.md) |
-| US-5004  | Currency display standardised — all amounts show `RM X,XXX.XX`               | 5     | my-bank-customer, my-bank-admin-portal | 🟡     | [US-5004.md](../user-stories/phase-5/US-5004.md) |
+| US-5001  | Transaction model enrichment — new fields, Counter, masking, API responses   | 5     | my-bank-api                            | ✅     | [US-5001.md](../user-stories/phase-5/US-5001.md) |
+| US-5002  | Transaction receipt view — customer portal                                   | 5     | my-bank-customer                       | ✅     | [US-5002.md](../user-stories/phase-5/US-5002.md) |
+| US-5003  | Transaction detail view — admin portal (unmasked)                            | 5     | my-bank-admin-portal                   | ✅     | [US-5003.md](../user-stories/phase-5/US-5003.md) |
+| US-5004  | Currency display standardised — all amounts show `RM X,XXX.XX`               | 5     | my-bank-customer, my-bank-admin-portal | ✅     | [US-5004.md](../user-stories/phase-5/US-5004.md) |
 | US-6001  | Admin views full customer profile — detail page                              | 6     | my-bank-api, my-bank-admin-portal      | 🟡     | [US-6001.md](../user-stories/phase-6/US-6001.md) |
 | US-6002  | Admin views staff profile — detail page                                      | 6     | my-bank-api, my-bank-admin-portal      | 🟡     | [US-6002.md](../user-stories/phase-6/US-6002.md) |
+| US-6003  | Admin views account detail page                                              | 6     | my-bank-api, my-bank-admin-portal      | 🟡     | [US-6003.md](../user-stories/phase-6/US-6003.md) |
 | US-7001  | Account type rules enforced (daily limits, withdrawal caps, overdraft)       | 7     | my-bank-api                            | ⬜     | —                                                |
 | US-7002  | Savings monthly withdrawal cap enforced (max 4/month)                        | 7     | my-bank-api                            | ⬜     | —                                                |
 | US-7003  | Banker sets overdraft limit on Current/Business account                      | 7     | my-bank-admin-portal                   | ⬜     | —                                                |
