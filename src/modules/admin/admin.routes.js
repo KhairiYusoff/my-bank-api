@@ -7,6 +7,7 @@ const {
   updateCustomer,
   deleteStaff,
   deleteCustomer,
+  getCustomer,
 } = require("./admin.controller");
 const {
   authMiddleware,
@@ -42,6 +43,11 @@ router.put("/customer/:customerId", [
   authorizeRoles("admin"),
   activityLogger("UPDATE_CUSTOMER", "Admin updated a customer status"),
   updateCustomer,
+]);
+router.get("/customer/:customerId", [
+  authorizeRoles("admin", "banker"),
+  activityLogger("VIEW_CUSTOMER_PROFILE", "Staff viewed customer profile"),
+  getCustomer,
 ]);
 
 module.exports = router;

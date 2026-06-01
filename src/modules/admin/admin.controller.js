@@ -82,3 +82,19 @@ exports.deleteCustomer = async (req, res) => {
     });
   }
 };
+
+exports.getCustomer = async (req, res) => {
+  try {
+    const customer = await adminService.getCustomerById(req.params.customerId);
+    return success(res, {
+      message: "Customer fetched.",
+      data: customer,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};

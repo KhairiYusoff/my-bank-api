@@ -101,9 +101,7 @@ class AdminService {
       throw err;
     }
     if (customer.role !== "customer") {
-      const err = new Error(
-        "Only customers can be updated via this endpoint.",
-      );
+      const err = new Error("Only customers can be updated via this endpoint.");
       err.statusCode = 400;
       throw err;
     }
@@ -166,6 +164,31 @@ class AdminService {
     }
 
     await User.deleteOne({ _id: customerId });
+  }
+
+  async getCustomerById(customerId) {
+    let customer;
+    try {
+      customer = await User.findOne({
+        _id: customerId,
+        role: "customer",
+      }).select("-password -refreshToken");
+    } catch (err) {
+      if (err.name === "CastError") {
+        const notFound = new Error("Customer not found.");
+        notFound.statusCode = 404;
+        throw notFound;
+      }
+      throw err;
+    }
+
+    if (!customer) {
+      const err = new Error("Customer not found.");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return customer;
   }
 }
 
