@@ -190,6 +190,31 @@ class AdminService {
 
     return customer;
   }
+
+  async getStaffById(staffId) {
+    let staff;
+    try {
+      staff = await User.findOne({
+        _id: staffId,
+        role: { $in: ["banker", "admin"] },
+      }).select("-password -refreshToken");
+    } catch (err) {
+      if (err.name === "CastError") {
+        const notFound = new Error("Staff not found.");
+        notFound.statusCode = 404;
+        throw notFound;
+      }
+      throw err;
+    }
+
+    if (!staff) {
+      const err = new Error("Staff not found.");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    return staff;
+  }
 }
 
 module.exports = new AdminService();

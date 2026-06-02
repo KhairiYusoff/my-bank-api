@@ -98,3 +98,19 @@ exports.getCustomer = async (req, res) => {
     });
   }
 };
+
+exports.getStaff = async (req, res) => {
+  try {
+    const staff = await adminService.getStaffById(req.params.staffId);
+    return success(res, {
+      message: "Staff fetched.",
+      data: staff,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
