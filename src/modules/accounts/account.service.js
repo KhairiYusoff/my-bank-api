@@ -20,7 +20,6 @@ class AccountService {
       branch,
       balance,
       interestRate,
-      currency,
       overdraftLimit,
       minimumBalance,
     } = accountData;
@@ -40,7 +39,7 @@ class AccountService {
       branch,
       balance: balance || 0,
       interestRate,
-      currency,
+      currency: "MYR",
       overdraftLimit,
       minimumBalance,
       status: "Active",

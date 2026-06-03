@@ -10,7 +10,6 @@ exports.createAccount = async (req, res) => {
       branch,
       balance,
       interestRate,
-      currency,
       overdraftLimit,
       minimumBalance,
     } = req.body;
@@ -19,7 +18,6 @@ exports.createAccount = async (req, res) => {
       branch,
       balance,
       interestRate,
-      currency,
       overdraftLimit,
       minimumBalance,
     });

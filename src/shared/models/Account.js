@@ -29,6 +29,7 @@ const AccountSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
+    enum: ["MYR"],
     default: "MYR",
   },
   status: {
