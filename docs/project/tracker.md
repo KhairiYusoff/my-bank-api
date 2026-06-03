@@ -2,26 +2,26 @@
 
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
-**Last Updated:** Jun 1, 2026
-**Current Phase:** Phase 6 in progress
+**Last Updated:** Jun 3, 2026
+**Current Phase:** Phase 7 (backlog — not started)
 
 ---
 
-## Now — Phase 6: Admin Detail Pages
+## Now — Phase 6: Admin Detail Pages ✅ (Complete)
 
-Three stories, implement in dependency order:
+All three stories shipped.
 
-1. [US-6001](../user-stories/phase-6/US-6001.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views full customer profile ⬜
-2. [US-6002](../user-stories/phase-6/US-6002.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views staff profile (depends on US-6001 for `ProfileSection`) ⬜
-3. [US-6003](../user-stories/phase-6/US-6003.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views account detail (depends on US-6001 for `ProfileSection`) ⬜
-
-> **Prerequisite before any Phase 6 code:** ActivityLog enum updated ✅ (`VIEW_CUSTOMER_PROFILE`, `VIEW_STAFF_PROFILE`, `VIEW_ACCOUNT_DETAIL`, `ACCOUNT_STATUS_CHANGED` added Jun 1 2026)
->
-> Read the full AC in each story file before writing any code.
+1. [US-6001](../user-stories/phase-6/US-6001.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views full customer profile ✅
+2. [US-6002](../user-stories/phase-6/US-6002.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views staff profile ✅
+3. [US-6003](../user-stories/phase-6/US-6003.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views account detail ✅
 
 ---
 
 ## Completed
+
+### Phase 6 — Admin Detail Pages (Jun 2–3, 2026) ✅
+
+All 3 stories done. US-6001 `8c8610b`/`1718b45`, US-6002 `0b85e1d`/`27215ef`, US-6003 Jun 3 2026.
 
 ### Phase 5 — Transaction Enrichment (Jun 1, 2026) ✅
 
@@ -51,22 +51,24 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 5 Backlog — Transaction Enrichment (Next Code Phase)
 
-| Story                                         | Repo                                       | Summary                                                                                                            | Status                   |
-| --------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------ |
-| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`                              | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ✅ `b60fffb` May 31 2026 |
-| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`                         | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ✅ `b82a59d` Jun 1 2026  |
-| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal`                     | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ✅ `1d4d6a3` Jun 1 2026  |
+| Story                                         | Repo                                       | Summary                                                                                                            | Status                              |
+| --------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| [US-5001](../user-stories/phase-5/US-5001.md) | `my-bank-api`                              | 12 new Transaction fields, Counter model, `maskName` utility, role-based API responses, `Account.currency` bug fix | ✅ `b60fffb` May 31 2026            |
+| [US-5002](../user-stories/phase-5/US-5002.md) | `my-bank-customer`                         | Tappable transaction rows + receipt drawer, null handling for pre-Phase-5 records                                  | ✅ `b82a59d` Jun 1 2026             |
+| [US-5003](../user-stories/phase-5/US-5003.md) | `my-bank-admin-portal`                     | Unmasked detail panel with deviceInfo, processingTime, duration                                                    | ✅ `1d4d6a3` Jun 1 2026             |
 | [US-5004](../user-stories/phase-5/US-5004.md) | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                     | ✅ `5dfd3fc` / `379ddfc` Jun 1 2026 |
 
 ---
 
 ## Phase 6 Backlog — Admin Detail Pages
 
-| Story                                         | Repo                                  | Summary                                                                                          | Status |
-| --------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
-| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page                     | 🟡     |
-| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page                                | 🟡     |
-| [US-6003](../user-stories/phase-6/US-6003.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views account detail — `GET /admin/accounts/:accountNumber` + detail page (depends US-6001) | 🟡     |
+| Story                                         | Repo                                  | Summary                                                                                                          | Status                              |
+| --------------------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page                                      | ✅ `8c8610b` / `1718b45` Jun 2 2026 |
+| [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page                                                 | ✅ `0b85e1d` / `27215ef` Jun 2 2026 |
+| [US-6003](../user-stories/phase-6/US-6003.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views account detail — `GET /accounts/:accountNumber/detail` + detail page (depends US-6001)               | ✅ Jun 3 2026                       |
+| [US-6004](../user-stories/phase-6/US-6004.md) | `my-bank-admin-portal`                | Admin views account transaction history — `/accounts/:accountNumber/transactions` + breadcrumb (depends US-6003) | ⬜                                  |
+| [US-6005](../user-stories/phase-6/US-6005.md) | `my-bank-api`, `my-bank-admin-portal` | Admin dashboard — summary stats (customers, accounts, staff, transactions today) + pending applications list     | ⬜                                  |
 
 ---
 

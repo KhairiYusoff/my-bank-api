@@ -209,17 +209,17 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 6 — Admin Detail Pages � (In Progress)
+## Phase 6 — Admin Detail Pages ✅ (Complete, Jun 2–3 2026)
 
 **Goal:** Replace the current Actions dropdown on Users/Staff list pages with a proper detail page per record. Enables admin and banker to view full customer KYC data and manage status/role from a dedicated page.
 
-**Stories (implement in order):**
+**Stories:**
 
-| Story   | Repo                                  | Scope                                                                                                                                            |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| US-6001 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection component, ChangeStatusModal reused |
-| US-6002 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/staff/:id` (admin only) + StaffDetailPage, new ChangeRoleModal with admin-promotion warning, reuses ProfileSection from US-6001      |
-| US-6003 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/accounts/:accountNumber` (admin + banker) + AccountDetailPage with Account Info, Financials, Account Holder sections, ChangeStatusModal reused |
+| Story   | Repo                                  | Scope                                                                                                                                                      | Status |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| US-6001 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection, ChangeStatusModal reused                    | ✅ `8c8610b` / `1718b45` Jun 2 |
+| US-6002 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/staff/:id` (admin only) + StaffDetailPage, ChangeRoleModal, reuses ProfileSection from US-6001                                               | ✅ `0b85e1d` / `27215ef` Jun 2 |
+| US-6003 | `my-bank-api`, `my-bank-admin-portal` | `GET /accounts/:accountNumber/detail` (admin + banker) + AccountDetailPage with Account Info, Financials, Account Holder sections, ChangeStatusModal reused | ✅ Jun 3 |
 
 **Gate:** Phase 5 must ship first. US-6001 must be done before US-6002 (shares ProfileSection component).
 
