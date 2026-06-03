@@ -175,3 +175,37 @@ exports.airdrop = async (req, res) => {
     });
   }
 };
+
+exports.getAccountByNumber = async (req, res) => {
+  try {
+    const account = await accountService.getAccountByNumber(
+      req.params.accountNumber,
+    );
+    return success(res, { message: "Account fetched.", data: account });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.updateAccountStatus = async (req, res) => {
+  try {
+    const account = await accountService.updateAccountStatus(
+      req.params.accountNumber,
+      req.body.status,
+    );
+    return success(res, {
+      message: "Account status updated.",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};

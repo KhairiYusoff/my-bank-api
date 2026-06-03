@@ -8,6 +8,8 @@ const {
   deposit,
   withdraw,
   airdrop,
+  getAccountByNumber,
+  updateAccountStatus,
 } = require("./account.controller");
 const {
   authMiddleware,
@@ -54,6 +56,18 @@ router.post(
   authorizeRoles("admin"),
   activityLogger("AIRDROP", "Admin airdropped funds"),
   airdrop,
+);
+router.get(
+  "/:accountNumber/detail",
+  authorizeRoles("admin", "banker"),
+  activityLogger("VIEW_ACCOUNT_DETAIL", "Staff viewed account detail"),
+  getAccountByNumber,
+);
+router.patch(
+  "/:accountNumber/status",
+  authorizeRoles("admin", "banker"),
+  activityLogger("ACCOUNT_STATUS_CHANGED", "Account status changed"),
+  updateAccountStatus,
 );
 
 module.exports = router;

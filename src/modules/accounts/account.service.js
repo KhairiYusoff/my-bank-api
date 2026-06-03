@@ -468,6 +468,51 @@ class AccountService {
 
     return { account, transaction };
   }
+
+  async getAccountByNumber(accountNumber) {
+    const account = await Account.findOne({ accountNumber }).populate(
+      "user",
+      "name email phoneNumber role",
+    );
+    if (!account) {
+      const err = new Error("Account not found.");
+      err.statusCode = 404;
+      throw err;
+    }
+    return account;
+  }
+
+  async updateAccountStatus(accountNumber, status) {
+    const allowed = ["Active", "Dormant", "Closed"];
+    if (!allowed.includes(status)) {
+      const err = new Error(
+        `Invalid status. Must be one of: ${allowed.join(", ")}.`,
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found.");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.status === "Closed") {
+      const err = new Error("Account is already closed and cannot be updated.");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = status;
+    if (status === "Closed") {
+      account.dateClosed = new Date();
+    }
+
+    await account.save();
+    return account;
+  }
 }
 
 module.exports = new AccountService();
