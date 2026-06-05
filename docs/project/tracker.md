@@ -81,16 +81,17 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 7 Backlog — Account Type Differentiation
 
-| Story   | Repo                   | Summary                                                                | Status |
-| ------- | ---------------------- | ---------------------------------------------------------------------- | ------ |
-| US-7001 | `my-bank-api`          | Account type rules enforced (daily limits, withdrawal caps, overdraft) | ⬜     |
-| US-7002 | `my-bank-api`          | Savings monthly withdrawal cap enforced (max 4/month)                  | ⬜     |
-| US-7003 | `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account                | ⬜     |
-| US-7004 | `my-bank-api`          | Transfer blocked if daily limit exceeded                               | ⬜     |
-| US-7005 | `my-bank-customer`     | Customer sees account type rules and limits in portal                  | ⬜     |
-| US-7006 | `my-bank-api`          | Monthly maintenance fee deducted automatically                         | ⬜     |
-| US-7007 | `my-bank-api`          | Savings interest credited monthly                                      | ⬜     |
-| US-7008 | `notification-service` | Customer notified when balance falls below maintenance threshold       | ⬜     |
+| Story                                         | Repo                                       | Summary                                                                          | Status |
+| --------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- | ------ |
+| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                              | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix | ⬜     |
+| [US-7002](../user-stories/phase-7/US-7002.md) | `my-bank-api`                              | Savings monthly withdrawal cap enforced (max 4/month)                            | ⬜     |
+| [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal`      | Banker sets overdraft limit on Current/Business account via portal               | ⬜     |
+| [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`                         | Customer sees account type rules and limits in portal                            | ⬜     |
+| [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                              | Monthly maintenance fee deducted automatically (cron, 1st of month)             | ⬜     |
+| [US-7007](../user-stories/phase-7/US-7007.md) | `my-bank-api`                              | Savings interest credited monthly (cron, last day of month)                     | ⬜     |
+| [US-7008](../user-stories/phase-7/US-7008.md) | `my-bank-api`, `notification-service`      | Customer notified when balance falls below maintenance threshold                 | ⬜     |
+
+> **Note — US-7004 removed:** “Transfer blocked if daily limit exceeded” was a subset of US-7001. Merged; no separate story file.
 
 ---
 
