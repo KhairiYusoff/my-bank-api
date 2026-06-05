@@ -18,24 +18,32 @@ class DashboardService {
       depositsTodayResult,
       withdrawalsTodayResult,
       portfolioResult,
-      recentPendingApplications,
-      recentTransactions,
     ] = await Promise.all([
-      // counts
+      // customer count
       User.countDocuments({ role: "customer" }),
+
+      // account count
       Account.countDocuments(),
+
+      // staff count
       User.countDocuments({ role: { $in: ["banker", "admin"] } }),
+
+      // transactions today
       Transaction.countDocuments({ createdAt: { $gte: todayStart } }),
 
-      // attention
-      User.countDocuments({ role: "customer", applicationStatus: "pending" }),
+      // pending applications
+      User.countDocuments({ role: "customer", isVerified: false }),
+
+      // failed transactions today
       Transaction.countDocuments({
         status: "failed",
         createdAt: { $gte: todayStart },
       }),
+
+      // dormant accounts
       Account.countDocuments({ status: "Dormant" }),
 
-      // financials — aggregate sums
+      // deposits today
       Transaction.aggregate([
         {
           $match: {
@@ -46,6 +54,8 @@ class DashboardService {
         },
         { $group: { _id: null, total: { $sum: "$amount" } } },
       ]),
+
+      // withdrawals today
       Transaction.aggregate([
         {
           $match: {
@@ -56,24 +66,12 @@ class DashboardService {
         },
         { $group: { _id: null, total: { $sum: "$amount" } } },
       ]),
+
+      // total portfolio balance
       Account.aggregate([
         { $match: { status: "Active" } },
         { $group: { _id: null, total: { $sum: "$balance" } } },
       ]),
-
-      // tables
-      User.find({ role: "customer", applicationStatus: "pending" })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select("_id name email createdAt")
-        .lean(),
-
-      Transaction.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate({ path: "account", select: "accountNumber" })
-        .select("_id type amount status date direction account")
-        .lean(),
     ]);
 
     return {
@@ -93,8 +91,6 @@ class DashboardService {
         withdrawalsToday: withdrawalsTodayResult[0]?.total ?? 0,
         totalPortfolioBalance: portfolioResult[0]?.total ?? 0,
       },
-      recentPendingApplications,
-      recentTransactions,
     };
   }
 }
