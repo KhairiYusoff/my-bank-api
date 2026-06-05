@@ -2,26 +2,33 @@
 
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
-**Last Updated:** Jun 3, 2026
+**Last Updated:** Jun 5, 2026
 **Current Phase:** Phase 7 (backlog — not started)
 
 ---
 
 ## Now — Phase 6: Admin Detail Pages ✅ (Complete)
 
-All three stories shipped.
+All 5 stories shipped including addendum US-6004 and US-6005.
 
-1. [US-6001](../user-stories/phase-6/US-6001.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views full customer profile ✅
-2. [US-6002](../user-stories/phase-6/US-6002.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views staff profile ✅
-3. [US-6003](../user-stories/phase-6/US-6003.md) — `my-bank-api`, `my-bank-admin-portal` — Admin views account detail ✅
+1. [US-6001](../user-stories/phase-6/US-6001.md) ✅
+2. [US-6002](../user-stories/phase-6/US-6002.md) ✅
+3. [US-6003](../user-stories/phase-6/US-6003.md) ✅
+4. [US-6004](../user-stories/phase-6/US-6004.md) ✅
+5. [US-6005](../user-stories/phase-6/US-6005.md) ✅
 
 ---
 
 ## Completed
 
-### Phase 6 — Admin Detail Pages (Jun 2–3, 2026) ✅
+### Phase 6 — Admin Detail Pages (Jun 2–5, 2026) ✅
 
-All 3 stories done. US-6001 `8c8610b`/`1718b45`, US-6002 `0b85e1d`/`27215ef`, US-6003 Jun 3 2026.
+All 5 stories done (including addendum US-6004 and US-6005).
+
+- US-6001 `8c8610b`/`1718b45`, US-6002 `0b85e1d`/`27215ef`, US-6003 Jun 3 2026
+- US-6004 `7f845dd` (FE) Jun 3 2026 — account transactions page, AppBreadcrumbs, formatCurrency fix
+- US-6005 `42567e2` (BE) / `d013cda` (FE) Jun 5 2026 — enterprise dashboard (KPI, financials, attention)
+- Hotfix `6ae743a` — currency locked to MYR at model/service/controller level + DB migration (17 records patched)
 
 ### Phase 5 — Transaction Enrichment (Jun 1, 2026) ✅
 
@@ -67,8 +74,8 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 | [US-6001](../user-stories/phase-6/US-6001.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views full customer profile — `GET /admin/customer/:id` + detail page                                      | ✅ `8c8610b` / `1718b45` Jun 2 2026 |
 | [US-6002](../user-stories/phase-6/US-6002.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views staff profile — `GET /admin/staff/:id` + detail page                                                 | ✅ `0b85e1d` / `27215ef` Jun 2 2026 |
 | [US-6003](../user-stories/phase-6/US-6003.md) | `my-bank-api`, `my-bank-admin-portal` | Admin views account detail — `GET /accounts/:accountNumber/detail` + detail page (depends US-6001)               | ✅ Jun 3 2026                       |
-| [US-6004](../user-stories/phase-6/US-6004.md) | `my-bank-admin-portal`                | Admin views account transaction history — `/accounts/:accountNumber/transactions` + breadcrumb (depends US-6003) | ⬜                                  |
-| [US-6005](../user-stories/phase-6/US-6005.md) | `my-bank-api`, `my-bank-admin-portal` | Admin dashboard — summary stats (customers, accounts, staff, transactions today) + pending applications list     | ⬜                                  |
+| [US-6004](../user-stories/phase-6/US-6004.md) | `my-bank-admin-portal`                | Admin views account transaction history — `/accounts/:accountNumber/transactions` + breadcrumb (depends US-6003) | ✅ `7f845dd` Jun 3 2026             |
+| [US-6005](../user-stories/phase-6/US-6005.md) | `my-bank-api`, `my-bank-admin-portal` | Admin dashboard — KPI cards, financial snapshot, attention signals, portfolio AUM                                | ✅ `42567e2` / `d013cda` Jun 5 2026 |
 
 ---
 
