@@ -26,6 +26,7 @@ const onboardingRoutes = require("./modules/onboarding/onboarding.routes");
 const aiRoutes = require("./modules/ai/ai.routes");
 const auditRoutes = require("./modules/audit/audit.routes");
 const notificationRoutes = require("./modules/notifications/notification.routes");
+const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
 // 4. Initialize Express app
 const app = express();
@@ -79,6 +80,7 @@ app.use("/api/onboarding", onboardingRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Error handling middleware (must be after all routes)
 app.use(errorHandler);
