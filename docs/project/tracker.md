@@ -96,11 +96,12 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 ## Phase 8 Backlog — Role Expansion (4 Roles)
 
-| Story   | Repo                                  | Summary                                                                                          | Status |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
-| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix | ⬜     |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                            | ⬜     |
-| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role          | ⬜     |
+| Story   | Repo                                  | Summary                                                                                                                     | Status |
+| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                            | ⬜     |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                       | ⬜     |
+| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                                     | ⬜     |
+| US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form | ⬜     |
 
 > Read `docs/engineering/security/authorization.md` before writing any code for Phase 8.
 
