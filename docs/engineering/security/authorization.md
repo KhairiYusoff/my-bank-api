@@ -74,6 +74,27 @@ MyBank has **4 roles**:
 | **AI** (Phase 13)                  |                      |          |           |          |
 | POST /ai/chat                      | ✅                   | ❌       | ❌        | ❌       |
 | GET /ai/insights                   | ✅                   | ❌       | ❌        | ✅       |
+| **Dashboard**                      |                      |          |           |          |
+| GET /dashboard                     | ❌                   | ✅       | ✅        | ✅       |
+| counts.staff (in response)         | ❌                   | ❌       | ✅        | ✅       |
+| **Admin Portal UI — Sidebar Nav**  |                      |          |           |          |
+| Dashboard                          | —                    | ✅       | ✅        | ✅       |
+| User Management                    | —                    | ✅       | ✅        | ✅       |
+| Staff Management                   | —                    | ❌       | ❌        | ✅       |
+| Account Management                 | —                    | ✅       | ✅        | ✅       |
+| Applications (Pending)             | —                    | ✅       | ✅ (read) | ✅       |
+| System Audit Logs                  | —                    | ❌       | ✅        | ✅       |
+| Transaction History                | —                    | ✅       | ✅        | ✅       |
+| Airdrop Management                 | —                    | ❌       | ❌        | ✅       |
+| **Admin Portal UI — Dashboard KPI Cards** |             |          |           |          |
+| Total Customers                    | —                    | ✅       | ✅        | ✅       |
+| Pending Applications               | —                    | ✅       | ✅        | ✅       |
+| Total Accounts                     | —                    | ✅       | ✅        | ✅       |
+| Staff Members                      | —                    | ❌       | ✅        | ✅       |
+| Transactions Today                 | —                    | ✅       | ✅        | ✅       |
+| Financial Snapshot (deposits/withdrawals/net flow) | — | ✅  | ✅        | ✅       |
+| Total Portfolio (AUM)              | —                    | ✅       | ✅        | ✅       |
+| Attention Cards                    | —                    | ✅       | ✅        | ✅       |
 
 ---
 

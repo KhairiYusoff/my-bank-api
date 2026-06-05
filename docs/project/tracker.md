@@ -100,8 +100,18 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 | ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
 | US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                            | ⬜     |
 | US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                       | ⬜     |
-| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                                     | ⬜     |
+| US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control in admin portal — sidebar nav, route guards, dashboard cards, and 403 error page (depends US-8001) | ⬜     |
 | US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form | ⬜     |
+
+**US-8003 Scope (do not implement before US-8001):**
+
+| Area | What to implement |
+| --- | --- |
+| Sidebar nav | Filter `navItems` array by role — banker sees no Staff, Airdrop, Audit; auditor sees no Staff, Airdrop, Applications (no mutations) |
+| Route guards | Wrap protected routes — if role lacks access and navigates via URL, redirect to `/403` |
+| 403 page | New `ForbiddenPage` component — "You don't have permission to access this page", Back to Dashboard button |
+| Dashboard cards | Hide **Staff Members** KPI card for banker and auditor; hide **Airdrop** data if not admin |
+| Dashboard BE | `getDashboardSummary` omits `counts.staff` from response if caller is `banker`; returns full data for `admin` and `auditor` |
 
 > Read `docs/engineering/security/authorization.md` before writing any code for Phase 8.
 
