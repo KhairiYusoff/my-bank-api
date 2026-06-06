@@ -18,20 +18,17 @@ const validateInitialApplication = [
     .not()
     .isEmpty()
     .isMobilePhone("any")
-    .withMessage("Please enter a valid phone number")
+    .withMessage("Please enter a valid phone number"),
 ];
 
 // CRITICAL: Login validation - prevents brute force & injection attacks
 const validateLogin = [
-  check("email", "Valid email is required")
-    .isEmail()
-    .normalizeEmail()
-    .escape(), // Prevents XSS
+  check("email", "Valid email is required").isEmail().normalizeEmail().escape(), // Prevents XSS
   check("password", "Password is required")
     .not()
     .isEmpty()
     .isLength({ min: 1, max: 128 }) // Prevents DoS with huge passwords
-    .withMessage("Password must be between 1 and 128 characters")
+    .withMessage("Password must be between 1 and 128 characters"),
 ];
 
 // CRITICAL: Financial transaction validation - prevents financial attacks
@@ -58,7 +55,7 @@ const validateTransfer = [
     .trim()
     .escape()
     .isLength({ max: 255 })
-    .withMessage("Description must not exceed 255 characters")
+    .withMessage("Description must not exceed 255 characters"),
 ];
 
 // CRITICAL: Deposit/Withdrawal validation
@@ -78,7 +75,7 @@ const validateTransaction = [
     .optional()
     .trim()
     .escape()
-    .isLength({ max: 255 })
+    .isLength({ max: 255 }),
 ];
 
 // Full validation for banker registering a customer
@@ -110,7 +107,14 @@ const validateFullRegistration = [
   check("educationLevel", "Education level is required")
     .not()
     .isEmpty()
-    .isIn(["none", "primary", "secondary", "diploma", "degree", "postgraduate"]),
+    .isIn([
+      "none",
+      "primary",
+      "secondary",
+      "diploma",
+      "degree",
+      "postgraduate",
+    ]),
   check("residencyStatus", "Residency status is required")
     .not()
     .isEmpty()
@@ -132,11 +136,18 @@ const validateFullRegistration = [
   check("salary", "Salary range is required")
     .not()
     .isEmpty()
-    .isIn(["<1000", "1000-2999", "3000-4999", "5000-6999", "7000-9999", "10000+"]),
+    .isIn([
+      "<1000",
+      "1000-2999",
+      "3000-4999",
+      "5000-6999",
+      "7000-9999",
+      "10000+",
+    ]),
   check("accountType", "Account type is required")
     .not()
     .isEmpty()
-      .isIn(["savings", "current", "business", "fixed_deposit"]),
+    .isIn(["savings", "current", "business", "fixed_deposit"]),
   check("purposeOfAccount", "Purpose of account is required")
     .not()
     .isEmpty()
@@ -189,10 +200,7 @@ const validateStaffRegistration = [
     .withMessage("Password must contain a lowercase letter")
     .matches(/[!@#$%^&*(),.?":{}|<>]/)
     .withMessage("Password must contain a special character"),
-  check("role", "Role is required")
-    .not()
-    .isEmpty()
-    .isIn(["banker", "admin"]),
+  check("role", "Role is required").not().isEmpty().isIn(["banker", "admin"]),
 ];
 
 module.exports = {

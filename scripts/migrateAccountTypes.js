@@ -31,11 +31,12 @@ async function run() {
 
   let total = 0;
   for (const [from, to] of Object.entries(TYPE_MAP)) {
-    const result = await mongoose
-      .connection
+    const result = await mongoose.connection
       .collection("accounts")
       .updateMany({ accountType: from }, { $set: { accountType: to } });
-    console.log(`  ${from} → ${to}: ${result.modifiedCount} document(s) updated`);
+    console.log(
+      `  ${from} → ${to}: ${result.modifiedCount} document(s) updated`,
+    );
     total += result.modifiedCount;
   }
 

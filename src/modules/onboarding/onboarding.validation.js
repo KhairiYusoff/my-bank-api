@@ -47,7 +47,14 @@ const validateFullRegistration = [
   check("educationLevel", "Education level is required")
     .not()
     .isEmpty()
-    .isIn(["none", "primary", "secondary", "diploma", "degree", "postgraduate"]),
+    .isIn([
+      "none",
+      "primary",
+      "secondary",
+      "diploma",
+      "degree",
+      "postgraduate",
+    ]),
   check("residencyStatus", "Residency status is required")
     .not()
     .isEmpty()
@@ -65,11 +72,18 @@ const validateFullRegistration = [
   check("salary", "Salary range is required")
     .not()
     .isEmpty()
-    .isIn(["<1000", "1000-2999", "3000-4999", "5000-6999", "7000-9999", "10000+"]),
+    .isIn([
+      "<1000",
+      "1000-2999",
+      "3000-4999",
+      "5000-6999",
+      "7000-9999",
+      "10000+",
+    ]),
   check("accountType", "Account type is required")
     .not()
     .isEmpty()
-      .isIn(["savings", "current", "business", "fixed_deposit"]),
+    .isIn(["savings", "current", "business", "fixed_deposit"]),
   check("purposeOfAccount", "Purpose of account is required")
     .not()
     .isEmpty()
@@ -91,7 +105,15 @@ const validateFullRegistration = [
   check("nextOfKin.relationship", "Next of kin relationship is required")
     .not()
     .isEmpty()
-    .isIn(["parent", "spouse", "child", "sibling", "relative", "friend", "other"]),
+    .isIn([
+      "parent",
+      "spouse",
+      "child",
+      "sibling",
+      "relative",
+      "friend",
+      "other",
+    ]),
 ];
 
 module.exports = { validateInitialApplication, validateFullRegistration };

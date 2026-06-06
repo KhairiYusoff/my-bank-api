@@ -13,7 +13,7 @@ const AccountSchema = new mongoose.Schema({
   },
   accountType: {
     type: String,
-      enum: ["savings", "current", "business", "fixed_deposit"],
+    enum: ["savings", "current", "business", "fixed_deposit"],
     required: false,
   },
   branch: {

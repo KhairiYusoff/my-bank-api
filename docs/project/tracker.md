@@ -86,26 +86,26 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 
 Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7 code starts.
 
-| ID     | Sev      | Summary                                                                                                       | Commit     |
-| ------ | -------- | ------------------------------------------------------------------------------------------------------------- | ---------- |
+| ID     | Sev      | Summary                                                                                                                                                      | Commit    |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
 | BUG-01 | CRITICAL | Account type enum unified to `savings/current/business/fixed_deposit` across Account model, User model, validations, accountTypeMap. Migration script added. | see below |
-| BUG-02 | CRITICAL | `verifyCustomer` wrapped in Mongoose session — user verify + account create are now atomic                    | see below |
-| BUG-03 | CRITICAL | `user.status` enforced in `loginUser()` and `authMiddleware` — suspended/terminated users blocked             | see below |
-| BUG-04 | CRITICAL | `CREATE_STAFF` added to `ActivityLog` enum — staff creation now auditable                                     | see below |
-| BUG-05 | HIGH     | Deferred to Phase 10 — requires product decision on soft vs hard delete                                       | —          |
-| BUG-06 | HIGH     | `account.status !== "Active"` guard added to `deposit()`, `withdraw()`, `transferFunds()`                    | see below |
+| BUG-02 | CRITICAL | `verifyCustomer` wrapped in Mongoose session — user verify + account create are now atomic                                                                   | see below |
+| BUG-03 | CRITICAL | `user.status` enforced in `loginUser()` and `authMiddleware` — suspended/terminated users blocked                                                            | see below |
+| BUG-04 | CRITICAL | `CREATE_STAFF` added to `ActivityLog` enum — staff creation now auditable                                                                                    | see below |
+| BUG-05 | HIGH     | Deferred to Phase 10 — requires product decision on soft vs hard delete                                                                                      | —         |
+| BUG-06 | HIGH     | `account.status !== "Active"` guard added to `deposit()`, `withdraw()`, `transferFunds()`                                                                    | see below |
 
 ---
 
-| Story                                         | Repo                                       | Summary                                                                          | Status |
-| --------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- | ------ |
-| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                              | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix | ⬜     |
-| [US-7002](../user-stories/phase-7/US-7002.md) | `my-bank-api`                              | Savings monthly withdrawal cap enforced (max 4/month)                            | ⬜     |
-| [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal`      | Banker sets overdraft limit on Current/Business account via portal               | ⬜     |
-| [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`                         | Customer sees account type rules and limits in portal                            | ⬜     |
-| [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                              | Monthly maintenance fee deducted automatically (cron, 1st of month)             | ⬜     |
-| [US-7007](../user-stories/phase-7/US-7007.md) | `my-bank-api`                              | Savings interest credited monthly (cron, last day of month)                     | ⬜     |
-| [US-7008](../user-stories/phase-7/US-7008.md) | `my-bank-api`, `notification-service`      | Customer notified when balance falls below maintenance threshold                 | ⬜     |
+| Story                                         | Repo                                  | Summary                                                                           | Status |
+| --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------- | ------ |
+| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                         | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix | ⬜     |
+| [US-7002](../user-stories/phase-7/US-7002.md) | `my-bank-api`                         | Savings monthly withdrawal cap enforced (max 4/month)                             | ⬜     |
+| [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account via portal                | ⬜     |
+| [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`                    | Customer sees account type rules and limits in portal                             | ⬜     |
+| [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                         | Monthly maintenance fee deducted automatically (cron, 1st of month)               | ⬜     |
+| [US-7007](../user-stories/phase-7/US-7007.md) | `my-bank-api`                         | Savings interest credited monthly (cron, last day of month)                       | ⬜     |
+| [US-7008](../user-stories/phase-7/US-7008.md) | `my-bank-api`, `notification-service` | Customer notified when balance falls below maintenance threshold                  | ⬜     |
 
 > **Note — US-7004 removed:** “Transfer blocked if daily limit exceeded” was a subset of US-7001. Merged; no separate story file.
 
@@ -113,22 +113,22 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 
 ## Phase 8 Backlog — Role Expansion (4 Roles)
 
-| Story   | Repo                                  | Summary                                                                                                                     | Status |
-| ------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
-| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                            | ⬜     |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                       | ⬜     |
+| Story   | Repo                                  | Summary                                                                                                                      | Status |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                             | ⬜     |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                        | ⬜     |
 | US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control in admin portal — sidebar nav, route guards, dashboard cards, and 403 error page (depends US-8001) | ⬜     |
-| US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form | ⬜     |
+| US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form  | ⬜     |
 
 **US-8003 Scope (do not implement before US-8001):**
 
-| Area | What to implement |
-| --- | --- |
-| Sidebar nav | Filter `navItems` array by role — banker sees no Staff, Airdrop, Audit; auditor sees no Staff, Airdrop, Applications (no mutations) |
-| Route guards | Wrap protected routes — if role lacks access and navigates via URL, redirect to `/403` |
-| 403 page | New `ForbiddenPage` component — "You don't have permission to access this page", Back to Dashboard button |
-| Dashboard cards | Hide **Staff Members** KPI card for banker and auditor; hide **Airdrop** data if not admin |
-| Dashboard BE | `getDashboardSummary` omits `counts.staff` from response if caller is `banker`; returns full data for `admin` and `auditor` |
+| Area            | What to implement                                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Sidebar nav     | Filter `navItems` array by role — banker sees no Staff, Airdrop, Audit; auditor sees no Staff, Airdrop, Applications (no mutations) |
+| Route guards    | Wrap protected routes — if role lacks access and navigates via URL, redirect to `/403`                                              |
+| 403 page        | New `ForbiddenPage` component — "You don't have permission to access this page", Back to Dashboard button                           |
+| Dashboard cards | Hide **Staff Members** KPI card for banker and auditor; hide **Airdrop** data if not admin                                          |
+| Dashboard BE    | `getDashboardSummary` omits `counts.staff` from response if caller is `banker`; returns full data for `admin` and `auditor`         |
 
 > Read `docs/engineering/security/authorization.md` before writing any code for Phase 8.
 

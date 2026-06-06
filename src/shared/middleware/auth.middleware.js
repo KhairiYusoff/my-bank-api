@@ -22,13 +22,19 @@ const authMiddleware = async function (req, res, next) {
       const issuedAt = decoded.iat * 1000; // iat is in seconds, convert to ms
       const pwdChangedAt = new Date(user.passwordChangedAt).getTime();
       if (issuedAt < pwdChangedAt) {
-        return res.status(401).json({ msg: "Token invalid due to password change. Please log in again." });
+        return res
+          .status(401)
+          .json({
+            msg: "Token invalid due to password change. Please log in again.",
+          });
       }
     }
 
-      if (user.status !== "active") {
-        return res.status(403).json({ msg: "Account suspended. Please contact support." });
-      }
+    if (user.status !== "active") {
+      return res
+        .status(403)
+        .json({ msg: "Account suspended. Please contact support." });
+    }
 
     req.user = user;
     next();

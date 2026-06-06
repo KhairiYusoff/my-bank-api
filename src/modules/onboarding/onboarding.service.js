@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { sendEmail } = require("../../shared/utils/email");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
+const mongoose = require("mongoose");
 const {
   notifyNewApplication,
 } = require("../../shared/services/websocket.service");
@@ -118,35 +119,25 @@ class OnboardingService {
     }
 
     user.applicationStatus = "approved";
-      const ACCOUNT_TYPE_MAP = {
+    const { url: completeProfileUrl } = this.buildProfileCompletionUrl(
+      user._id,
+    );
     await this.sendApprovalEmail({
       email: user.email,
       name: user.name,
       completeProfileUrl,
     });
-      err.statusCode = 404;
-      const session = await mongoose.startSession();
-      session.startTransaction();
-      try {
-        await user.save({ session });
-        const newAccount = new Account({
-          user: user._id,
-          accountNumber: `MYB${Date.now()}`,
-          accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
-          balance: 0,
-          currency: "MYR",
-          status: "Active",
-          dateOpened: new Date(),
-        });
-        await newAccount.save({ session });
-        await session.commitTransaction();
-      } catch (err) {
-        await session.abortTransaction();
-        throw err;
-      } finally {
-        session.endSession();
-      }
 
+    await user.save();
+
+    return { userId: user._id, completeProfileUrl };
+  }
+
+  async completeProfile(userId, profileData) {
+    const user = await User.findById(userId);
+    if (!user) {
+      const err = new Error("User not found");
+      err.statusCode = 404;
       throw err;
     }
     if (user.isProfileComplete) {
@@ -199,24 +190,35 @@ class OnboardingService {
 
     user.isVerified = true;
     user.applicationStatus = "completed";
-    await user.save();
 
-    const accountTypeMap = {
     const ACCOUNT_TYPE_MAP = {
       savings: "savings",
       current: "current",
       business: "business",
       fixed_deposit: "fixed_deposit",
     };
-    const newAccount = new Account({
-      user: user._id,
-      accountNumber: `MYB${Date.now()}`,
-      accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
-      balance: 0,
-      currency: "MYR",
-      status: "Active",
-      dateOpened: new Date(),
-    });
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await user.save({ session });
+      const newAccount = new Account({
+        user: user._id,
+        accountNumber: `MYB${Date.now()}`,
+        accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
+        balance: 0,
+        currency: "MYR",
+        status: "Active",
+        dateOpened: new Date(),
+      });
+      await newAccount.save({ session });
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
 
     await this.sendActivationEmail({ email: user.email, name: user.name });
   }

@@ -26,16 +26,16 @@ exports.loginUser = async (email, password) => {
     throw err;
   }
 
-    if (user.status !== "active") {
-      const err = new Error(
-        "Your account has been suspended. Please contact support.",
-      );
-      err.statusCode = 403;
-      err.code = "USER_SUSPENDED";
-      throw err;
-    }
+  if (user.status !== "active") {
+    const err = new Error(
+      "Your account has been suspended. Please contact support.",
+    );
+    err.statusCode = 403;
+    err.code = "USER_SUSPENDED";
+    throw err;
+  }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     const err = new Error("Invalid credentials");
     err.statusCode = 400;

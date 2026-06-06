@@ -8,7 +8,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: 2,
-      maxlength: 100
+      maxlength: 100,
     },
     email: {
       type: String,
@@ -16,21 +16,21 @@ const UserSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      maxlength: 255
+      maxlength: 255,
     },
     phoneNumber: {
       type: String,
-      required: function() {
-        return this.role === 'customer';
+      required: function () {
+        return this.role === "customer";
       },
       unique: true,
-      trim: true
+      trim: true,
     },
     password: {
       type: String,
-      required: function() {
-        return this.role !== 'customer' || this.isVerified;
-      }
+      required: function () {
+        return this.role !== "customer" || this.isVerified;
+      },
     },
     identityNumber: {
       type: String,
@@ -39,66 +39,66 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
-      }
+      },
     },
     applicationStatus: {
       type: String,
       enum: ["pending", "approved", "rejected", "on_hold", "completed"],
-      default: "pending"
+      default: "pending",
     },
     isVerified: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isProfileComplete: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isFirstTime: {
       type: Boolean,
-      default: true
+      default: true,
     },
     role: {
       type: String,
       enum: ["customer", "banker", "admin"],
-      default: "customer"
+      default: "customer",
     },
     status: {
       type: String,
       enum: ["active", "suspended", "terminated"],
-      default: "active"
+      default: "active",
     },
     address: {
-      street: { 
+      street: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
+        },
       },
-      city: { 
+      city: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
+        },
       },
-      state: { 
+      state: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
+        },
       },
-      postalCode: { 
+      postalCode: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
-      }
+        },
+      },
     },
     dateOfBirth: {
       type: Date,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
-      }
+      },
     },
     job: {
       type: String,
@@ -120,7 +120,7 @@ const UserSchema = new mongoose.Schema(
     },
     accountType: {
       type: String,
-        enum: ["savings", "current", "business", "fixed_deposit"],
+      enum: ["savings", "current", "business", "fixed_deposit"],
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
@@ -180,17 +180,17 @@ const UserSchema = new mongoose.Schema(
       },
     },
     nextOfKin: {
-      name: { 
+      name: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
+        },
       },
-      phone: { 
+      phone: {
         type: String,
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
+        },
       },
       relationship: {
         type: String,
@@ -201,12 +201,12 @@ const UserSchema = new mongoose.Schema(
           "sibling",
           "relative",
           "friend",
-          "other"
+          "other",
         ],
-        required: function() {
+        required: function () {
           return this.role === "customer" && this.isProfileComplete;
-        }
-      }
+        },
+      },
     },
     maritalStatus: {
       type: String,
@@ -239,7 +239,7 @@ const UserSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 UserSchema.pre("save", async function (next) {
@@ -247,7 +247,7 @@ UserSchema.pre("save", async function (next) {
     return next();
   }
   // Only hash if not already a bcrypt hash
-  if (typeof this.password === 'string' && this.password.startsWith('$2')) {
+  if (typeof this.password === "string" && this.password.startsWith("$2")) {
     return next();
   }
   const salt = await bcrypt.genSalt(10);

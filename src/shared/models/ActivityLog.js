@@ -52,8 +52,8 @@ const ActivityLogSchema = new mongoose.Schema(
         "VIEW_STAFF_PROFILE",
         "VIEW_ACCOUNT_DETAIL",
         "ACCOUNT_STATUS_CHANGED",
-          "CREATE_STAFF",
-        ],
+        "CREATE_STAFF",
+      ],
     },
     details: {
       type: String,
@@ -112,7 +112,7 @@ const ActivityLogSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 // Indexes for faster queries
