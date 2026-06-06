@@ -13,7 +13,7 @@ const AccountSchema = new mongoose.Schema({
   },
   accountType: {
     type: String,
-    enum: ["Savings", "Checking", "Business"],
+      enum: ["savings", "current", "business", "fixed_deposit"],
     required: false,
   },
   branch: {
@@ -46,6 +46,7 @@ const AccountSchema = new mongoose.Schema({
   },
   overdraftLimit: {
     type: Number,
+    default: 0,
   },
   minimumBalance: {
     type: Number,

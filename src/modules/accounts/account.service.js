@@ -231,9 +231,15 @@ class AccountService {
         throw err;
       }
 
-      const balanceBefore = account.balance;
-      account.balance += amount;
-      const completedAt = new Date();
+        if (account.status !== "Active") {
+          const err = new Error("This account is not active and cannot receive deposits");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        const balanceBefore = account.balance;
+        account.balance += amount;
+        const completedAt = new Date();
 
       transaction = new Transaction({
         account: account._id,
@@ -315,8 +321,14 @@ class AccountService {
         throw err;
       }
 
-      if (account.balance < amount) {
-        const err = new Error("Insufficient funds");
+        if (account.status !== "Active") {
+          const err = new Error("This account is not active and cannot process withdrawals");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        if (account.balance < amount) {
+          const err = new Error("Insufficient funds");
         err.statusCode = 400;
         throw err;
       }

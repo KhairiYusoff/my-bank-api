@@ -118,24 +118,35 @@ class OnboardingService {
     }
 
     user.applicationStatus = "approved";
-    const { url: completeProfileUrl } = this.buildProfileCompletionUrl(
-      user._id,
-    );
+      const ACCOUNT_TYPE_MAP = {
     await this.sendApprovalEmail({
       email: user.email,
       name: user.name,
       completeProfileUrl,
     });
-    await user.save();
-
-    return { userId: user._id, completeProfileUrl };
-  }
-
-  async completeProfile(userId, profileData) {
-    const user = await User.findById(userId);
-    if (!user) {
-      const err = new Error("User not found");
       err.statusCode = 404;
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        await user.save({ session });
+        const newAccount = new Account({
+          user: user._id,
+          accountNumber: `MYB${Date.now()}`,
+          accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
+          balance: 0,
+          currency: "MYR",
+          status: "Active",
+          dateOpened: new Date(),
+        });
+        await newAccount.save({ session });
+        await session.commitTransaction();
+      } catch (err) {
+        await session.abortTransaction();
+        throw err;
+      } finally {
+        session.endSession();
+      }
+
       throw err;
     }
     if (user.isProfileComplete) {
@@ -191,14 +202,16 @@ class OnboardingService {
     await user.save();
 
     const accountTypeMap = {
-      savings: "Savings",
-      checking: "Checking",
-      business: "Business",
+    const ACCOUNT_TYPE_MAP = {
+      savings: "savings",
+      current: "current",
+      business: "business",
+      fixed_deposit: "fixed_deposit",
     };
-    await Account.create({
+    const newAccount = new Account({
       user: user._id,
       accountNumber: `MYB${Date.now()}`,
-      accountType: accountTypeMap[user.accountType] || "Savings",
+      accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
       balance: 0,
       currency: "MYR",
       status: "Active",

@@ -69,7 +69,7 @@ const validateFullRegistration = [
   check("accountType", "Account type is required")
     .not()
     .isEmpty()
-    .isIn(["savings", "current", "fixed deposit"]),
+      .isIn(["savings", "current", "business", "fixed_deposit"]),
   check("purposeOfAccount", "Purpose of account is required")
     .not()
     .isEmpty()

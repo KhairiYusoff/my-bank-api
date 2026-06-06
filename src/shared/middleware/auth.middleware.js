@@ -26,6 +26,10 @@ const authMiddleware = async function (req, res, next) {
       }
     }
 
+      if (user.status !== "active") {
+        return res.status(403).json({ msg: "Account suspended. Please contact support." });
+      }
+
     req.user = user;
     next();
   } catch (err) {

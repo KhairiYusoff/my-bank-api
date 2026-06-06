@@ -103,11 +103,23 @@ class TransactionService {
         throw err;
       }
 
-      if (fromAccount.balance < amount) {
-        const err = new Error("Insufficient funds");
-        err.statusCode = 400;
-        throw err;
-      }
+        if (fromAccount.status !== "Active") {
+          const err = new Error("This account is not active and cannot process transfers");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        if (toAccount.status !== "Active") {
+          const err = new Error("Recipient account is not active and cannot receive transfers");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        if (fromAccount.balance < amount) {
+          const err = new Error("Insufficient funds");
+          err.statusCode = 400;
+          throw err;
+        }
 
       // Update balances
       const fromBalanceBefore = fromAccount.balance;

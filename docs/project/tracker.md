@@ -3,7 +3,8 @@
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
 **Last Updated:** Jun 5, 2026
-**Current Phase:** Phase 7 (backlog — not started)
+**Last Updated:** Jun 6, 2026
+**Current Phase:** Pre-Phase 7 bug fixes (in progress)
 
 ---
 
@@ -80,6 +81,21 @@ All services deployed. P0 bugs fixed. See roadmap.md for detail.
 ---
 
 ## Phase 7 Backlog — Account Type Differentiation
+
+## Pre-Phase 7 — Lifecycle Bug Fixes ✅ (Jun 6, 2026)
+
+Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7 code starts.
+
+| ID     | Sev      | Summary                                                                                                       | Commit     |
+| ------ | -------- | ------------------------------------------------------------------------------------------------------------- | ---------- |
+| BUG-01 | CRITICAL | Account type enum unified to `savings/current/business/fixed_deposit` across Account model, User model, validations, accountTypeMap. Migration script added. | see below |
+| BUG-02 | CRITICAL | `verifyCustomer` wrapped in Mongoose session — user verify + account create are now atomic                    | see below |
+| BUG-03 | CRITICAL | `user.status` enforced in `loginUser()` and `authMiddleware` — suspended/terminated users blocked             | see below |
+| BUG-04 | CRITICAL | `CREATE_STAFF` added to `ActivityLog` enum — staff creation now auditable                                     | see below |
+| BUG-05 | HIGH     | Deferred to Phase 10 — requires product decision on soft vs hard delete                                       | —          |
+| BUG-06 | HIGH     | `account.status !== "Active"` guard added to `deposit()`, `withdraw()`, `transferFunds()`                    | see below |
+
+---
 
 | Story                                         | Repo                                       | Summary                                                                          | Status |
 | --------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- | ------ |

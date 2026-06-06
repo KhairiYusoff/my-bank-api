@@ -120,7 +120,7 @@ const UserSchema = new mongoose.Schema(
     },
     accountType: {
       type: String,
-      enum: ["savings", "current", "fixed deposit"],
+        enum: ["savings", "current", "business", "fixed_deposit"],
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
