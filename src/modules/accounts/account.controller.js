@@ -223,3 +223,16 @@ exports.setOverdraftLimit = async (req, res) => {
     });
   }
 };
+
+exports.getAccountLimits = async (req, res) => {
+  try {
+    const data = accountService.getAccountLimits();
+    return success(res, { message: "Account limits fetched", data });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};

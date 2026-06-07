@@ -6,6 +6,7 @@ const {
   sendNotification,
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
+const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -552,7 +553,10 @@ class AccountService {
       throw err;
     }
 
-    if (account.accountType === "savings" || account.accountType === "fixed_deposit") {
+    if (
+      account.accountType === "savings" ||
+      account.accountType === "fixed_deposit"
+    ) {
       const err = new Error("Overdraft is not available for this account type");
       err.statusCode = 400;
       throw err;
@@ -560,7 +564,14 @@ class AccountService {
 
     account.overdraftLimit = overdraftLimit;
     await account.save();
-    return { accountNumber: account.accountNumber, overdraftLimit: account.overdraftLimit };
+    return {
+      accountNumber: account.accountNumber,
+      overdraftLimit: account.overdraftLimit,
+    };
+  }
+
+  getAccountLimits() {
+    return ACCOUNT_LIMITS;
   }
 }
 

@@ -7,23 +7,12 @@ const {
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
+const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
   admin: "system",
   customer: "web",
-};
-
-const MAX_SINGLE_TRANSFER = {
-  savings: 5000,
-  current: 10000,
-  business: 20000,
-};
-
-const DAILY_TRANSFER_LIMIT = {
-  savings: 10000,
-  current: 20000,
-  business: 50000,
 };
 
 class TransactionService {
@@ -76,8 +65,9 @@ class TransactionService {
       throw err;
     }
 
-    const maxSingleLimit = MAX_SINGLE_TRANSFER[fromAccountCheck.accountType];
-    const dailyLimit = DAILY_TRANSFER_LIMIT[fromAccountCheck.accountType];
+    const typeLimits = ACCOUNT_LIMITS[fromAccountCheck.accountType];
+    const maxSingleLimit = typeLimits?.maxSingleTransfer;
+    const dailyLimit = typeLimits?.dailyTransferLimit;
     if (!maxSingleLimit || !dailyLimit) {
       const err = new Error("Unsupported account type for transfers");
       err.statusCode = 400;

@@ -11,6 +11,7 @@ const {
   getAccountByNumber,
   updateAccountStatus,
   setOverdraftLimit,
+  getAccountLimits,
 } = require("./account.controller");
 const {
   authMiddleware,
@@ -39,6 +40,7 @@ router.delete(
   deleteAccount,
 );
 router.get("/all", authorizeRoles("admin"), getAllAccounts);
+router.get("/limits", getAccountLimits);
 router.get("/", authorizeRoles("customer"), getAccounts);
 router.get("/balance/:accountNumber", authorizeRoles("customer"), getBalance);
 router.post(
