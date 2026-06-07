@@ -99,8 +99,8 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 
 | Story                                         | Repo                                  | Summary                                                                           | Status |
 | --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------- | ------ |
-| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                         | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix | ⬜     |
-| [US-7002](../user-stories/phase-7/US-7002.md) | `my-bank-api`                         | Savings monthly withdrawal cap enforced (max 4/month)                             | ⬜     |
+| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                         | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix | ✅ `785e6bb` Jun 7 2026 |
+| ~~US-7002~~                                   | ~~`my-bank-api`~~                     | ~~Savings monthly withdrawal cap (max 4/month)~~ — dropped; Reg D not applicable to BNM; moved to Phase 14 as AML soft-flag | ❌ dropped |
 | [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account via portal                | ⬜     |
 | [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`                    | Customer sees account type rules and limits in portal                             | ⬜     |
 | [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                         | Monthly maintenance fee deducted automatically (cron, 1st of month)               | ⬜     |
@@ -177,6 +177,19 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 | US-12001 | `my-bank-customer` | Customer saves a beneficiary with nickname                    | ⬜     |
 | US-12002 | `my-bank-customer` | Customer manages (add/edit/delete) beneficiaries              | ⬜     |
 | US-12003 | `my-bank-customer` | Transfer form pre-fills account number from saved beneficiary | ⬜     |
+
+---
+
+## Phase 14 Backlog — Fraud & Risk (AML/CFT)
+
+> Dedicated fraud detection phase. `riskFlags` field on Transaction is already schema-ready — this phase populates and surfaces it.
+
+| Story    | Repo                                  | Summary                                                                                              | Status |
+| -------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------ |
+| US-14001 | `my-bank-api`                         | BNM AML soft flags on withdrawals: `CTR_THRESHOLD_BREACH` (≥RM50k), `STRUCTURING_SUSPECTED` (RM40k–49,999), `RAPID_DRAIN` (≥50% balance in 1hr) | ⬜     |
+| US-14002 | `my-bank-api`                         | Velocity soft flags on transfers: `VELOCITY_BREACH` (5 transfers in 10 min), `NEW_RECIPIENT_HIGH_VALUE` (new recipient + amount >50% of type cap) | ⬜     |
+| US-14003 | `my-bank-api`, `my-bank-admin-portal` | Admin flagged transactions dashboard — filter by riskFlag, date, account type                        | ⬜     |
+| US-14004 | `my-bank-api`, `notification-service` | Compliance alert sent to admin when `CTR_THRESHOLD_BREACH` or `STRUCTURING_SUSPECTED` is triggered   | ⬜     |
 
 ---
 

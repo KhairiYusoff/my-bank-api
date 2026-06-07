@@ -543,6 +543,25 @@ class AccountService {
     await account.save();
     return account;
   }
+
+  async setOverdraftLimit(accountNumber, overdraftLimit) {
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.accountType === "savings" || account.accountType === "fixed_deposit") {
+      const err = new Error("Overdraft is not available for this account type");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.overdraftLimit = overdraftLimit;
+    await account.save();
+    return { accountNumber: account.accountNumber, overdraftLimit: account.overdraftLimit };
+  }
 }
 
 module.exports = new AccountService();

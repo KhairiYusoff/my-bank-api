@@ -10,6 +10,7 @@ const {
   airdrop,
   getAccountByNumber,
   updateAccountStatus,
+  setOverdraftLimit,
 } = require("./account.controller");
 const {
   authMiddleware,
@@ -17,6 +18,7 @@ const {
 } = require("../../shared/middleware/auth.middleware");
 const {
   validateAccountCreation,
+  validateOverdraftLimit,
 } = require("../../shared/middleware/account.middleware");
 const { activityLogger } = require("../audit/audit.service");
 const router = express.Router();
@@ -68,6 +70,13 @@ router.patch(
   authorizeRoles("admin", "banker"),
   activityLogger("ACCOUNT_STATUS_CHANGED", "Account status changed"),
   updateAccountStatus,
+);
+router.patch(
+  "/:accountNumber/overdraft-limit",
+  authorizeRoles("admin", "banker"),
+  validateOverdraftLimit,
+  activityLogger("UPDATE_OVERDRAFT_LIMIT", "Staff updated overdraft limit"),
+  setOverdraftLimit,
 );
 
 module.exports = router;

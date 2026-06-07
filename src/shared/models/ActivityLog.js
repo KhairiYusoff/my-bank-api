@@ -53,6 +53,7 @@ const ActivityLogSchema = new mongoose.Schema(
         "VIEW_ACCOUNT_DETAIL",
         "ACCOUNT_STATUS_CHANGED",
         "CREATE_STAFF",
+        "UPDATE_OVERDRAFT_LIMIT",
       ],
     },
     details: {

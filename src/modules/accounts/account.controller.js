@@ -207,3 +207,19 @@ exports.updateAccountStatus = async (req, res) => {
     });
   }
 };
+
+exports.setOverdraftLimit = async (req, res) => {
+  try {
+    const result = await accountService.setOverdraftLimit(
+      req.params.accountNumber,
+      req.body.overdraftLimit,
+    );
+    return success(res, { message: "Overdraft limit updated", data: result });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
