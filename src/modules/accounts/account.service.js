@@ -307,6 +307,12 @@ class AccountService {
     const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
 
+    if (amount < 10) {
+      const err = new Error("Minimum withdrawal amount is RM10.00");
+      err.statusCode = 400;
+      throw err;
+    }
+
     const query = { accountNumber };
     if (role === "customer") query.user = userId;
 
@@ -331,7 +337,16 @@ class AccountService {
         throw err;
       }
 
-      if (account.balance < amount) {
+      if (account.accountType === "fixed_deposit") {
+        const err = new Error(
+          "Fixed Deposit withdrawals are not permitted until the account matures",
+        );
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const available = account.balance + (account.overdraftLimit ?? 0);
+      if (available < amount) {
         const err = new Error("Insufficient funds");
         err.statusCode = 400;
         throw err;

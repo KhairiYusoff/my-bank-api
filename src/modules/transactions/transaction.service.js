@@ -14,6 +14,18 @@ const ROLE_TO_CHANNEL = {
   customer: "web",
 };
 
+const MAX_SINGLE_TRANSFER = {
+  savings: 5000,
+  current: 10000,
+  business: 20000,
+};
+
+const DAILY_TRANSFER_LIMIT = {
+  savings: 10000,
+  current: 20000,
+  business: 50000,
+};
+
 class TransactionService {
   async transferFunds(
     fromAccountNumber,
@@ -28,13 +40,87 @@ class TransactionService {
     const submittedAt = new Date();
     const channel = ROLE_TO_CHANNEL[role] ?? "web";
 
+    if (amount < 1) {
+      const err = new Error("Minimum transfer amount is RM1.00");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (fromAccountNumber === toAccountNumber) {
+      const err = new Error("Cannot transfer to the same account");
+      err.statusCode = 400;
+      throw err;
+    }
+
     const fromAccountCheck = await Account.findOne({
       accountNumber: fromAccountNumber,
       user: userId,
-    }).select("_id");
+    }).select("_id accountType status balance overdraftLimit");
     if (!fromAccountCheck) {
       const err = new Error("Account not found or access denied");
       err.statusCode = 404;
+      throw err;
+    }
+
+    if (fromAccountCheck.status !== "Active") {
+      const err = new Error(
+        "This account is not active and cannot process transfers",
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (fromAccountCheck.accountType === "fixed_deposit") {
+      const err = new Error("Fixed Deposit accounts cannot send transfers");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const maxSingleLimit = MAX_SINGLE_TRANSFER[fromAccountCheck.accountType];
+    const dailyLimit = DAILY_TRANSFER_LIMIT[fromAccountCheck.accountType];
+    if (!maxSingleLimit || !dailyLimit) {
+      const err = new Error("Unsupported account type for transfers");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (amount > maxSingleLimit) {
+      const err = new Error(
+        `Transfer amount exceeds the RM${maxSingleLimit} single transfer limit for this account type`,
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    const dailyAgg = await Transaction.aggregate([
+      {
+        $match: {
+          account: fromAccountCheck._id,
+          type: "transfer",
+          direction: "debit",
+          date: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const dailyTotal = dailyAgg[0]?.total ?? 0;
+    if (dailyTotal + amount > dailyLimit) {
+      const err = new Error(
+        `This transfer would exceed the RM${dailyLimit} daily transfer limit for this account type`,
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const availableFunds =
+      fromAccountCheck.balance + (fromAccountCheck.overdraftLimit ?? 0);
+    if (availableFunds < amount) {
+      const err = new Error("Insufficient funds");
+      err.statusCode = 400;
       throw err;
     }
 
@@ -50,11 +136,25 @@ class TransactionService {
     const toAccountForName = await Account.findOne({
       accountNumber: toAccountNumber,
     })
-      .select("user")
+      .select("user accountType status")
       .lean();
     if (!toAccountForName) {
       const err = new Error("Recipient account not found");
       err.statusCode = 404;
+      throw err;
+    }
+
+    if (toAccountForName.status !== "Active") {
+      const err = new Error(
+        "Recipient account is not active and cannot receive transfers",
+      );
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (toAccountForName.accountType === "fixed_deposit") {
+      const err = new Error("Fixed Deposit accounts cannot receive transfers");
+      err.statusCode = 400;
       throw err;
     }
     const counterpartUser = await User.findById(toAccountForName.user)
@@ -119,7 +219,23 @@ class TransactionService {
         throw err;
       }
 
-      if (fromAccount.balance < amount) {
+      if (fromAccount.accountType === "fixed_deposit") {
+        const err = new Error("Fixed Deposit accounts cannot send transfers");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      if (toAccount.accountType === "fixed_deposit") {
+        const err = new Error(
+          "Fixed Deposit accounts cannot receive transfers",
+        );
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const availableInSession =
+        fromAccount.balance + (fromAccount.overdraftLimit ?? 0);
+      if (availableInSession < amount) {
         const err = new Error("Insufficient funds");
         err.statusCode = 400;
         throw err;
