@@ -26,6 +26,7 @@
     "jsonwebtoken": "^8.5.1",
     "libphonenumber-js": "^1.11.7",
     "mongoose": "^6.0.12",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.3",
     "socket.io": "^4.8.1",
     "swagger-ui-express": "^5.0.1",

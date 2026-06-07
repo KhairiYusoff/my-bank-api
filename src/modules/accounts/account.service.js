@@ -7,6 +7,9 @@ const {
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
 const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
+const {
+  notifyBelowThreshold,
+} = require("../../shared/utils/maintenanceThreshold");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -415,6 +418,8 @@ class AccountService {
         notifyErr.message,
       );
     }
+
+    await notifyBelowThreshold(account);
 
     return { account, transaction };
   }

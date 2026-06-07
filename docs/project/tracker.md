@@ -211,3 +211,40 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 | --- | --------------------------------------------------------------------------------------- | ------ |
 | P1  | `authorizeRoles` redundant `User.findById` — `req.user` already set by `authMiddleware` | Medium |
 | P2  | Route auto-loader in `server.js`                                                        | Low    |
+
+---
+
+## Infrastructure — Pending Action: Migrate API from Render to Fly.io
+
+**Why:** Render free tier sleeps after 15 minutes of inactivity. `node-cron` jobs (US-7006 maintenance fee, US-7007 savings interest) are missed when the server is asleep. For cron jobs to run reliably in production, the server must be always-on.
+
+**Action required:** Migrate `my-bank-api` from Render to Fly.io before Phase 7 cron jobs are considered production-ready.
+
+### Free tier hosting options — no forced sleep
+
+| Platform         | Free tier         | Sleeps? | Cron reliable? | Notes                                                           |
+| ---------------- | ----------------- | ------- | -------------- | --------------------------------------------------------------- |
+| **Fly.io**       | 3 shared VMs free | ❌ No   | ✅ Yes         | **Recommended** — genuinely always-on, uses existing Dockerfile |
+| **Koyeb**        | 1 free instance   | ❌ No   | ✅ Yes         | Simple deploy, good DX                                          |
+| **Railway**      | $5 credit/month   | ❌ No   | ✅ Yes         | Credit usually covers a small API                               |
+| Render (current) | Free tier         | ✅ Yes  | ❌ Unreliable  | Sleeps after 15min idle                                         |
+| Vercel           | Serverless only   | N/A     | ❌ No          | Frontend/Lambda only — no persistent process                    |
+
+### Migration steps (Fly.io)
+
+```bash
+# Install flyctl
+brew install flyctl
+
+# Login
+fly auth login
+
+# From my-bank-api root (Dockerfile already exists)
+fly launch        # detects Dockerfile, creates fly.toml
+fly secrets set PORT=5000 MONGO_URI=... JWT_SECRET=... # copy from Render env vars
+fly deploy
+
+# Update VITE_API_URL in Vercel + my-bank-admin-portal to point to new Fly.io URL
+```
+
+**Status:** ⬜ Not started — do after Phase 7 crons are implemented and tested locally.

@@ -8,6 +8,9 @@ const {
 const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
 const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
+const {
+  notifyBelowThreshold,
+} = require("../../shared/utils/maintenanceThreshold");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -316,6 +319,13 @@ class TransactionService {
       fromTransaction._id,
     ).catch((e) =>
       console.error("Failed to send transfer notification:", e.message),
+    );
+
+    notifyBelowThreshold({
+      ...fromAccount.toObject(),
+      balance: fromBalanceAfter,
+    }).catch((e) =>
+      console.error("Failed to send low balance alert:", e.message),
     );
 
     return {

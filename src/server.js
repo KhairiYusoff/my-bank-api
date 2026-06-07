@@ -28,14 +28,18 @@ const auditRoutes = require("./modules/audit/audit.routes");
 const notificationRoutes = require("./modules/notifications/notification.routes");
 const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
-// 4. Initialize Express app
+// 4. Cron jobs
+require("./modules/cron/savingsInterest.cron");
+require("./modules/cron/maintenanceFee.cron");
+
+// 5. Initialize Express app
 const app = express();
 app.set("trust proxy", 1);
 
-// 5. Connect to Database
+// 6. Connect to Database
 connectDB();
 
-// 6. Middleware
+// 7. Middleware
 const corsOptions = {
   origin: [process.env.ADMIN_FRONTEND_URL, process.env.CUSTOMER_FRONTEND_URL],
   credentials: true,
@@ -49,10 +53,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 7. Rate Limiting
+// 8. Rate Limiting
 app.use(rateLimitMiddleware);
 
-// 8. API Documentation
+// 9. API Documentation
 if (process.env.NODE_ENV !== "production") {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.get("/api-docs.json", (req, res) => {
@@ -69,7 +73,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-// 9. Routes
+// 10. Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/accounts", accountRoutes);

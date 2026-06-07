@@ -8,7 +8,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["deposit", "withdrawal", "airdrop", "transfer"],
+    enum: ["deposit", "withdrawal", "airdrop", "transfer", "fee", "interest"],
     required: true,
   },
   amount: {
@@ -24,7 +24,8 @@ const TransactionSchema = new mongoose.Schema({
   performedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true,
+    required: false,
+    default: null,
   },
   date: {
     type: Date,
