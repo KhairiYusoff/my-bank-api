@@ -52,7 +52,7 @@ All models live in `src/shared/models/`.
 {
   user: ObjectId (ref: User),
   accountNumber: String (unique, format: "MYB" + timestamp),
-  accountType: String (enum: ["Savings", "Checking", "Business"]),
+  accountType: String (enum: ["savings", "current", "business", "fixed_deposit"]),
   branch: String,
   balance: Number (default: 0, represents cents: 5000 = RM 50.00),
   currency: String (default: "MYR"),
@@ -92,18 +92,18 @@ All models live in `src/shared/models/`.
 
 ## 3. Transaction Model
 
-**Purpose:** Record all money movements (deposit, withdraw, transfer, airdrop)
+**Purpose:** Record all money movements (deposit, withdraw, transfer, airdrop, fee, interest)
 
 **Schema:**
 
 ```javascript
 {
   account: ObjectId (ref: Account),
-  type: String (enum: ["deposit", "withdrawal", "airdrop", "transfer"]),
+  type: String (enum: ["deposit", "withdrawal", "airdrop", "transfer", "fee", "interest"]),
   amount: Number (in cents, always positive),
   description: String,
   status: String (enum: ["pending", "completed", "failed"], default: "completed"),
-  performedBy: ObjectId (ref: User),
+  performedBy: ObjectId (ref: User, optional — null for system transactions e.g. cron fee/interest),
   date: Date (default: now),
 
   // Extra for transfers
@@ -124,7 +124,7 @@ All models live in `src/shared/models/`.
 
 - `amount` always positive (sign conveyed by `type`)
 - `account` is required
-- `performedBy` is required
+- `performedBy` is optional (null for system-generated transactions: fee, interest)
 - Status starts as "completed" (no pending state currently)
 
 **Atomicity:**

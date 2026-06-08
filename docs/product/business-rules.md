@@ -2,7 +2,7 @@
 
 > This is the source of truth for all business logic decisions. Code must conform to this document, not the other way around.
 
-**Last Updated:** May 29, 2026
+**Last Updated:** Jun 8, 2026
 
 ---
 
@@ -25,7 +25,7 @@
 | Min maintained balance | RM1        | RM0                       | RM500                     | RM1,000 (locked)        |
 | Daily transfer limit   | RM10,000   | RM20,000                  | RM50,000                  | ❌ No transfers         |
 | Max single transfer    | RM5,000    | RM10,000                  | RM20,000                  | ❌ No transfers         |
-| Withdrawal limit       | 4x / month | Unlimited                 | Unlimited                 | Only at maturity        |
+| Withdrawal limit       | Unlimited  | Unlimited                 | Unlimited                 | Only at maturity        |
 | Overdraft              | ❌ No      | ✅ Up to banker-set limit | ✅ Up to banker-set limit | ❌ No                   |
 | Interest               | ✅ Yes     | ❌ No                     | ❌ No                     | ✅ Yes (higher rate)    |
 | Dormancy applies       | ✅ Yes     | ✅ Yes                    | ✅ Yes                    | ❌ Governed by maturity |
@@ -74,7 +74,6 @@
 | Check                 | Rule                                            |
 | --------------------- | ----------------------------------------------- |
 | Min withdrawal        | RM10.00                                         |
-| Savings monthly limit | 4 withdrawals per calendar month (5th rejected) |
 | FD withdrawal         | Only at or after maturity date                  |
 | Dormant account       | Withdrawals blocked until reactivated           |
 

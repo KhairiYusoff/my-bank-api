@@ -2,25 +2,30 @@
 
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
-**Last Updated:** Jun 5, 2026
-**Last Updated:** Jun 6, 2026
-**Current Phase:** Pre-Phase 7 bug fixes (in progress)
+**Last Updated:** Jun 8, 2026
+**Current Phase:** Phase 8 — Role Expansion
 
 ---
 
-## Now — Phase 6: Admin Detail Pages ✅ (Complete)
-
-All 5 stories shipped including addendum US-6004 and US-6005.
-
-1. [US-6001](../user-stories/phase-6/US-6001.md) ✅
-2. [US-6002](../user-stories/phase-6/US-6002.md) ✅
-3. [US-6003](../user-stories/phase-6/US-6003.md) ✅
-4. [US-6004](../user-stories/phase-6/US-6004.md) ✅
-5. [US-6005](../user-stories/phase-6/US-6005.md) ✅
+## Now — Phase 8: Role Expansion (in progress)
 
 ---
 
 ## Completed
+
+### Phase 7 — Account Type Differentiation (Jun 6–7, 2026) ✅
+
+| Story | Repo | Summary | Commit |
+| ----- | ---- | ------- | ------ |
+| US-7001 | `my-bank-api` | Transfer & withdrawal rules — limits, overdraft, FD/status blocks | `785e6bb` Jun 7 2026 |
+| ~~US-7002~~ | — | Dropped — Reg D not applicable to BNM; moved to Phase 14 | — |
+| US-7003 | `my-bank-api`, `my-bank-admin-portal` | Banker sets overdraft limit via portal | `11d67bf` / `6cd0687` Jun 7 2026 |
+| US-7005 | `my-bank-customer`, `my-bank-api` | Account type chip with limits tooltip; GET /accounts/limits endpoint | `63b3b05` / `023952f` Jun 7 2026 |
+| US-7006 | `my-bank-api` | Monthly maintenance fee cron (1st of month, 00:01 MYT) | `3642e88` Jun 7 2026 |
+| US-7007 | `my-bank-api` | Savings interest cron (last day of month, 23:59 MYT) | `3642e88` Jun 7 2026 |
+| US-7008 | `my-bank-api` | Low balance alert utility — wired into withdraw + transfer | `3642e88` Jun 7 2026 |
+
+Pre-Phase 7 bug fixes (BUG-01 to BUG-06) — `d42d94a` / `568db78` Jun 6 2026
 
 ### Phase 6 — Admin Detail Pages (Jun 2–5, 2026) ✅
 
@@ -97,15 +102,15 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 
 ---
 
-| Story                                         | Repo                                  | Summary                                                                                                                     | Status                  |
-| --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                         | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix                                           | ✅ `785e6bb` Jun 7 2026 |
-| ~~US-7002~~                                   | ~~`my-bank-api`~~                     | ~~Savings monthly withdrawal cap (max 4/month)~~ — dropped; Reg D not applicable to BNM; moved to Phase 14 as AML soft-flag | ❌ dropped              |
-| [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account via portal                                                          | ⬜                      |
-| [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`                    | Customer sees account type rules and limits in portal                                                                       | ⬜                      |
-| [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                         | Monthly maintenance fee deducted automatically (cron, 1st of month)                                                         | ⬜                      |
-| [US-7007](../user-stories/phase-7/US-7007.md) | `my-bank-api`                         | Savings interest credited monthly (cron, last day of month)                                                                 | ⬜                      |
-| [US-7008](../user-stories/phase-7/US-7008.md) | `my-bank-api`, `notification-service` | Customer notified when balance falls below maintenance threshold                                                            | ⬜                      |
+| Story                                         | Repo                                  | Summary                                                                                                                     | Status                              |
+| --------------------------------------------- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| [US-7001](../user-stories/phase-7/US-7001.md) | `my-bank-api`                         | Transfer & withdrawal rules — limits, overdraft, FD/status blocks, model enum fix                                           | ✅ `785e6bb` Jun 7 2026             |
+| ~~US-7002~~                                   | ~~`my-bank-api`~~                     | ~~Savings monthly withdrawal cap (max 4/month)~~ — dropped; Reg D not applicable to BNM; moved to Phase 14 as AML soft-flag | ❌ dropped                          |
+| [US-7003](../user-stories/phase-7/US-7003.md) | `my-bank-api`, `my-bank-admin-portal` | Banker sets overdraft limit on Current/Business account via portal                                                          | ✅ `11d67bf` / `6cd0687` Jun 7 2026 |
+| [US-7005](../user-stories/phase-7/US-7005.md) | `my-bank-customer`, `my-bank-api`     | Account type chip with limits tooltip in BalanceCard; GET /accounts/limits endpoint                                         | ✅ `63b3b05` / `023952f` Jun 7 2026 |
+| [US-7006](../user-stories/phase-7/US-7006.md) | `my-bank-api`                         | Monthly maintenance fee deducted automatically (cron, 1st of month, MYT)                                                   | ✅ `3642e88` Jun 7 2026             |
+| [US-7007](../user-stories/phase-7/US-7007.md) | `my-bank-api`                         | Savings interest credited monthly (cron, last day of month, MYT)                                                            | ✅ `3642e88` Jun 7 2026             |
+| [US-7008](../user-stories/phase-7/US-7008.md) | `my-bank-api`                         | Low balance alert utility — wired into withdraw and transfer (debit leg)                                                    | ✅ `3642e88` Jun 7 2026             |
 
 > **Note — US-7004 removed:** “Transfer blocked if daily limit exceeded” was a subset of US-7001. Merged; no separate story file.
 
