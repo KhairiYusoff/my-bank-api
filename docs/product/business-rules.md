@@ -2,7 +2,7 @@
 
 > This is the source of truth for all business logic decisions. Code must conform to this document, not the other way around.
 
-**Last Updated:** Jun 8, 2026
+**Last Updated:** Jun 10, 2026
 
 ---
 
@@ -172,7 +172,27 @@ pending_approval → active → dormant → suspended → closed
 
 ---
 
-## 6. Reference Number Format
+## 6. User Roles & Access Control
+
+### 6.1 Role Definitions
+
+| Role         | Platform              | Permissions                                                          | Mutation Allowed |
+| ------------ | --------------------- | -------------------------------------------------------------------- | ---------------- |
+| **Customer** | `my-bank-customer`    | Own accounts, own transactions, own expenses                         | ✅ Own only      |
+| **Banker**   | `my-bank-admin-portal`| Manage applications, any account transactions, view basic audit     | ✅ All except staff|
+| **Auditor**  | `my-bank-admin-portal`| Read-only access to all data, unmasked details, full system audit   | ❌ None          |
+| **Admin**    | `my-bank-admin-portal`| Full system access, staff management, airdrop, system config        | ✅ Full          |
+
+### 6.2 Auditor Specific Rules
+
+- **Zero-Mutation Policy**: The auditor role is strictly read-only. API calls using `POST`, `PUT`, `PATCH`, or `DELETE` must return `403 Forbidden` if they affect banking data, applications, or user status.
+- **Unmasked Data Access**: Auditors are granted the privilege to see full, unmasked transaction details (e.g., full counterpart names and account numbers) for investigation purposes.
+- **Full Audit Visibility**: Auditors can view the entire system's activity log, including actions performed by `Admin` and `Banker` roles.
+- **Separation of Duties**: Auditors cannot create or approve applications they might later audit, ensuring no conflict of interest.
+
+---
+
+## 7. Reference Number Format
 
 All transactions get a human-readable reference at write time:
 
@@ -188,7 +208,7 @@ TXN-YYYYMMDD-XXXXX
 
 ---
 
-## 7. Beneficiary Management
+## 8. Beneficiary Management
 
 - Customer can save up to 20 beneficiaries
 - Beneficiary = `{ nickname, accountNumber, bankName (always "MyBank" for now) }`
@@ -197,7 +217,7 @@ TXN-YYYYMMDD-XXXXX
 
 ---
 
-## 8. Statement Rules
+## 9. Statement Rules
 
 - Monthly statement = all transactions for a given calendar month on a given account
 - Includes: opening balance, closing balance, total credits, total debits, transaction list
@@ -207,7 +227,7 @@ TXN-YYYYMMDD-XXXXX
 
 ---
 
-## 9. AI Chat Rules
+## 10. AI Chat Rules
 
 - Chat history persists in **Redux store** only — survives page navigation, cleared on logout/refresh
 - AI responses must never include generic disclaimers like "this is not financial advice" unprompted

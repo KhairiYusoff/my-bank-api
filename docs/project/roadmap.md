@@ -264,7 +264,7 @@ Audit (May 29, 2026) found most items already wired:
 
 | Story   | Repo                                  | Scope                                                                                                            |
 | ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| US-8001 | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` |
+| [US-8001](../user-stories/phase-8/US-8001.md) | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` |
 | US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup before portal access                       |
 | US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                          |
 
