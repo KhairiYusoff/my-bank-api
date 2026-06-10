@@ -41,7 +41,7 @@ router.put("/complete-profile", [
 router.use(authMiddleware);
 
 router.get("/pending", [
-  authorizeRoles("admin", "banker"),
+  authorizeRoles("admin", "banker", "auditor"),
   activityLogger("VIEW_APPLICATIONS", "Staff viewing pending applications"),
   getPendingApplications,
 ]);

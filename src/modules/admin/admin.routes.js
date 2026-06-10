@@ -46,12 +46,12 @@ router.put("/customer/:customerId", [
   updateCustomer,
 ]);
 router.get("/customer/:customerId", [
-  authorizeRoles("admin", "banker"),
+  authorizeRoles("admin", "banker", "auditor"),
   activityLogger("VIEW_CUSTOMER_PROFILE", "Staff viewed customer profile"),
   getCustomer,
 ]);
 router.get("/staff/:staffId", [
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "auditor"),
   activityLogger("VIEW_STAFF_PROFILE", "Admin viewed staff profile"),
   getStaff,
 ]);

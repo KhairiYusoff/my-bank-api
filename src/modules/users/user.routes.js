@@ -45,7 +45,7 @@ router.put(
   activityLogger("PREFERENCES_UPDATED", "User updated preferences"),
   updatePreferences,
 );
-router.get("/customers", authorizeRoles("banker", "admin"), getAllCustomers);
-router.get("/staff", authorizeRoles("admin"), getAllStaff);
+router.get("/customers", authorizeRoles("banker", "admin", "auditor"), getAllCustomers);
+router.get("/staff", authorizeRoles("admin", "auditor"), getAllStaff);
 
 module.exports = router;

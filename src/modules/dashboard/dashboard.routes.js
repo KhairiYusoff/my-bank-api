@@ -9,7 +9,7 @@ const { activityLogger } = require("../audit/audit.service");
 
 router.get("/", [
   authMiddleware,
-  authorizeRoles("admin", "banker"),
+  authorizeRoles("admin", "banker", "auditor"),
   activityLogger("VIEW_DASHBOARD", "Staff viewed dashboard"),
   getDashboardSummary,
 ]);

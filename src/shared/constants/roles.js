@@ -7,6 +7,7 @@ const roles = {
   LOAN_OFFICER: "loan_officer", // Loan processing and approval
   RELATIONSHIP_MANAGER: "relationship_manager", // Premier/Preferred banking
   COMPLIANCE_OFFICER: "compliance_officer", // KYC and compliance checking
+  AUDITOR: "auditor", // Internal auditor
 
   // Customer Roles
   RETAIL_CUSTOMER: "retail_customer", // Regular retail banking customer

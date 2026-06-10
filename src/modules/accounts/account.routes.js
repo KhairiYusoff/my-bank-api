@@ -39,7 +39,7 @@ router.delete(
   activityLogger("ACCOUNT_CLOSURE", "Banker deleted an account"),
   deleteAccount,
 );
-router.get("/all", authorizeRoles("admin"), getAllAccounts);
+router.get("/all", authorizeRoles("admin", "auditor"), getAllAccounts);
 router.get("/limits", getAccountLimits);
 router.get("/", authorizeRoles("customer"), getAccounts);
 router.get("/balance/:accountNumber", authorizeRoles("customer"), getBalance);
@@ -63,7 +63,7 @@ router.post(
 );
 router.get(
   "/:accountNumber/detail",
-  authorizeRoles("admin", "banker"),
+  authorizeRoles("admin", "banker", "auditor"),
   activityLogger("VIEW_ACCOUNT_DETAIL", "Staff viewed account detail"),
   getAccountByNumber,
 );

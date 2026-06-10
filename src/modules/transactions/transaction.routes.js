@@ -27,13 +27,13 @@ router.post(
 );
 router.get(
   "/account/:accountNumber",
-  authorizeRoles("customer", "banker", "admin"),
+  authorizeRoles("customer", "banker", "admin", "auditor"),
   getAccountTransactions,
 );
-router.get("/all", authorizeRoles("admin"), getAllTransactions);
+router.get("/all", authorizeRoles("admin", "auditor"), getAllTransactions);
 router.get(
   "/:transactionId",
-  authorizeRoles("customer", "banker", "admin"),
+  authorizeRoles("customer", "banker", "admin", "auditor"),
   getTransactionDetails,
 );
 
