@@ -225,29 +225,38 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 7 — Account Type Differentiation 🔴 (Backlog)
+## Phase 7 — Account Type Differentiation ✅ (Jun 6–7, 2026)
 
-**Goal:** Enforce differentiated rules per account type in code. Currently all accounts behave identically regardless of type.
+**Goal:** Enforce differentiated rules per account type in code. All accounts previously behaved identically regardless of type.
 
-### Work items
+**Pre-phase bug fixes (Jun 6):** Full lifecycle audit before code changes.
+- BUG-01 CRITICAL: Account type enum unified (`savings/current/business/fixed_deposit`) across model, validations, migration script — `d42d94a`
+- BUG-02 CRITICAL: `verifyCustomer` wrapped in Mongoose session (atomic user+account creation) — `d42d94a`
+- BUG-03 CRITICAL: `user.status` enforced in login + auth middleware (suspended/terminated blocked) — `d42d94a`
+- BUG-04 CRITICAL: `CREATE_STAFF` added to ActivityLog enum — `d42d94a`
+- BUG-06 HIGH: Active status guard added to deposit/withdraw/transfer — `568db78`
+- BUG-05 HIGH: Deferred to Phase 10 (soft vs hard delete product decision)
 
-- [ ] Enforce min balance on account creation per type
-- [ ] Enforce daily transfer limits per account type (Savings: RM10k, Current: RM20k, Business: RM50k)
-- [ ] Enforce max single transfer per account type
-- [ ] Enforce savings monthly withdrawal counter (max 4 — reset on 1st of month)
-- [ ] Enforce overdraft limits for Current/Business (banker-set, default 0)
-- [ ] FD accounts: block all transfers
-- [ ] Dormant accounts: block all transactions
-- [ ] Monthly maintenance fee cron (1st of month, skip if balance ≥ threshold)
-- [ ] Savings interest cron (last day of month, credit based on balance tier)
-- [ ] Add `overdraftLimit` field to `Account` model
-- [ ] Add `monthlyWithdrawalCount` + `lastWithdrawalMonthReset` to `Account` model for Savings cap
+| Story | Repo | Scope | Commit |
+| ----- | ---- | ----- | ------ |
+| US-7001 | `my-bank-api` | Transfer + withdrawal hard blocks: min amounts, self-transfer, FD restrictions, per-type single/daily caps, overdraft-aware balance check | `785e6bb` |
+| ~~US-7002~~ | — | Dropped — savings monthly withdrawal cap (Reg D, not applicable to BNM). Moved to Phase 14 Fraud & Risk backlog | — |
+| US-7003 | `my-bank-api`, `my-bank-admin-portal` | `PATCH /accounts/:accountNumber/overdraft-limit` + Set Overdraft Limit dialog in admin portal | `11d67bf` / `6cd0687` |
+| US-7005 | `my-bank-customer`, `my-bank-api` | `GET /accounts/limits` endpoint; account type chip with \u24d8 tooltip in BalanceCard; limits served from shared constants (single source of truth) | `63b3b05` / `023952f` |
+| US-7006 | `my-bank-api` | Maintenance fee cron — `node-cron`, 00:01 MYT on 1st of month, fee waived if balance < fee, per-account error isolation | `3642e88` |
+| US-7007 | `my-bank-api` | Savings interest cron — 23:59 MYT last day of month, tiered rates 0.5%/1.0%/1.5% p.a., interest Transaction type added to schema | `3642e88` |
+| US-7008 | `my-bank-api` | `notifyBelowThreshold` utility — wired into withdraw and transfer debit leg post-commit | `3642e88` |
 
-**Gate:** Phase 6 must ship first (balance-after field required for fee transactions).
+**Schema changes (Phase 7):**
+- `Transaction.type` enum: added `"fee"` and `"interest"`
+- `Transaction.performedBy`: `required: true` → `required: false` (null for system cron transactions)
+- `src/shared/constants/accountLimits.js`: canonical limits config (single source used by both enforcement and display)
+
+**Infrastructure note:** `node-cron` jobs run in-process. Render free tier sleeps after 15min idle — migrate to Fly.io for reliable production cron execution. See tracker.md for migration steps.
 
 ---
 
-## Phase 8 — Role Expansion (4 Roles) 🔴 (Backlog)
+## Phase 8 — Role Expansion (4 Roles) 🔵 (Current Phase, Jun 2026)
 
 **Goal:** Expand the admin portal to support 4 distinct roles — `admin`, `banker`, `auditor`, `customer`. Add `auditor` as a new read-only staff role, enforce a first-login flow for all staff, and restrict sidebar navigation per role.
 
