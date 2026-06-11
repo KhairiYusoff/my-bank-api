@@ -3,7 +3,7 @@ const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
 
 class DashboardService {
-  async getDashboardSummary() {
+  async getDashboardSummary(userRole) {
     const todayStart = new Date();
     todayStart.setUTCHours(0, 0, 0, 0);
 
@@ -74,11 +74,10 @@ class DashboardService {
       ]),
     ]);
 
-    return {
+    const summary = {
       counts: {
         customers: customerCount,
         accounts: accountCount,
-        staff: staffCount,
         transactionsToday,
       },
       attention: {
@@ -92,6 +91,12 @@ class DashboardService {
         totalPortfolioBalance: portfolioResult[0]?.total ?? 0,
       },
     };
+
+    if (["admin", "auditor"].includes(userRole)) {
+      summary.counts.staff = staffCount;
+    }
+
+    return summary;
   }
 }
 

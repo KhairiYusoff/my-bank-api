@@ -23,78 +23,82 @@ MyBank has **4 roles**:
 
 ---
 
-## RBAC Matrix
+## RBAC Matrix (Access & Navigation)
 
-| Endpoint                           | customer             | banker   | auditor   | admin    |
-| ---------------------------------- | -------------------- | -------- | --------- | -------- |
-| **Auth**                           |                      |          |           |          |
-| POST /auth/login                   | ✅                   | ✅       | ✅        | ✅       |
-| POST /auth/register                | ✅                   | ❌       | ❌        | ❌       |
-| GET /auth/check-token              | ✅                   | ✅       | ✅        | ✅       |
-| **Onboarding**                     |                      |          |           |          |
-| POST /onboarding/apply             | ✅ (unauthenticated) | ❌       | ❌        | ❌       |
-| PUT /onboarding/complete-profile   | ✅ (token-gated)     | ❌       | ❌        | ❌       |
-| GET /onboarding/pending            | ❌                   | ✅       | ✅ (read) | ✅       |
-| POST /onboarding/approve/:userId   | ❌                   | ✅       | ❌        | ✅       |
-| POST /onboarding/verify/:userId    | ❌                   | ✅       | ❌        | ✅       |
-| **Accounts**                       |                      |          |           |          |
-| POST /accounts/create              | ❌                   | ✅       | ❌        | ✅       |
-| DELETE /accounts/:accountNumber    | ✅ (own, balance=0)  | ✅ (any) | ❌        | ✅ (any) |
-| GET /accounts (own)                | ✅                   | ❌       | ❌        | ❌       |
-| GET /accounts/all                  | ❌                   | ✅       | ✅        | ✅       |
-| POST /accounts/deposit             | ✅ (own)             | ✅ (any) | ❌        | ✅ (any) |
-| POST /accounts/withdraw            | ✅ (own)             | ✅ (any) | ❌        | ✅ (any) |
-| POST /accounts/airdrop             | ❌                   | ❌       | ❌        | ✅       |
-| **Transactions**                   |                      |          |           |          |
-| POST /transactions/transfer        | ✅ (from own)        | ✅ (any) | ❌        | ❌       |
-| GET /transactions/account/:number  | ✅ (own)             | ✅ (any) | ✅ (any)  | ✅ (any) |
-| GET /transactions/all              | ❌                   | ✅       | ✅        | ✅       |
-| GET /transactions/:id (unmasked)   | ❌                   | ❌       | ✅        | ✅       |
-| **Users**                          |                      |          |           |          |
-| GET /users/me                      | ✅                   | ✅       | ✅        | ✅       |
-| PUT /users/me                      | ✅                   | ✅       | ✅        | ✅       |
-| GET /users/customers               | ❌                   | ✅       | ✅        | ✅       |
-| GET /users/staff                   | ❌                   | ❌       | ✅        | ✅       |
-| GET /users/:id (detail)            | ❌                   | ❌       | ✅        | ✅       |
-| **Admin**                          |                      |          |           |          |
-| POST /admin/create-staff           | ❌                   | ❌       | ❌        | ✅       |
-| PUT /admin/staff/:staffId          | ❌                   | ❌       | ❌        | ✅       |
-| DELETE /admin/staff/:staffId       | ❌                   | ❌       | ❌        | ✅       |
-| PUT /admin/customer/:customerId    | ❌                   | ❌       | ❌        | ✅       |
-| DELETE /admin/customer/:customerId | ❌                   | ❌       | ❌        | ✅       |
-| **Audit**                          |                      |          |           |          |
-| GET /audit/me                      | ✅                   | ✅       | ✅        | ✅       |
-| GET /audit/user/:userId            | ❌                   | ✅       | ✅        | ✅       |
-| GET /audit/all                     | ❌                   | ❌       | ✅        | ✅       |
-| **Expenses**                       |                      |          |           |          |
-| POST /expenses                     | ✅                   | ❌       | ❌        | ✅       |
-| GET /expenses (own)                | ✅                   | ❌       | ❌        | ❌       |
-| GET /expenses (all)                | ❌                   | ❌       | ✅        | ✅       |
-| PUT/DELETE /expenses/:id           | ✅ (own)             | ❌       | ❌        | ✅ (any) |
-| **AI** (Phase 13)                  |                      |          |           |          |
-| POST /ai/chat                      | ✅                   | ❌       | ❌        | ❌       |
-| GET /ai/insights                   | ✅                   | ❌       | ❌        | ✅       |
-| **Dashboard**                      |                      |          |           |          |
-| GET /dashboard                     | ❌                   | ✅       | ✅        | ✅       |
-| counts.staff (in response)         | ❌                   | ❌       | ✅        | ✅       |
-| **Admin Portal UI — Sidebar Nav**  |                      |          |           |          |
-| Dashboard                          | —                    | ✅       | ✅        | ✅       |
-| User Management                    | —                    | ✅       | ✅        | ✅       |
-| Staff Management                   | —                    | ❌       | ❌        | ✅       |
-| Account Management                 | —                    | ✅       | ✅        | ✅       |
-| Applications (Pending)             | —                    | ✅       | ✅ (read) | ✅       |
-| System Audit Logs                  | —                    | ❌       | ✅        | ✅       |
-| Transaction History                | —                    | ✅       | ✅        | ✅       |
-| Airdrop Management                 | —                    | ❌       | ❌        | ✅       |
-| **Admin Portal UI — Dashboard KPI Cards** |             |          |           |          |
-| Total Customers                    | —                    | ✅       | ✅        | ✅       |
-| Pending Applications               | —                    | ✅       | ✅        | ✅       |
-| Total Accounts                     | —                    | ✅       | ✅        | ✅       |
-| Staff Members                      | —                    | ❌       | ✅        | ✅       |
-| Transactions Today                 | —                    | ✅       | ✅        | ✅       |
-| Financial Snapshot (deposits/withdrawals/net flow) | — | ✅  | ✅        | ✅       |
-| Total Portfolio (AUM)              | —                    | ✅       | ✅        | ✅       |
-| Attention Cards                    | —                    | ✅       | ✅        | ✅       |
+| Endpoint | customer | banker | auditor | admin |
+| :--- | :---: | :---: | :---: | :---: |
+| **Auth** | | | | |
+| POST /auth/login | ✅ | ✅ | ✅ | ✅ |
+| POST /auth/register | ✅ | ❌ | ❌ | ❌ |
+| GET /auth/check-token | ✅ | ✅ | ✅ | ✅ |
+| **Onboarding** | | | | |
+| POST /onboarding/apply | ✅ | ❌ | ❌ | ❌ |
+| PUT /onboarding/complete-profile | ✅ | ❌ | ❌ | ❌ |
+| GET /onboarding/pending | ❌ | ✅ | ✅ | ✅ |
+| POST /onboarding/approve/:userId | ❌ | ✅ | ❌ | ✅ |
+| POST /onboarding/verify/:userId | ❌ | ✅ | ❌ | ✅ |
+| **Accounts** | | | | |
+| POST /accounts/create | ❌ | ✅ | ❌ | ✅ |
+| DELETE /accounts/:accountNumber | ✅ | ✅ | ❌ | ✅ |
+| GET /accounts (own) | ✅ | ❌ | ❌ | ❌ |
+| GET /accounts/all | ❌ | ✅ | ✅ | ✅ |
+| POST /accounts/deposit | ✅ | ✅ | ❌ | ✅ |
+| POST /accounts/withdraw | ✅ | ✅ | ❌ | ✅ |
+| POST /accounts/airdrop | ❌ | ❌ | ❌ | ✅ |
+| **Transactions** | | | | |
+| POST /transactions/transfer | ✅ | ✅ | ❌ | ❌ |
+| GET /transactions/account/:number | ✅ | ✅ | ✅ | ✅ |
+| GET /transactions/all | ❌ | ✅ | ✅ | ✅ |
+| GET /transactions/:id (unmasked) | ❌ | ❌ | ✅ | ✅ |
+| **Users** | | | | |
+| GET /users/me | ✅ | ✅ | ✅ | ✅ |
+| PUT /users/me | ✅ | ✅ | ✅ | ✅ |
+| GET /users/customers | ❌ | ✅ | ✅ | ✅ |
+| GET /users/staff | ❌ | ❌ | ✅ | ✅ |
+| GET /users/:id (detail) | ❌ | ❌ | ✅ | ✅ |
+| **Admin** | | | | |
+| POST /admin/create-staff | ❌ | ❌ | ❌ | ✅ |
+| PUT /admin/staff/:staffId | ❌ | ❌ | ❌ | ✅ |
+| DELETE /admin/staff/:staffId | ❌ | ❌ | ❌ | ✅ |
+| PUT /admin/customer/:customerId | ❌ | ❌ | ❌ | ✅ |
+| DELETE /admin/customer/:customerId | ❌ | ❌ | ❌ | ✅ |
+| **Audit** | | | | |
+| GET /audit/me | ✅ | ✅ | ✅ | ✅ |
+| GET /audit/user/:userId | ❌ | ✅ | ✅ | ✅ |
+| GET /audit/all | ❌ | ❌ | ✅ | ✅ |
+| **Expenses** | | | | |
+| POST /expenses | ✅ | ❌ | ❌ | ✅ |
+| GET /expenses (own) | ✅ | ❌ | ❌ | ❌ |
+| GET /expenses (all) | ❌ | ❌ | ✅ | ✅ |
+| PUT/DELETE /expenses/:id | ✅ | ❌ | ❌ | ✅ |
+| **AI** | | | | |
+| POST /ai/chat | ✅ | ❌ | ❌ | ❌ |
+| GET /ai/insights | ✅ | ❌ | ❌ | ✅ |
+| **Dashboard** | | | | |
+| GET /dashboard | ❌ | ✅ | ✅ | ✅ |
+| **Admin Portal UI — Sidebar Nav** | | | | |
+| Dashboard | — | ✅ | ✅ | ✅ |
+| User Management | — | ✅ | ✅ | ✅ |
+| Staff Management | — | ❌ | ❌ | ✅ |
+| Account Management | — | ✅ | ✅ | ✅ |
+| Applications (Pending) | — | ✅ | ✅ | ✅ |
+| System Audit Logs | — | ❌ | ✅ | ✅ |
+| Transaction History | — | ✅ | ✅ | ✅ |
+| Airdrop Management | — | ❌ | ❌ | ✅ |
+
+## Sensitive Data Exposure Matrix
+
+*The RBAC Matrix covers endpoint access and UI navigation. This table defines strict rules for field-level visibility and widget accessibility.*
+
+| Data/Field | Banker | Auditor | Admin |
+| :--- | :---: | :---: | :---: |
+| `counts.staff` (Dashboard) | ❌ | ✅ | ✅ |
+| Transaction Details (Unmasked) | ❌ | ✅ | ✅ |
+| Staff Profile (`phoneNumber`, `staffId`) | ❌ | ✅ | ✅ |
+| Full Audit Logs | ❌ | ✅ | ✅ |
+| Dashboard KPI: Staff Members | ❌ | ✅ | ✅ |
+
+*Legend: ✅ = Visible/Accessible | ❌ = Hidden/Masked/Forbidden*
 
 ---
 
@@ -213,4 +217,18 @@ Further future (not planned): resource-level permissions per staff member (e.g.,
 
 ---
 
-**Last Updated:** May 30, 2026
+## Sensitive Data Exposure Matrix
+
+| Data/Field | Banker | Auditor | Admin |
+| :--- | :---: | :---: | :---: |
+| `counts.staff` (Dashboard) | ❌ | ✅ | ✅ |
+| Transaction Details (Unmasked) | ❌ | ✅ | ✅ |
+| Staff Profile (`phoneNumber`, `staffId`) | ❌ | ✅ | ✅ |
+| Full Audit Logs | ❌ | ✅ | ✅ |
+| Transaction History (All) | ✅ | ✅ | ✅ |
+
+*Legend: ✅ = Visible/Accessible | ❌ = Hidden/Masked/Forbidden*
+
+---
+
+**Last Updated:** Jun 10, 2026

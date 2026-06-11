@@ -3,7 +3,7 @@ const dashboardService = require("./dashboard.service");
 
 exports.getDashboardSummary = async (req, res) => {
   try {
-    const data = await dashboardService.getDashboardSummary();
+    const data = await dashboardService.getDashboardSummary(req.user.role);
     return success(res, { data });
   } catch (err) {
     console.error(err.message);
