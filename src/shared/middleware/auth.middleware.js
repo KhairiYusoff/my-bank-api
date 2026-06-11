@@ -22,11 +22,9 @@ const authMiddleware = async function (req, res, next) {
       const issuedAt = decoded.iat * 1000; // iat is in seconds, convert to ms
       const pwdChangedAt = new Date(user.passwordChangedAt).getTime();
       if (issuedAt < pwdChangedAt) {
-        return res
-          .status(401)
-          .json({
-            msg: "Token invalid due to password change. Please log in again.",
-          });
+        return res.status(401).json({
+          msg: "Token invalid due to password change. Please log in again.",
+        });
       }
     }
 
@@ -34,6 +32,20 @@ const authMiddleware = async function (req, res, next) {
       return res
         .status(403)
         .json({ msg: "Account suspended. Please contact support." });
+    }
+
+    // Force first-login handshake
+    if (user.isFirstTime) {
+      // Allow only password change and essential auth routes
+      const allowedPaths = ["/me/password", "/logout", "/check-token"];
+      const isAllowed = allowedPaths.some((path) => req.path.endsWith(path));
+
+      if (!isAllowed) {
+        return res.status(403).json({
+          msg: "First login change required",
+          mustChangePassword: true,
+        });
+      }
     }
 
     req.user = user;

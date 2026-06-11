@@ -50,7 +50,6 @@ exports.loginUser = async (email, password) => {
   });
 
   const isFirstTime = user.isFirstTime;
-  if (user.isFirstTime) user.isFirstTime = false;
   user.refreshToken = refreshToken;
   await user.save();
 
@@ -64,6 +63,7 @@ exports.loginUser = async (email, password) => {
       role: user.role,
       isVerified: user.isVerified,
       isFirstTime,
+      mustChangePassword: isFirstTime,
     },
   };
 };

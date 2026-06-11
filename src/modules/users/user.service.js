@@ -91,6 +91,7 @@ class UserService {
 
     user.password = newPassword;
     user.passwordChangedAt = new Date();
+    user.isFirstTime = false;
     await user.save();
   }
 
@@ -104,6 +105,7 @@ class UserService {
 
     user.password = newPassword;
     user.passwordChangedAt = new Date();
+    user.isFirstTime = false;
     await user.save();
   }
 
