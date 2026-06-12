@@ -7,7 +7,7 @@ const {
 
 class AdminService {
   async createStaff({ name, email, password, role }) {
-    const validRoles = ["admin", "banker"];
+    const validRoles = ["admin", "banker", "auditor"];
     if (!validRoles.includes(role)) {
       const err = new Error("Invalid role assignment");
       err.statusCode = 400;
@@ -47,15 +47,15 @@ class AdminService {
       err.statusCode = 404;
       throw err;
     }
-    if (staff.role !== "banker" && staff.role !== "admin") {
+    if (staff.role !== "banker" && staff.role !== "admin" && staff.role !== "auditor") {
       const err = new Error(
-        "Only staff (banker/admin) can be updated via this endpoint.",
+        "Only staff (banker/admin/auditor) can be updated via this endpoint.",
       );
       err.statusCode = 400;
       throw err;
     }
 
-    const allowedRoles = ["banker", "admin"];
+    const allowedRoles = ["banker", "admin", "auditor"];
     const allowedStatus = ["active", "suspended", "terminated"];
     let updated = false;
 
@@ -196,7 +196,7 @@ class AdminService {
     try {
       staff = await User.findOne({
         _id: staffId,
-        role: { $in: ["banker", "admin"] },
+        role: { $in: ["banker", "admin", "auditor"] },
       }).select("-password -refreshToken");
     } catch (err) {
       if (err.name === "CastError") {
