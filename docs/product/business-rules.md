@@ -19,16 +19,16 @@
 
 ### 1.2 Rules Per Type
 
-| Rule                   | Savings    | Current                   | Business                  | Fixed Deposit           |
-| ---------------------- | ---------- | ------------------------- | ------------------------- | ----------------------- |
-| Min opening balance    | RM20       | RM20                      | RM500                     | RM1,000                 |
-| Min maintained balance | RM1        | RM0                       | RM500                     | RM1,000 (locked)        |
-| Daily transfer limit   | RM10,000   | RM20,000                  | RM50,000                  | ❌ No transfers         |
-| Max single transfer    | RM5,000    | RM10,000                  | RM20,000                  | ❌ No transfers         |
-| Withdrawal limit       | Unlimited  | Unlimited                 | Unlimited                 | Only at maturity        |
-| Overdraft              | ❌ No      | ✅ Up to banker-set limit | ✅ Up to banker-set limit | ❌ No                   |
-| Interest               | ✅ Yes     | ❌ No                     | ❌ No                     | ✅ Yes (higher rate)    |
-| Dormancy applies       | ✅ Yes     | ✅ Yes                    | ✅ Yes                    | ❌ Governed by maturity |
+| Rule                   | Savings   | Current                   | Business                  | Fixed Deposit           |
+| ---------------------- | --------- | ------------------------- | ------------------------- | ----------------------- |
+| Min opening balance    | RM20      | RM20                      | RM500                     | RM1,000                 |
+| Min maintained balance | RM1       | RM0                       | RM500                     | RM1,000 (locked)        |
+| Daily transfer limit   | RM10,000  | RM20,000                  | RM50,000                  | ❌ No transfers         |
+| Max single transfer    | RM5,000   | RM10,000                  | RM20,000                  | ❌ No transfers         |
+| Withdrawal limit       | Unlimited | Unlimited                 | Unlimited                 | Only at maturity        |
+| Overdraft              | ❌ No     | ✅ Up to banker-set limit | ✅ Up to banker-set limit | ❌ No                   |
+| Interest               | ✅ Yes    | ❌ No                     | ❌ No                     | ✅ Yes (higher rate)    |
+| Dormancy applies       | ✅ Yes    | ✅ Yes                    | ✅ Yes                    | ❌ Governed by maturity |
 
 ### 1.3 Fixed Deposit Rules
 
@@ -71,11 +71,11 @@
 
 ### 2.3 Withdrawal Limits
 
-| Check                 | Rule                                            |
-| --------------------- | ----------------------------------------------- |
-| Min withdrawal        | RM10.00                                         |
-| FD withdrawal         | Only at or after maturity date                  |
-| Dormant account       | Withdrawals blocked until reactivated           |
+| Check           | Rule                                  |
+| --------------- | ------------------------------------- |
+| Min withdrawal  | RM10.00                               |
+| FD withdrawal   | Only at or after maturity date        |
+| Dormant account | Withdrawals blocked until reactivated |
 
 ---
 
@@ -136,7 +136,7 @@
 
 ---
 
-## 5. Account Lifecycle
+## 5. Account Lifecycle Rules
 
 ### 5.1 Status Flow
 
@@ -170,18 +170,29 @@ pending_approval → active → dormant → suspended → closed
 - FD accounts: must be at or past maturity date
 - Closed accounts: hidden from customer portal, preserved in DB for audit
 
+### 5.4 Account Provisioning Rules
+
+- **Default Provisioning:** Only `savings` accounts are created automatically upon successful customer onboarding.
+- **Product Requests:** Customers must request `current`, `business`, or `fixed_deposit` accounts via the portal.
+- **Provisioning Workflow:**
+  1. Customer submits account request (POST `/accounts/request`).
+  2. Request created with status `pending_approval`.
+  3. Banker reviews request via Admin Portal.
+  4. Banker approves → Account is created (Status: `active`).
+- **Validation:** All account types must pass product-specific validation (min balance, KYC level, documentation) before approval.
+
 ---
 
 ## 6. User Roles & Access Control
 
 ### 6.1 Role Definitions
 
-| Role         | Platform              | Permissions                                                          | Mutation Allowed |
-| ------------ | --------------------- | -------------------------------------------------------------------- | ---------------- |
-| **Customer** | `my-bank-customer`    | Own accounts, own transactions, own expenses                         | ✅ Own only      |
-| **Banker**   | `my-bank-admin-portal`| Manage applications, any account transactions, view basic audit     | ✅ All except staff|
-| **Auditor**  | `my-bank-admin-portal`| Read-only access to all data, unmasked details, full system audit   | ❌ None          |
-| **Admin**    | `my-bank-admin-portal`| Full system access, staff management, airdrop, system config        | ✅ Full          |
+| Role         | Platform               | Permissions                                                       | Mutation Allowed    |
+| ------------ | ---------------------- | ----------------------------------------------------------------- | ------------------- |
+| **Customer** | `my-bank-customer`     | Own accounts, own transactions, own expenses                      | ✅ Own only         |
+| **Banker**   | `my-bank-admin-portal` | Manage applications, any account transactions, view basic audit   | ✅ All except staff |
+| **Auditor**  | `my-bank-admin-portal` | Read-only access to all data, unmasked details, full system audit | ❌ None             |
+| **Admin**    | `my-bank-admin-portal` | Full system access, staff management, airdrop, system config      | ✅ Full             |
 
 ### 6.2 Auditor Specific Rules
 

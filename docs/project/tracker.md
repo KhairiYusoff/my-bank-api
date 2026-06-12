@@ -147,16 +147,14 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 
 ---
 
-## Phase 9 Backlog — Fixed Deposit
+## Phase 9 Backlog — Fixed Deposit Module
 
-| Story   | Repo                   | Summary                                                    | Status |
-| ------- | ---------------------- | ---------------------------------------------------------- | ------ |
-| US-9001 | `my-bank-admin-portal` | Banker creates Fixed Deposit account for customer          | ⬜     |
-| US-9002 | `my-bank-customer`     | Customer views FD with maturity date and expected interest | ⬜     |
-| US-9003 | `notification-service` | Customer notified 7 days before FD matures                 | ⬜     |
-| US-9004 | `my-bank-api`          | Customer withdraws FD at maturity (principal + interest)   | ⬜     |
-| US-9005 | `my-bank-api`          | Customer withdraws FD early (forfeits interest)            | ⬜     |
-| US-9006 | `my-bank-api`          | FD auto-renews if no action after maturity                 | ⬜     |
+| Story   | Repo                                  | Summary                                                                                                       | Status | Story File                                       |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
+| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — Backend logic for account requests and approvals                                | ⬜     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
+| US-9002 | `my-bank-customer`, `my-bank-admin` | FD Onboarding UI — Request workflow for customer, approval dashboard for banker                              | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
+| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — Cron processing for FD maturity, interest crediting, and renewal/grace periods     | ⬜     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
+
 
 ---
 
