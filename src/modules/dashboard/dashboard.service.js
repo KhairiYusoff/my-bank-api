@@ -26,7 +26,7 @@ class DashboardService {
       Account.countDocuments(),
 
       // staff count
-      User.countDocuments({ role: { $in: ["banker", "admin"] } }),
+      User.countDocuments({ role: { $in: ["banker", "admin", "auditor"] } }),
 
       // transactions today
       Transaction.countDocuments({ createdAt: { $gte: todayStart } }),

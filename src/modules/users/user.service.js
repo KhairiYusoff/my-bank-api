@@ -227,7 +227,7 @@ class UserService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { role: "banker" };
+    const filter = { role: { $in: ["banker", "auditor", "admin"] } };
     if (name) filter.name = new RegExp(name, "i");
     if (email) filter.email = new RegExp(email, "i");
     if (status) filter.status = status;
