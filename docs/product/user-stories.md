@@ -73,7 +73,6 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 | US-8001  | Add `auditor` role — update User model enum and all `authorizeRoles()` calls | 8     | my-bank-api                            | ✅     | [US-8001.md](../user-stories/phase-8/US-8001.md) |
 | US-8002  | Staff first-login flow — forced password change + profile setup              | 8     | my-bank-api, my-bank-admin-portal      | 🟡     | [US-8002.md](../user-stories/phase-8/US-8002.md) |
 | US-8003  | Role-based access control — sidebar nav, route guards, dashboard cards, 403 page | 8     | my-bank-api, my-bank-admin-portal      | ⬜     | —                                                |
-| US-8004  | Enhance staff creation — phone number, auto staffId, welcome email           | 8     | my-bank-api, my-bank-admin-portal      | ⬜     | —                                                |
 | US-9001  | Banker creates Fixed Deposit account for customer                            | 9     | my-bank-admin-portal                   | ⬜     | —                                                |
 | US-9002  | Customer views FD with maturity date and expected interest                   | 9     | my-bank-customer                       | ⬜     | —                                                |
 | US-9003  | Customer notified 7 days before FD matures                                   | 9     | notification-service                   | ⬜     | —                                                |

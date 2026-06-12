@@ -14,7 +14,6 @@
 | US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                             | ✅     | [US-8001.md](../user-stories/phase-8/US-8001.md) |
 | US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                        | 🟡     | [US-8002.md](../user-stories/phase-8/US-8002.md) |
 | US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control in admin portal — sidebar nav, route guards, dashboard cards, and 403 error page (depends US-8001) | ⬜ | [US-8003.md](../user-stories/phase-8/US-8003.md) |
-| US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form  | ⬜ | [US-8004.md](../user-stories/phase-8/US-8004.md) |
 
 
 ---
