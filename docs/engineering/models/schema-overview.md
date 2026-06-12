@@ -61,7 +61,7 @@ All models live in `src/shared/models/`.
   minimumBalance: Number (default: 0),
 
   // Status
-  status: String (enum: ["Active", "Dormant", "Closed"]),
+  status: String (enum: ["pending_approval", "active", "dormant", "suspended", "pending_closure", "closed"]),
   dateOpened: Date (default: now),
   dateClosed: Date (set on closure)
 }
@@ -79,7 +79,7 @@ All models live in `src/shared/models/`.
 - `balance >= 0` (no negative, enforced in code)
 - `user` is required
 - `accountNumber` must be unique
-- Status can only change: Active → Dormant → Closed (not reversible)
+- Lifecycle: `pending_approval` → `active` → `dormant` / `suspended` → `closed` (see business-rules.md §5.1)
 
 **Money Flow:**
 

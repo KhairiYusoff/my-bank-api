@@ -8,6 +8,10 @@ const {
 const { getNextReference } = require("../../shared/utils/reference");
 const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
 const {
+  ACCOUNT_STATUS,
+  BANKER_MUTABLE_STATUSES,
+} = require("../../shared/constants/accountStatus");
+const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
 
@@ -46,7 +50,7 @@ class AccountService {
       currency: "MYR",
       overdraftLimit,
       minimumBalance,
-      status: "Active",
+      status: ACCOUNT_STATUS.ACTIVE,
       dateOpened: new Date(),
     });
 
@@ -235,7 +239,7 @@ class AccountService {
         throw err;
       }
 
-      if (account.status !== "Active") {
+      if (account.status !== ACCOUNT_STATUS.ACTIVE) {
         const err = new Error(
           "This account is not active and cannot receive deposits",
         );
@@ -333,7 +337,7 @@ class AccountService {
         throw err;
       }
 
-      if (account.status !== "Active") {
+      if (account.status !== ACCOUNT_STATUS.ACTIVE) {
         const err = new Error(
           "This account is not active and cannot process withdrawals",
         );
@@ -519,10 +523,9 @@ class AccountService {
   }
 
   async updateAccountStatus(accountNumber, status) {
-    const allowed = ["Active", "Dormant", "Closed"];
-    if (!allowed.includes(status)) {
+    if (!BANKER_MUTABLE_STATUSES.includes(status)) {
       const err = new Error(
-        `Invalid status. Must be one of: ${allowed.join(", ")}.`,
+        `Invalid status. Must be one of: ${BANKER_MUTABLE_STATUSES.join(", ")}.`,
       );
       err.statusCode = 400;
       throw err;
@@ -535,14 +538,14 @@ class AccountService {
       throw err;
     }
 
-    if (account.status === "Closed") {
+    if (account.status === ACCOUNT_STATUS.CLOSED) {
       const err = new Error("Account is already closed and cannot be updated.");
       err.statusCode = 400;
       throw err;
     }
 
     account.status = status;
-    if (status === "Closed") {
+    if (status === ACCOUNT_STATUS.CLOSED) {
       account.dateClosed = new Date();
     }
 

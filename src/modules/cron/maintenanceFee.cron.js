@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const Account = require("../../shared/models/Account");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
 const Transaction = require("../../shared/models/Transaction");
 const { getNextReference } = require("../../shared/utils/reference");
 const {
@@ -28,7 +29,7 @@ cron.schedule(
 
     try {
       const accounts = await Account.find({
-        status: "Active",
+        status: ACCOUNT_STATUS.ACTIVE,
         accountType: { $in: ["savings", "current", "business"] },
       });
 

@@ -2,24 +2,33 @@
 
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
-**Last Updated:** Jun 8, 2026
-**Current Phase:** Phase 8 — Role Expansion
+**Last Updated:** Jun 12, 2026
+**Current Phase:** Phase 9 — Fixed Deposit Module
 
 ---
 
-## Now — Phase 8: Role Expansion (in progress)
+## Now — Phase 9: Fixed Deposit Module (in progress)
 
-| Story   | Repo                                  | Summary                                                                                                                      | Status | Story File                                       |
-| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
-| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                             | ✅     | [US-8001.md](../user-stories/phase-8/US-8001.md) |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup | ✅ | [US-8002.md](../user-stories/phase-8/US-8002.md) |
+| Story   | Repo                                  | Summary                                                                                                       | Status | Story File                                       |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
+| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — account request + banker approval (Account model only, no new collection)       | ⬜     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
+| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
+| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — cron processing for FD maturity, interest crediting, renewal/grace periods        | ⬜     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
 
-| US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control in admin portal — sidebar nav, route guards, dashboard cards, and 403 error page (depends US-8001) | ✅ | [US-8003.md](../user-stories/phase-8/US-8003.md) |
-
+> **Prerequisite before US-9001 code:** Run DB hygiene — see [Tech Debt — Enum Normalisation](#tech-debt--enum-normalisation-pending) below.
 
 ---
 
 ## Completed
+
+### Phase 8 — Role Expansion (Jun 2026) ✅
+
+| Story | Repo | Summary | Status |
+| ----- | ---- | ------- | ------ |
+| US-8001 | `my-bank-api` | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix | ✅ |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup | ✅ |
+| US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control — sidebar nav, route guards, dashboard cards, 403 page | ✅ |
+| ~~US-8004~~ | — | ~~Enhance staff creation — phoneNumber, auto staffId, welcome email~~ — **dropped**; scope absorbed into future staff-management work if needed | ❌ dropped |
 
 ### Phase 7 — Account Type Differentiation (Jun 6–7, 2026) ✅
 
@@ -124,37 +133,15 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 
 ---
 
-## Phase 8 Backlog — Role Expansion (4 Roles)
-
-| Story   | Repo                                  | Summary                                                                                                                      | Status |
-| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
-| US-8001 | `my-bank-api`                         | Add `auditor` role — expand User model enum, update all `authorizeRoles()` calls per RBAC matrix                             | ⬜     |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup                                                        | ⬜     |
-| US-8003 | `my-bank-api`, `my-bank-admin-portal` | Role-based access control in admin portal — sidebar nav, route guards, dashboard cards, and 403 error page (depends US-8001) | ⬜     |
-| US-8004 | `my-bank-api`, `my-bank-admin-portal` | Enhance staff creation — add `phoneNumber` + auto `staffId`, send welcome email; depends US-8001 for auditor option in form  | ⬜     |
-
-**US-8003 Scope (do not implement before US-8001):**
-
-| Area            | What to implement                                                                                                                   |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Sidebar nav     | Filter `navItems` array by role — banker sees no Staff, Airdrop, Audit; auditor sees no Staff, Airdrop, Applications (no mutations) |
-| Route guards    | Wrap protected routes — if role lacks access and navigates via URL, redirect to `/403`                                              |
-| 403 page        | New `ForbiddenPage` component — "You don't have permission to access this page", Back to Dashboard button                           |
-| Dashboard cards | Hide **Staff Members** KPI card for banker and auditor; hide **Airdrop** data if not admin                                          |
-| Dashboard BE    | `getDashboardSummary` omits `counts.staff` from response if caller is `banker`; returns full data for `admin` and `auditor`         |
-
-> Read `docs/engineering/security/authorization.md` before writing any code for Phase 8.
-
----
-
 ## Phase 9 Backlog — Fixed Deposit Module
 
 | Story   | Repo                                  | Summary                                                                                                       | Status | Story File                                       |
 | ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
-| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — Backend logic for account requests and approvals                                | ⬜     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
-| US-9002 | `my-bank-customer`, `my-bank-admin` | FD Onboarding UI — Request workflow for customer, approval dashboard for banker                              | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
+| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — account request + banker approval (Account model only)                          | ⬜     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
+| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
 | US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — Cron processing for FD maturity, interest crediting, and renewal/grace periods     | ⬜     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
 
+> Implement in order: US-9001 → US-9002 → US-9003.
 
 ---
 
@@ -213,6 +200,22 @@ Discovered via full lifecycle audit. All critical/high bugs fixed before Phase 7
 | US-13003 | `my-bank-api`      | AI answers based on user's actual data, not generic        | ⬜     |
 | US-13004 | `my-bank-api`      | AI responds without unprompted disclaimers                 | ⬜     |
 | US-13005 | `my-bank-customer` | AI chat cleared on logout                                  | ⬜     |
+
+---
+
+## Tech Debt — Enum Normalisation (pending)
+
+Code and docs are out of sync with production DB. **Resolve before US-9001 implementation.**
+
+| Item | Code today | Target (`business-rules.md`) | Action |
+| ---- | ---------- | ---------------------------- | ------ |
+| `Account.accountType` | ~~`Savings` / `Checking` / `Business`~~ | `savings` / `current` / `business` / `fixed_deposit` | ✅ Dev DB migrated (22 records) — re-run `node scripts/migrateAccountTypes.js` on staging/prod |
+| `Account.status` | ~~`Active` / `Dormant` / `Closed`~~ | `pending_approval` / `active` / `dormant` / `suspended` / `closed` / `pending_closure` | ✅ Code migrated — run `node scripts/migrateAccountStatus.js` on each DB |
+| `schema-overview.md` | Stale (missing `auditor`) | Match live models | ✅ Status enum updated; auditor role still pending in schema doc |
+
+**Why migrate status now (not later):** Phase 9 needs `pending_approval`. Phase 10 needs `suspended` and `pending_closure`. Adding PascalCase variants (`Pending_approval`) would compound the mess. `User.status` already uses lowercase — Account should match.
+
+**FD `matured` is NOT an account lifecycle status.** Keep lifecycle on `account.status`; track FD maturity state via `maturityDate` + optional `fdMaturedAt` timestamp (US-9003). Roadmap item `status: active\|matured\|withdrawn` refers to FD product state, not the dormancy lifecycle enum.
 
 ---
 

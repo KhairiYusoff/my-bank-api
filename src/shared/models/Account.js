@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { ACCOUNT_STATUS_VALUES } = require("../constants/accountStatus");
 
 const AccountSchema = new mongoose.Schema({
   user: {
@@ -34,8 +35,8 @@ const AccountSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Active", "Dormant", "Closed"],
-    default: "Active",
+    enum: ACCOUNT_STATUS_VALUES,
+    default: "active",
   },
   dateOpened: {
     type: Date,

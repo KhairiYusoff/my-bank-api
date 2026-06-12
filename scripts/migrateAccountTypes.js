@@ -20,9 +20,9 @@ const TYPE_MAP = {
 };
 
 async function run() {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
   if (!uri) {
-    console.error("MONGODB_URI is not set in .env");
+    console.error("MONGO_URI (or MONGODB_URI) is not set in .env");
     process.exit(1);
   }
 

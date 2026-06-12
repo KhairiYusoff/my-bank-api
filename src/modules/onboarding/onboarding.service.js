@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { sendEmail } = require("../../shared/utils/email");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
 const mongoose = require("mongoose");
 const {
   notifyNewApplication,
@@ -208,7 +209,7 @@ class OnboardingService {
         accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
         balance: 0,
         currency: "MYR",
-        status: "Active",
+        status: ACCOUNT_STATUS.ACTIVE,
         dateOpened: new Date(),
       });
       await newAccount.save({ session });

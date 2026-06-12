@@ -8,6 +8,7 @@ const {
 const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
 const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
@@ -54,7 +55,7 @@ class TransactionService {
       throw err;
     }
 
-    if (fromAccountCheck.status !== "Active") {
+    if (fromAccountCheck.status !== ACCOUNT_STATUS.ACTIVE) {
       const err = new Error(
         "This account is not active and cannot process transfers",
       );
@@ -137,7 +138,7 @@ class TransactionService {
       throw err;
     }
 
-    if (toAccountForName.status !== "Active") {
+    if (toAccountForName.status !== ACCOUNT_STATUS.ACTIVE) {
       const err = new Error(
         "Recipient account is not active and cannot receive transfers",
       );
@@ -196,7 +197,7 @@ class TransactionService {
         throw err;
       }
 
-      if (fromAccount.status !== "Active") {
+      if (fromAccount.status !== ACCOUNT_STATUS.ACTIVE) {
         const err = new Error(
           "This account is not active and cannot process transfers",
         );
@@ -204,7 +205,7 @@ class TransactionService {
         throw err;
       }
 
-      if (toAccount.status !== "Active") {
+      if (toAccount.status !== ACCOUNT_STATUS.ACTIVE) {
         const err = new Error(
           "Recipient account is not active and cannot receive transfers",
         );

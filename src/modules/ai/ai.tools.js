@@ -3,6 +3,7 @@ const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
 const ActivityLog = require("../../shared/models/ActivityLog");
 const User = require("../../shared/models/User");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
 const AiAuditLog = require("../../shared/models/AiAuditLog");
 
 const PERIOD_DAYS = {
@@ -49,7 +50,7 @@ const getSpendingBreakdown = async (userId, period = "month") => {
       { $sort: { total: -1 } },
     ]),
     Account.find(
-      { user: userId, status: "Active" },
+      { user: userId, status: ACCOUNT_STATUS.ACTIVE },
       "accountType balance currency",
     ).lean(),
   ]);

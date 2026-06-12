@@ -1,6 +1,7 @@
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
 
 class DashboardService {
   async getDashboardSummary(userRole) {
@@ -41,7 +42,7 @@ class DashboardService {
       }),
 
       // dormant accounts
-      Account.countDocuments({ status: "Dormant" }),
+      Account.countDocuments({ status: ACCOUNT_STATUS.DORMANT }),
 
       // deposits today
       Transaction.aggregate([
@@ -69,7 +70,7 @@ class DashboardService {
 
       // total portfolio balance
       Account.aggregate([
-        { $match: { status: "Active" } },
+        { $match: { status: ACCOUNT_STATUS.ACTIVE } },
         { $group: { _id: null, total: { $sum: "$balance" } } },
       ]),
     ]);
