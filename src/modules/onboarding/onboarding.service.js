@@ -193,18 +193,12 @@ class OnboardingService {
     user.isVerified = true;
     user.applicationStatus = "completed";
 
-    const ACCOUNT_TYPE_MAP = {
-      savings: "savings",
-      current: "current",
-      business: "business",
-      fixed_deposit: "fixed_deposit",
-    };
-
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
       await user.save({ session });
-      const accountType = ACCOUNT_TYPE_MAP[user.accountType] || "savings";
+      //Only Savings accounts are auto-created during onboarding; other types require request/approve
+      const accountType = "savings";
       const accountNumber = await generateAccountNumber(accountType, user.branch);
       
       const newAccount = new Account({
