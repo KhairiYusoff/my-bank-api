@@ -12,6 +12,10 @@ const {
   updateAccountStatus,
   setOverdraftLimit,
   getAccountLimits,
+  requestAccount,
+  getPendingAccountRequests,
+  approveAccountRequest,
+  rejectAccountRequest,
 } = require("./account.controller");
 const {
   authMiddleware,
@@ -79,6 +83,30 @@ router.patch(
   validateOverdraftLimit,
   activityLogger("UPDATE_OVERDRAFT_LIMIT", "Staff updated overdraft limit"),
   setOverdraftLimit,
+);
+
+router.post(
+  "/request",
+  authorizeRoles("customer"),
+  activityLogger("ACCOUNT_REQUEST", "Customer requested new account"),
+  requestAccount,
+);
+router.get(
+  "/account-requests",
+  authorizeRoles("banker", "admin", "auditor"),
+  getPendingAccountRequests,
+);
+router.post(
+  "/account-requests/:accountId/approve",
+  authorizeRoles("banker"),
+  activityLogger("APPROVE_ACCOUNT_REQUEST", "Banker approved account request"),
+  approveAccountRequest,
+);
+router.post(
+  "/account-requests/:accountId/reject",
+  authorizeRoles("banker"),
+  activityLogger("REJECT_ACCOUNT_REQUEST", "Banker rejected account request"),
+  rejectAccountRequest,
 );
 
 module.exports = router;

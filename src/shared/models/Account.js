@@ -53,6 +53,44 @@ const AccountSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  // Fixed Deposit fields
+  lockPeriod: {
+    type: Number,
+    enum: [1, 3, 6, 12],
+    required: function () {
+      return this.accountType === "fixed_deposit";
+    },
+  },
+  maturityDate: {
+    type: Date,
+    required: function () {
+      return this.accountType === "fixed_deposit";
+    },
+  },
+  linkedAccount: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Account",
+    required: function () {
+      return this.accountType === "fixed_deposit";
+    },
+  },
+  principal: {
+    type: Number,
+    required: function () {
+      return this.accountType === "fixed_deposit";
+    },
+  },
+  autoRenew: {
+    type: Boolean,
+    default: false,
+  },
+  // Business field
+  companyRegistrationDoc: {
+    type: String,
+    required: function () {
+      return this.accountType === "business";
+    },
+  },
 });
 
 // Indexes for faster queries

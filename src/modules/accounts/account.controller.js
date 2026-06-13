@@ -236,3 +236,76 @@ exports.getAccountLimits = async (req, res) => {
     });
   }
 };
+
+exports.requestAccount = async (req, res) => {
+  try {
+    const account = await accountService.requestAccount(req.user.id, req.body);
+    return success(res, {
+      message: "Account request submitted successfully",
+      data: account,
+      statusCode: 201,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.getPendingAccountRequests = async (req, res) => {
+  try {
+    const result = await accountService.getPendingAccountRequests(req.query);
+    return success(res, {
+      message: "Pending account requests fetched",
+      data: result.accounts,
+      meta: result.meta,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.approveAccountRequest = async (req, res) => {
+  try {
+    const account = await accountService.approveAccountRequest(
+      req.params.accountId,
+      req.user.id,
+    );
+    return success(res, {
+      message: "Account request approved",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.rejectAccountRequest = async (req, res) => {
+  try {
+    const account = await accountService.rejectAccountRequest(
+      req.params.accountId,
+      req.user.id,
+      req.body.reason,
+    );
+    return success(res, {
+      message: "Account request rejected",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};

@@ -29,4 +29,22 @@ const ACCOUNT_LIMITS = {
   },
 };
 
-module.exports = { ACCOUNT_LIMITS };
+const MIN_OPENING_BALANCE = {
+  savings: 20,
+  current: 20,
+  business: 500,
+  fixed_deposit: 1000,
+};
+
+const FD_INTEREST_RATES = {
+  1: 1.5, // 1 month
+  3: 2.0, // 3 months
+  6: 2.5, // 6 months
+  12: 3.0, // 12 months
+};
+
+module.exports = {
+  ACCOUNT_LIMITS,
+  MIN_OPENING_BALANCE,
+  FD_INTEREST_RATES,
+};

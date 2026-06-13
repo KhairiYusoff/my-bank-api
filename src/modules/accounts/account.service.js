@@ -1,12 +1,13 @@
 const Account = require("../../shared/models/Account");
 const User = require("../../shared/models/User");
 const Transaction = require("../../shared/models/Transaction");
+const ActivityLog = require("../../shared/models/ActivityLog");
 const mongoose = require("mongoose");
 const {
   sendNotification,
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
-const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
+const { ACCOUNT_LIMITS, MIN_OPENING_BALANCE, FD_INTEREST_RATES } = require("../../shared/constants/accountLimits");
 const {
   ACCOUNT_STATUS,
   BANKER_MUTABLE_STATUSES,
@@ -549,8 +550,255 @@ class AccountService {
     if (status === ACCOUNT_STATUS.CLOSED) {
       account.dateClosed = new Date();
     }
-
     await account.save();
+    return account;
+  }
+
+  async requestAccount(userId, accountData) {
+    const {
+      accountType,
+      branch,
+      amount,
+      lockPeriod,
+      linkedAccount,
+      companyRegistrationDoc,
+    } = accountData;
+
+    if (!["current", "business", "fixed_deposit"].includes(accountType)) {
+      const err = new Error("Account type requires banker approval");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const customer = await User.findOne({ _id: userId, role: "customer" });
+    if (!customer) {
+      const err = new Error("Customer not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const minBalance = MIN_OPENING_BALANCE[accountType];
+    if (!amount || amount < minBalance) {
+      const err = new Error(`Initial deposit amount below minimum for ${accountType} (RM${minBalance})`);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (accountType === "fixed_deposit") {
+      if (!lockPeriod || ![1, 3, 6, 12].includes(lockPeriod)) {
+        const err = new Error("Valid lock period (1, 3, 6, or 12 months) is required for Fixed Deposit");
+        err.statusCode = 400;
+        throw err;
+      }
+      if (!linkedAccount) {
+        const err = new Error("Linked account number is required for Fixed Deposit");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const linkedAccountDoc = await Account.findOne({ accountNumber: linkedAccount, user: userId });
+      if (!linkedAccountDoc) {
+        const err = new Error("Linked account not found or access denied");
+        err.statusCode = 404;
+        throw err;
+      }
+      if (linkedAccountDoc.status !== ACCOUNT_STATUS.ACTIVE) {
+        const err = new Error("Linked account is not active");
+        err.statusCode = 400;
+        throw err;
+      }
+    }
+
+    if (accountType === "business" && !companyRegistrationDoc) {
+      const err = new Error("Company registration document is required for Business account");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const accountNumber = await generateAccountNumber(accountType, branch);
+    const newAccount = new Account({
+      user: userId,
+      accountNumber,
+      accountType,
+      branch,
+      status: ACCOUNT_STATUS.PENDING_APPROVAL,
+      balance: 0,
+      currency: "MYR",
+      principal: accountType === "fixed_deposit" ? amount : undefined,
+      lockPeriod: accountType === "fixed_deposit" ? lockPeriod : undefined,
+      linkedAccount: accountType === "fixed_deposit" ? (await Account.findOne({ accountNumber: linkedAccount }))._id : undefined,
+      companyRegistrationDoc: accountType === "business" ? companyRegistrationDoc : undefined,
+      dateOpened: new Date(),
+    });
+
+    return await newAccount.save();
+  }
+
+  async getPendingAccountRequests(query) {
+    const {
+      page = 1,
+      limit = 20,
+      sort = "desc",
+    } = query;
+
+    const numericPage = Math.max(parseInt(page, 10), 1);
+    const numericLimit = Math.max(parseInt(limit, 10), 1);
+    const skip = (numericPage - 1) * numericLimit;
+
+    const [total, accounts] = await Promise.all([
+      Account.countDocuments({ status: ACCOUNT_STATUS.PENDING_APPROVAL }),
+      Account.find({ status: ACCOUNT_STATUS.PENDING_APPROVAL })
+        .populate("user", "name email phoneNumber role")
+        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(numericLimit),
+    ]);
+
+    return {
+      accounts,
+      meta: {
+        page: numericPage,
+        limit: numericLimit,
+        total,
+        pages: Math.ceil(total / numericLimit),
+      },
+    };
+  }
+
+  async approveAccountRequest(accountId, bankerId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const account = await Account.findById(accountId).session(session);
+      if (!account) {
+        const err = new Error("Account request not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      if (account.status !== ACCOUNT_STATUS.PENDING_APPROVAL) {
+        const err = new Error("Account is not in pending approval state");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      if (account.accountType === "fixed_deposit") {
+        account.maturityDate = new Date();
+        account.maturityDate.setMonth(account.maturityDate.getMonth() + account.lockPeriod);
+        account.interestRate = FD_INTEREST_RATES[account.lockPeriod];
+        
+        const linkedAccount = await Account.findById(account.linkedAccount).session(session);
+        if (!linkedAccount) {
+          const err = new Error("Linked account not found");
+          err.statusCode = 404;
+          throw err;
+        }
+        if (linkedAccount.balance < account.principal) {
+          const err = new Error("Insufficient funds in linked account");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        linkedAccount.balance -= account.principal;
+        account.balance = account.principal;
+
+        await linkedAccount.save({ session });
+      }
+
+      account.status = ACCOUNT_STATUS.ACTIVE;
+      account.dateOpened = new Date();
+
+      await account.save({ session });
+      await ActivityLog.create({
+        action: "APPROVE_ACCOUNT_REQUEST",
+        actor: bankerId,
+        target: accountId,
+        targetType: "Account",
+        details: {
+          accountType: account.accountType,
+          accountNumber: account.accountNumber,
+        },
+      });
+      
+      await session.commitTransaction();
+
+      try {
+        await sendNotification({
+          type: "account_opened",
+          title: "Account Approved",
+          message: `Your ${account.accountType} account ${account.accountNumber} has been approved!`,
+          link: `/accounts/${account.accountNumber}`,
+          recipient: { role: "customer", userId: account.user.toString() },
+          source: { service: "my-bank-api", id: accountId.toString() },
+          data: {
+            accountType: account.accountType,
+            accountNumber: account.accountNumber,
+          },
+          read: false,
+          delivered: false,
+        });
+      } catch (notifyErr) {
+        console.error("Failed to send account approval notification:", notifyErr.message);
+      }
+
+      return account;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async rejectAccountRequest(accountId, bankerId, reason) {
+    const account = await Account.findById(accountId);
+    if (!account) {
+      const err = new Error("Account request not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.status !== ACCOUNT_STATUS.PENDING_APPROVAL) {
+      const err = new Error("Account is not in pending approval state");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = ACCOUNT_STATUS.CLOSED;
+    await account.save();
+
+    await ActivityLog.create({
+      action: "REJECT_ACCOUNT_REQUEST",
+      actor: bankerId,
+      target: accountId,
+      targetType: "Account",
+      details: {
+        accountType: account.accountType,
+        accountNumber: account.accountNumber,
+        reason,
+      },
+    });
+
+    try {
+      await sendNotification({
+        type: "account_rejected",
+        title: "Account Request Rejected",
+        message: `Your ${account.accountType} account request has been rejected. Reason: ${reason}`,
+        link: "/accounts",
+        recipient: { role: "customer", userId: account.user.toString() },
+        source: { service: "my-bank-api", id: accountId.toString() },
+        data: {
+          accountType: account.accountType,
+          reason,
+        },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send account rejection notification:", notifyErr.message);
+    }
+
     return account;
   }
 
