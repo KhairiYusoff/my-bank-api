@@ -2,7 +2,7 @@
 
 > This is the source of truth for all business logic decisions. Code must conform to this document, not the other way around.
 
-**Last Updated:** Jun 10, 2026
+**Last Updated:** Jun 12, 2026
 
 ---
 
@@ -45,6 +45,45 @@
 - Limit set by banker at account level (default: RM0 until banker sets it)
 - Overdraft balance incurs no interest in MVP (future: charge interest on negative balance)
 - Account cannot go below `-overdraftLimit`
+
+### 1.5 Account Number Format
+
+All **new** accounts created from Phase 9 onward use a fixed 13-digit format, following MyBank standards:
+
+```
+{PPP}{BBB}{SSSSSS}{C}
+```
+
+| Segment | Length | Description |
+| ------- | ------ | ----------- |
+| `PPP`   | 3      | Product Code (e.g., 100 for Savings, 300 for Current) |
+| `BBB`   | 3      | Branch Code (e.g., 514 for KL Main, 512 for PJ) |
+| `SSSSSS`| 6      | Obfuscated sequence number (unique per branch/product) |
+| `C`     | 1      | Checksum digit (Luhn algorithm) |
+
+**Product codes (`PPP`)**:
+
+| Account type     | Code | Example            |
+| ---------------- | ---- | ------------------ |
+| `savings`        | `100` | `1005142345674`    |
+| `current`        | `300` | `3005142345675`    |
+| `business`       | `500` | `5005142345678`    |
+| `fixed_deposit`  | `700` | `7005142345672`    |
+
+**Assignment rules**:
+
+| Provisioning path | When `accountNumber` is assigned |
+| ----------------- | -------------------------------- |
+| Onboarding (savings) | At customer verification — account is `active` immediately |
+| `POST /accounts/request` (current / business / FD) | At request time — account is `pending_approval` |
+| Banker `POST /accounts/create` | At creation |
+| `approveAccountRequest` | **Never** — approval activates the same document; number does not change |
+
+**Generation**: `shared/utils/generateAccountNumber.js` — uses branch-specific atomic Counters, obfuscates the sequence to prevent enumeration, and appends a Luhn checksum for data integrity.
+
+**Legacy format (pre-Phase 9)**: `MYB{timestamp}` (e.g. `MYB1776836236910`). Existing records are valid and are not migrated.
+
+**Masking (customer-facing API responses)**: Account numbers are masked as `{first 3 chars}****{last 4 chars}` — e.g. `1005142345674` → `100****5674`. Staff roles (`banker`, `admin`, `auditor`) receive the full unmasked value. Format length is fixed at 13 digits.
 
 ---
 

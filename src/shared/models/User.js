@@ -125,6 +125,12 @@ const UserSchema = new mongoose.Schema(
         return this.role === "customer" && this.isProfileComplete;
       },
     },
+    branch: {
+      type: String,
+      required: function () {
+        return this.role === "customer" && this.isProfileComplete;
+      },
+    },
     preferences: {
       language: { type: String, default: "en" },
       notifications: { type: Boolean, default: true },

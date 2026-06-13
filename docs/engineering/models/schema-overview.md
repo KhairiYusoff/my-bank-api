@@ -51,7 +51,7 @@ All models live in `src/shared/models/`.
 ```javascript
 {
   user: ObjectId (ref: User),
-  accountNumber: String (unique, format: "MYB" + timestamp),
+  accountNumber: String (unique, 13 digits — see business-rules.md §1.5: {PPP}{BBB}{SSSSSS}{C}; legacy pre-Phase 9: MYB{timestamp}),
   accountType: String (enum: ["savings", "current", "business", "fixed_deposit"]),
   branch: String,
   balance: Number (default: 0, represents cents: 5000 = RM 50.00),

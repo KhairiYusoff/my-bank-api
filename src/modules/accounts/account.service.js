@@ -14,6 +14,7 @@ const {
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
+const { generateAccountNumber } = require("../../shared/utils/generateAccountNumber");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -39,7 +40,7 @@ class AccountService {
       throw err;
     }
 
-    const accountNumber = `MYB${Date.now()}`;
+    const accountNumber = await generateAccountNumber(accountType, branch);
     const newAccount = new Account({
       user: userId,
       accountNumber,

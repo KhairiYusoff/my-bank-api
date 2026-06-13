@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const {
   notifyNewApplication,
 } = require("../../shared/services/websocket.service");
+const { generateAccountNumber } = require("../../shared/utils/generateAccountNumber");
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
 
@@ -203,10 +204,14 @@ class OnboardingService {
     session.startTransaction();
     try {
       await user.save({ session });
+      const accountType = ACCOUNT_TYPE_MAP[user.accountType] || "savings";
+      const accountNumber = await generateAccountNumber(accountType, user.branch);
+      
       const newAccount = new Account({
         user: user._id,
-        accountNumber: `MYB${Date.now()}`,
-        accountType: ACCOUNT_TYPE_MAP[user.accountType] || "savings",
+        accountNumber,
+        accountType,
+        branch: user.branch,
         balance: 0,
         currency: "MYR",
         status: ACCOUNT_STATUS.ACTIVE,
