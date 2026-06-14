@@ -63,6 +63,7 @@ const validateFullRegistration = [
   check("address.city", "City is required").not().isEmpty(),
   check("address.state", "State is required").not().isEmpty(),
   check("address.postalCode", "Postal code is required").not().isEmpty(),
+  check("branch", "Branch code is required").not().isEmpty(),
   check("job", "Job is required").not().isEmpty(),
   check("employerName", "Employer name is required").not().isEmpty(),
   check("employmentType", "Employment type is required")
@@ -95,6 +96,7 @@ const validateFullRegistration = [
       "education",
       "travel",
       "others",
+      "other",
     ]),
   check("nextOfKin.name", "Next of kin name is required").not().isEmpty(),
   check("nextOfKin.phone", "Next of kin phone is required")
