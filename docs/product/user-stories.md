@@ -73,12 +73,12 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 | US-8001  | Add `auditor` role — update User model enum and all `authorizeRoles()` calls | 8     | my-bank-api                            | ✅     | [US-8001.md](../user-stories/phase-8/US-8001.md) |
 | US-8002  | Staff first-login flow — forced password change + profile setup              | 8     | my-bank-api, my-bank-admin-portal      | ✅     | [US-8002.md](../user-stories/phase-8/US-8002.md) |
 | US-8003  | Role-based access control — sidebar nav, route guards, dashboard cards, 403 page | 8     | my-bank-api, my-bank-admin-portal      | ✅     | [US-8003.md](../user-stories/phase-8/US-8003.md) |
-| US-9001  | Unified Provisioning Engine — Backend logic for account requests and approvals | 9     | my-bank-api                            | ⬜     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
-| US-9002  | FD Onboarding UI — Request workflow for customer, approval dashboard for banker | 9     | my-bank-customer, my-bank-admin-portal | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
-| US-9003  | Maturity & Renewal Engine — Cron processing for FD maturity and renewal        | 9     | my-bank-api                            | ⬜     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
-| US-9004  | Customer withdraws FD at maturity (principal + interest)                     | 9     | my-bank-api                            | ⬜     | —                                                |
-| US-9005  | Customer withdraws FD early (forfeits interest)                              | 9     | my-bank-api                            | ⬜     | —                                                |
-| US-9006  | FD auto-renews if no action after maturity                                   | 9     | my-bank-api                            | ⬜     | —                                                |
+| US-9001  | Unified Provisioning Engine — Backend logic for account requests and approvals | 9     | my-bank-api                            | ✅     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
+| US-9002  | FD Onboarding UI — Request workflow for customer, approval dashboard for banker | 9     | my-bank-customer, my-bank-admin-portal | ✅     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
+| US-9003  | Maturity & Renewal Engine — Cron processing for FD maturity and renewal        | 9     | my-bank-api                            | ✅     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
+| US-9004  | FD Settlement at Maturity — Customer manually withdraws principal during grace period | 9     | my-bank-api, my-bank-customer          | ⬜     | [US-9004.md](../user-stories/phase-9/US-9004.md) |
+| US-9005  | Emergency Early FD Withdrawal — Breaking the lock with interest forfeiture       | 9     | my-bank-api, my-bank-customer          | ⬜     | [US-9005.md](../user-stories/phase-9/US-9005.md) |
+| US-9006  | FD Maturity Instruction Management — Toggle auto-renewal and receive alerts      | 9     | my-bank-api, my-bank-customer          | ⬜     | [US-9006.md](../user-stories/phase-9/US-9006.md) |
 | US-10001 | Account goes dormant after 12 months no activity (cron)                      | 10    | my-bank-api                            | ⬜     | —                                                |
 | US-10002 | Dormant account shows clear message with reactivation steps                  | 10    | my-bank-customer                       | ⬜     | —                                                |
 | US-10003 | Customer notified at 11 months no activity (pre-dormancy warning)            | 10    | notification-service                   | ⬜     | —                                                |
