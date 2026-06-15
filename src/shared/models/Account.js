@@ -84,6 +84,13 @@ const AccountSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  interestPaid: {
+    type: Boolean,
+    default: false,
+  },
+  lastMaturityProcessed: {
+    type: Date,
+  },
   // Business field
   companyRegistrationDoc: {
     type: String,

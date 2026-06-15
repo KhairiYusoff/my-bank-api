@@ -34,9 +34,13 @@
 
 - Lock periods: 1 / 3 / 6 / 12 months (customer selects on creation)
 - Maturity date auto-calculated: `dateOpened + lockPeriod`
-- Interest credited on maturity (not monthly)
+- **Maturity Lifecycle (Real Bank Logic):**
+  - **Day 0 (Maturity Date):** Accrued interest is automatically credited to the linked Savings/Current account. The principal remains in the FD.
+  - **Day 1 to 7 (Grace Period):** Customer can manually withdraw the principal via the portal ("Withdraw Principal").
+  - **Day 8 (Post-Grace Period):** If no manual withdrawal occurred:
+    - If `autoRenew` is **ON**: Principal auto-renews for the same lock period at current rates.
+    - If `autoRenew` is **OFF**: Principal is automatically credited to the linked account and the FD is closed.
 - Early withdrawal: allowed but **forfeits all interest** (principal returned only)
-- Auto-renewal: if customer does not withdraw within 7 days of maturity, FD auto-renews for same period at current rate
 - No transfers in or out during lock period
 
 ### 1.4 Overdraft Rules
@@ -142,7 +146,7 @@ All **new** accounts created from Phase 9 onward use a fixed 13-digit format, fo
 | 12 months   | 3.50% |
 
 - Interest = `principal × rate × (lockPeriod / 12)`
-- Credited to linked Savings/Current account on maturity (not to FD itself)
+- **Interest Payout:** Automatically credited to linked Savings/Current account on maturity date (Day 0).
 - Early withdrawal: principal returned to source account, zero interest
 
 ---

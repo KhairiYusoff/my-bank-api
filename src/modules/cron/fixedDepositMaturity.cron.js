@@ -19,96 +19,142 @@ cron.schedule(
   async () => {
     console.log("[Cron] FD Maturity Engine started:", new Date().toISOString());
 
+    const session = await Account.startSession();
+    session.startTransaction();
+
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      // Find all active FD accounts that have matured
-      const maturedFDs = await Account.find({
+      // Find all active FD accounts that are matured or past maturity
+      const fds = await Account.find({
         status: ACCOUNT_STATUS.ACTIVE,
         accountType: "fixed_deposit",
         maturityDate: { $lte: today },
-      });
+      }).session(session);
 
-      console.log(`[Cron] Processing ${maturedFDs.length} FD accounts`);
+      console.log(`[Cron] Checking ${fds.length} FD accounts for maturity actions`);
 
-      for (const fd of maturedFDs) {
+      for (const fd of fds) {
         try {
           const maturityDate = new Date(fd.maturityDate);
-          const diffTime = Math.abs(today - maturityDate);
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          maturityDate.setHours(0, 0, 0, 0);
+          
+          const diffTime = today.getTime() - maturityDate.getTime();
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-          // 1. Grace Period Check (7 days)
-          if (diffDays <= 7) {
-            console.log(`[Cron] FD ${fd.accountNumber} in grace period (${diffDays} days). Waiting for customer action.`);
-            continue;
+          // BRANCH A: Day 0 (Maturity Date) - Payout Interest
+          if (diffDays >= 0 && !fd.interestPaid) {
+            console.log(`[Cron] FD ${fd.accountNumber} matured today. Processing interest payout.`);
+            
+            const interest = fd.principal * FD_RATES[fd.lockPeriod] * (fd.lockPeriod / 12);
+            
+            const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+            if (linkedAccount) {
+              const balanceBefore = linkedAccount.balance;
+              linkedAccount.balance += interest;
+              await linkedAccount.save({ session });
+
+              const reference = await getNextReference();
+              await Transaction.create([{
+                account: linkedAccount._id,
+                amount: interest,
+                type: "credit",
+                direction: "credit",
+                description: `FD Interest Payout: ${fd.accountNumber}`,
+                reference,
+                currency: "MYR",
+                status: "completed",
+                balanceBefore,
+                balanceAfter: linkedAccount.balance
+              }], { session });
+
+              fd.interestPaid = true;
+              fd.lastMaturityProcessed = today;
+              await fd.save({ session });
+
+              await sendNotification({
+                type: "fd_interest_paid",
+                title: "FD Interest Received",
+                message: `Interest of RM${interest.toFixed(2)} from your FD ${fd.accountNumber} has been credited to ${linkedAccount.accountNumber}.`,
+                recipient: { userId: fd.user.toString() },
+              });
+            }
           }
 
-          // 2. Post-Grace Period: Settlement or Renewal
-          if (fd.autoRenew) {
-            // Logic for Auto-Renewal
-            console.log(`[Cron] FD ${fd.accountNumber} maturing. Processing renewal.`);
-            
-            // Calculate interest and credit to linked account
-            const interest = fd.principal * FD_RATES[fd.lockPeriod] * (fd.lockPeriod / 12);
-            
-            // Perform credit transfer
-            const linkedAccount = await Account.findOne({ accountNumber: fd.linkedAccount });
-            if (!linkedAccount) throw new Error("Linked account not found");
+          // BRANCH B: Day 8 (Post-Grace Period) - Auto-Renewal or Settlement
+          if (diffDays >= 8) {
+            if (fd.autoRenew) {
+              console.log(`[Cron] FD ${fd.accountNumber} grace period over. Processing renewal.`);
+              
+              // Renewal logic: Reset lock period
+              fd.dateOpened = today;
+              const newMaturity = new Date(today);
+              newMaturity.setMonth(newMaturity.getMonth() + fd.lockPeriod);
+              fd.maturityDate = newMaturity;
+              fd.interestPaid = false; // Ready for next maturity
+              await fd.save({ session });
 
-            const balanceBefore = linkedAccount.balance;
-            linkedAccount.balance += (fd.principal + interest);
-            await linkedAccount.save();
-
-            // Create Transaction record
-            const reference = await getNextReference();
-            await Transaction.create({
-              account: linkedAccount._id,
-              amount: (fd.principal + interest),
-              type: "credit",
-              direction: "credit",
-              description: `FD Maturity Settlement: ${fd.accountNumber}`,
-              reference,
-              currency: "MYR",
-              status: "completed",
-            });
-
-            // Update FD for new period
-            fd.dateOpened = today.toISOString();
-            const newMaturity = new Date(today);
-            newMaturity.setMonth(newMaturity.getMonth() + fd.lockPeriod);
-            fd.maturityDate = newMaturity.toISOString();
-            await fd.save();
-
-            await sendNotification({
+              await sendNotification({
                 type: "fd_renewed",
-                title: "FD Renewed",
-                message: `Your FD ${fd.accountNumber} has matured. Principal + Interest credited to ${fd.linkedAccount}. Account renewed for ${fd.lockPeriod} months.`,
+                title: "FD Auto-Renewed",
+                message: `Your FD ${fd.accountNumber} has been renewed for another ${fd.lockPeriod} months.`,
                 recipient: { userId: fd.user.toString() },
-            });
+              });
+            } else {
+              console.log(`[Cron] FD ${fd.accountNumber} grace period over. Processing final settlement.`);
+              
+              const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+              if (linkedAccount) {
+                const balanceBefore = linkedAccount.balance;
+                linkedAccount.balance += fd.principal;
+                await linkedAccount.save({ session });
 
-          } else {
-            // Maturity without renewal
-            console.log(`[Cron] FD ${fd.accountNumber} maturing. No auto-renewal.`);
-            
-            const interest = fd.principal * FD_RATES[fd.lockPeriod] * (fd.lockPeriod / 12);
-            
-            const linkedAccount = await Account.findOne({ accountNumber: fd.linkedAccount });
-            if (linkedAccount) {
-                linkedAccount.balance += (fd.principal + interest);
-                await linkedAccount.save();
+                const reference = await getNextReference();
+                await Transaction.create([{
+                  account: linkedAccount._id,
+                  amount: fd.principal,
+                  type: "credit",
+                  direction: "credit",
+                  description: `FD Principal Settlement: ${fd.accountNumber}`,
+                  reference,
+                  currency: "MYR",
+                  status: "completed",
+                  balanceBefore,
+                  balanceAfter: linkedAccount.balance
+                }], { session });
+
+                fd.status = "closed";
+                fd.balance = 0;
+                await fd.save({ session });
+
+                await sendNotification({
+                  type: "fd_settled",
+                  title: "FD Settled & Closed",
+                  message: `Your FD ${fd.accountNumber} has been settled. Principal of RM${fd.principal.toFixed(2)} credited to ${linkedAccount.accountNumber}.`,
+                  recipient: { userId: fd.user.toString() },
+                });
+              }
             }
+          }
 
-            fd.status = "closed";
-            await fd.save();
+          if (diffDays > 0 && diffDays <= 7) {
+            console.log(`[Cron] FD ${fd.accountNumber} is in grace period (Day ${diffDays}).`);
           }
 
         } catch (err) {
           console.error(`[Cron] Error processing FD ${fd.accountNumber}:`, err.message);
+          // Don't throw, continue with other FDs
         }
       }
+
+      await session.commitTransaction();
+      console.log("[Cron] FD Maturity Engine completed successfully");
     } catch (err) {
+      await session.abortTransaction();
       console.error("[Cron] FD Maturity Engine failed:", err.message);
+    } finally {
+      session.endSession();
     }
   },
   { timezone: "Asia/Kuala_Lumpur" }
