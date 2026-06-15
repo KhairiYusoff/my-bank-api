@@ -263,6 +263,25 @@ exports.updateFdInstructions = async (req, res) => {
   }
 };
 
+exports.fdWithdrawEarly = async (req, res) => {
+  try {
+    const result = await accountService.fdWithdrawEarly(
+      req.params.accountNumber,
+      req.user.id,
+    );
+    return success(res, {
+      message: "Fixed Deposit early withdrawal processed successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
 exports.getAccountLimits = async (req, res) => {
   try {
     const data = accountService.getAccountLimits();

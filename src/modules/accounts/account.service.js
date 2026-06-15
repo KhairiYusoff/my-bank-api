@@ -980,6 +980,103 @@ class AccountService {
     return fd;
   }
 
+  async fdWithdrawEarly(accountNumber, userId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const fd = await Account.findOne({ accountNumber, user: userId }).session(session);
+      if (!fd) {
+        const err = new Error("Account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      if (fd.accountType !== "fixed_deposit") {
+        const err = new Error("Only Fixed Deposit accounts can be withdrawn early");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const today = new Date();
+      const maturityDate = new Date(fd.maturityDate);
+
+      if (today >= maturityDate) {
+        const err = new Error("Account has matured. Please use the standard settlement flow.");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+      if (!linkedAccount) {
+        const err = new Error("Linked account not found for principal return");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      const balanceBefore = linkedAccount.balance;
+      linkedAccount.balance += fd.principal;
+      await linkedAccount.save({ session });
+
+      const reference = await getNextReference();
+      await Transaction.create([{
+        account: linkedAccount._id,
+        amount: fd.principal,
+        type: "credit",
+        direction: "credit",
+        description: `Early FD Principal Withdrawal (Interest Forfeited): ${fd.accountNumber}`,
+        reference,
+        currency: "MYR",
+        status: "completed",
+        balanceBefore,
+        balanceAfter: linkedAccount.balance
+      }], { session });
+
+      fd.status = ACCOUNT_STATUS.CLOSED;
+      fd.balance = 0;
+      await fd.save({ session });
+
+      await ActivityLog.create([{
+        action: "FD_EARLY_WITHDRAWAL",
+        actor: userId,
+        target: fd._id,
+        targetType: "Account",
+        details: {
+          accountNumber: fd.accountNumber,
+          principal: fd.principal,
+          penalty: "100% Interest Forfeited"
+        },
+      }], { session });
+
+      await session.commitTransaction();
+
+      try {
+        await sendNotification({
+          type: "fd_settled",
+          title: "Early FD Withdrawal Processed",
+          message: `Your emergency early withdrawal of RM${fd.principal.toFixed(2)} from FD ${fd.accountNumber} has been processed. Accrued interest was forfeited.`,
+          link: `/accounts/${fd.accountNumber}`,
+          recipient: { role: "customer", userId: userId.toString() },
+          source: { service: "my-bank-api", id: fd._id.toString() },
+          data: {
+            amount: fd.principal,
+            accountNumber: fd.accountNumber,
+            type: "early_withdrawal"
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Failed to send early FD withdrawal notification:", notifyErr.message);
+      }
+
+      return fd;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  }
+
   getAccountLimits() {
     return ACCOUNT_LIMITS;
   }

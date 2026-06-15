@@ -171,7 +171,7 @@ All **new** accounts created from Phase 9 onward use a fixed 13-digit format, fo
 | Monthly maintenance — Business | RM15.00 / month | If average monthly balance < RM5,000       |
 | Monthly maintenance — FD       | RM0.00          | Never charged                              |
 | Dormancy fee                   | RM10.00 / year  | Charged on anniversary of dormancy trigger |
-| Early account closure          | RM20.00         | Account closed within 3 months of opening  |
+| Early account closure          | RM20.00         | Account closed within 3 months of opening (Excludes FD) |
 
 - Maintenance fees deducted on the 1st of each month via cron
 - If balance insufficient to cover fee: fee is waived that month, account flagged
@@ -289,3 +289,4 @@ TXN-YYYYMMDD-XXXXX
 - AI must not execute transactions — read-only financial context only
 - AI responses must be specific to the user's actual data, not generic
 - Guardrails: no investment advice, no tax advice, no legal advice — but respond naturally without the disclaimer unless specifically asked about those topics
+opics

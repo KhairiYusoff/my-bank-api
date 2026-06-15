@@ -123,4 +123,11 @@ router.patch(
   require("./account.controller").updateFdInstructions,
 );
 
+router.post(
+  "/:accountNumber/fd-withdraw-early",
+  authorizeRoles("customer"),
+  activityLogger("FD_EARLY_WITHDRAWAL", "Customer withdrew FD principal early"),
+  require("./account.controller").fdWithdrawEarly,
+);
+
 module.exports = router;
