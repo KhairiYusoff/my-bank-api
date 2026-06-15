@@ -12,8 +12,10 @@
 | Story   | Repo                                  | Summary                                                                                                       | Status | Story File                                       |
 | ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
 | US-9001 | `my-bank-api`                         | Unified Provisioning Engine — account request + banker approval (Account model only, no new collection)       | ✅     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
-| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ⬜     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
-| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — cron processing for FD maturity, interest crediting, renewal/grace periods        | ⬜     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
+| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ✅     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
+| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — cron processing for FD maturity, interest crediting, renewal/grace periods        | ✅     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
+| US-9004 | `my-bank-customer`, `my-bank-api`     | Manual Principal Settlement — Customer withdraws principal during 7-day grace period                          | ✅     | [US-9004.md](../user-stories/phase-9/US-9004.md) |
+| US-9006 | `my-bank-customer`, `my-bank-api`     | Manage FD Instructions — Toggle Auto-Renewal and update linked settlement account                             | ✅     | [US-9006.md](../user-stories/phase-9/US-9006.md) |
 
 > **Prerequisite before US-9001 code:** Run DB hygiene — see [Tech Debt — Enum Normalisation](#tech-debt--enum-normalisation-pending) below.
 
