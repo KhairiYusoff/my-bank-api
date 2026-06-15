@@ -109,4 +109,18 @@ router.post(
   rejectAccountRequest,
 );
 
+router.post(
+  "/:accountNumber/fd-settle",
+  authorizeRoles("customer"),
+  activityLogger("FD_PRINCIPAL_SETTLEMENT", "Customer settled FD principal"),
+  require("./account.controller").fdSettle,
+);
+
+router.patch(
+  "/:accountNumber/fd-instructions",
+  authorizeRoles("customer"),
+  activityLogger("UPDATE_FD_INSTRUCTIONS", "Customer updated FD instructions"),
+  require("./account.controller").updateFdInstructions,
+);
+
 module.exports = router;

@@ -224,6 +224,45 @@ exports.setOverdraftLimit = async (req, res) => {
   }
 };
 
+exports.fdSettle = async (req, res) => {
+  try {
+    const result = await accountService.fdSettle(
+      req.params.accountNumber,
+      req.user.id,
+    );
+    return success(res, {
+      message: "Fixed Deposit principal has been settled successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.updateFdInstructions = async (req, res) => {
+  try {
+    const result = await accountService.updateFdInstructions(
+      req.params.accountNumber,
+      req.user.id,
+      req.body,
+    );
+    return success(res, {
+      message: "Fixed Deposit instructions updated successfully",
+      data: result,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
 exports.getAccountLimits = async (req, res) => {
   try {
     const data = accountService.getAccountLimits();

@@ -83,6 +83,7 @@ class AccountService {
     const [total, accounts] = await Promise.all([
       Account.countDocuments(filter),
       Account.find(filter)
+        .populate("linkedAccount", "accountNumber")
         .sort({ dateOpened: sort === "asc" ? 1 : -1 })
         .skip(skip)
         .limit(numericLimit),
@@ -149,6 +150,7 @@ class AccountService {
 
     let accountsQuery = Account.find(filter)
       .populate("user", "name email role")
+      .populate("linkedAccount", "accountNumber")
       .sort({ dateOpened: sort === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(numericLimit);
@@ -168,6 +170,7 @@ class AccountService {
           },
           select: "name email role",
         })
+        .populate("linkedAccount", "accountNumber")
         .sort({ dateOpened: sort === "asc" ? 1 : -1 })
         .skip(skip)
         .limit(numericLimit);
@@ -512,10 +515,9 @@ class AccountService {
   }
 
   async getAccountByNumber(accountNumber) {
-    const account = await Account.findOne({ accountNumber }).populate(
-      "user",
-      "name email phoneNumber role",
-    );
+    const account = await Account.findOne({ accountNumber })
+      .populate("user", "name email phoneNumber role")
+      .populate("linkedAccount", "accountNumber");
     if (!account) {
       const err = new Error("Account not found.");
       err.statusCode = 404;
@@ -604,6 +606,11 @@ class AccountService {
       }
       if (linkedAccountDoc.status !== ACCOUNT_STATUS.ACTIVE) {
         const err = new Error("Linked account is not active");
+        err.statusCode = 400;
+        throw err;
+      }
+      if (linkedAccountDoc.accountType === "fixed_deposit") {
+        const err = new Error("Cannot link a Fixed Deposit account to another Fixed Deposit");
         err.statusCode = 400;
         throw err;
       }
@@ -825,6 +832,152 @@ class AccountService {
       accountNumber: account.accountNumber,
       overdraftLimit: account.overdraftLimit,
     };
+  }
+
+  async fdSettle(accountNumber, userId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const fd = await Account.findOne({ accountNumber, user: userId }).session(session);
+      if (!fd) {
+        const err = new Error("Account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      if (fd.accountType !== "fixed_deposit") {
+        const err = new Error("Only Fixed Deposit accounts can be settled");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const maturityDate = new Date(fd.maturityDate);
+      maturityDate.setHours(0, 0, 0, 0);
+
+      const diffTime = today.getTime() - maturityDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        const err = new Error("FD has not matured yet");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      if (diffDays > 7) {
+        const err = new Error("Grace period for manual settlement has expired");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+      if (!linkedAccount) {
+        const err = new Error("Linked account not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      const balanceBefore = linkedAccount.balance;
+      linkedAccount.balance += fd.principal;
+      await linkedAccount.save({ session });
+
+      const reference = await getNextReference();
+      await Transaction.create([{
+        account: linkedAccount._id,
+        amount: fd.principal,
+        type: "credit",
+        direction: "credit",
+        description: `Manual FD Principal Settlement: ${fd.accountNumber}`,
+        reference,
+        currency: "MYR",
+        status: "completed",
+        balanceBefore,
+        balanceAfter: linkedAccount.balance
+      }], { session });
+
+      fd.status = ACCOUNT_STATUS.CLOSED;
+      fd.balance = 0;
+      await fd.save({ session });
+
+      await ActivityLog.create([{
+        action: "FD_PRINCIPAL_SETTLEMENT",
+        actor: userId,
+        target: fd._id,
+        targetType: "Account",
+        details: {
+          accountNumber: fd.accountNumber,
+          amount: fd.principal,
+        },
+      }], { session });
+
+      await session.commitTransaction();
+
+      try {
+        await sendNotification({
+          type: "fd_settled",
+          title: "FD Principal Withdrawn",
+          message: `Your manual withdrawal of RM${fd.principal.toFixed(2)} from FD ${fd.accountNumber} has been processed.`,
+          link: `/accounts/${fd.accountNumber}`,
+          recipient: { role: "customer", userId: userId.toString() },
+          source: { service: "my-bank-api", id: fd._id.toString() },
+          data: {
+            amount: fd.principal,
+            accountNumber: fd.accountNumber,
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Failed to send FD settlement notification:", notifyErr.message);
+      }
+
+      return fd;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async updateFdInstructions(accountNumber, userId, instructions) {
+    const { autoRenew, linkedAccount } = instructions;
+    const fd = await Account.findOne({ accountNumber, user: userId });
+    
+    if (!fd || fd.accountType !== "fixed_deposit") {
+      const err = new Error("Fixed Deposit account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (autoRenew !== undefined) fd.autoRenew = autoRenew;
+    
+    if (linkedAccount) {
+      const linkedAccDoc = await Account.findOne({ accountNumber: linkedAccount, user: userId });
+      if (!linkedAccDoc) {
+        const err = new Error("Invalid linked account");
+        err.statusCode = 400;
+        throw err;
+      }
+      if (linkedAccDoc.accountType === "fixed_deposit") {
+        const err = new Error("Cannot link a Fixed Deposit account to another Fixed Deposit");
+        err.statusCode = 400;
+        throw err;
+      }
+      fd.linkedAccount = linkedAccDoc._id;
+    }
+
+    await fd.save();
+
+    await ActivityLog.create({
+      action: "UPDATE_FD_INSTRUCTIONS",
+      actor: userId,
+      target: fd._id,
+      targetType: "Account",
+      details: instructions,
+    });
+
+    return fd;
   }
 
   getAccountLimits() {
