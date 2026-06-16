@@ -2,27 +2,36 @@
 
 > **Scope:** Current phase focus + upcoming phase backlogs. History and phase goals live in [roadmap.md](roadmap.md) — this file only tracks what's active and what's next.
 
-**Last Updated:** Jun 12, 2026
-**Current Phase:** Phase 9 — Fixed Deposit Module
+**Last Updated:** Jun 15, 2026
+**Current Phase:** Phase 10 — Dormancy & Lifecycle
 
 ---
 
-## Now — Phase 9: Fixed Deposit Module (in progress)
+## Now — Phase 10: Dormancy & Lifecycle (in progress)
 
-| Story   | Repo                                  | Summary                                                                                                       | Status | Story File                                       |
-| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------ |
-| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — account request + banker approval (Account model only, no new collection)       | ✅     | [US-9001.md](../user-stories/phase-9/US-9001.md) |
-| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ✅     | [US-9002.md](../user-stories/phase-9/US-9002.md) |
-| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — cron processing for FD maturity, interest crediting, renewal/grace periods        | ✅     | [US-9003.md](../user-stories/phase-9/US-9003.md) |
-| US-9004 | `my-bank-customer`, `my-bank-api`     | Manual Principal Settlement — Customer withdraws principal during 7-day grace period                          | ✅     | [US-9004.md](../user-stories/phase-9/US-9004.md) |
-| US-9005 | `my-bank-customer`, `my-bank-api`     | Emergency Early FD Withdrawal — Breaking the lock with interest forfeiture                                    | ✅     | [US-9005.md](../user-stories/phase-9/US-9005.md) |
-| US-9006 | `my-bank-customer`, `my-bank-api`     | Manage FD Instructions — Toggle Auto-Renewal and update linked settlement account                             | ✅     | [US-9006.md](../user-stories/phase-9/US-9006.md) |
-
-> **Prerequisite before US-9001 code:** Run DB hygiene — see [Tech Debt — Enum Normalisation](#tech-debt--enum-normalisation-pending) below.
+| Story    | Repo                   | Summary                                                           | Status | Story File |
+| -------- | ---------------------- | ----------------------------------------------------------------- | ------ | ---------- |
+| US-10001 | `my-bank-api`          | Account goes dormant after 12 months no activity (cron)           | ⬜     | —          |
+| US-10002 | `my-bank-customer`     | Dormant account shows clear message with reactivation steps       | ⬜     | —          |
+| US-10003 | `notification-service` | Customer notified at 11 months no activity (pre-dormancy warning) | ⬜     | —          |
+| US-10004 | `my-bank-admin-portal` | Banker reactivates dormant account                                | ⬜     | —          |
+| US-10005 | `my-bank-admin-portal` | Admin suspends a customer account                                 | ⬜     | —          |
+| US-10006 | `my-bank-customer`     | Customer requests account closure                                 | ⬜     | —          |
 
 ---
 
 ## Completed
+
+### Phase 9 — Fixed Deposit Module (Jun 2026) ✅
+
+| Story   | Repo                                  | Summary                                                                                                       | Status | Commit |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ | ------ |
+| US-9001 | `my-bank-api`                         | Unified Provisioning Engine — account request + banker approval                                               | ✅     | `ca5a041` |
+| US-9002 | `my-bank-customer`, `my-bank-admin-portal` | FD Onboarding UI — customer request form + banker Approval Hub tab                                         | ✅     | `db361ff` |
+| US-9003 | `my-bank-api`                         | Maturity & Renewal Engine — cron processing for FD maturity, interest crediting, renewal/grace periods        | ✅     | `be6d412` |
+| US-9004 | `my-bank-customer`, `my-bank-api`     | Manual Principal Settlement — Customer withdraws principal during 7-day grace period                          | ✅     | `50a8c28` |
+| US-9005 | `my-bank-customer`, `my-bank-api`     | Emergency Early FD Withdrawal — Breaking the lock with interest forfeiture                                    | ✅     | `e40bed2` |
+| US-9006 | `my-bank-customer`, `my-bank-api`     | Manage FD Instructions — Toggle Auto-Renewal and update linked settlement account                             | ✅     | `50a8c28` |
 
 ### Phase 8 — Role Expansion (Jun 2026) ✅
 

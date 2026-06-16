@@ -256,17 +256,17 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 8 — Role Expansion (4 Roles) 🔵 (Current Phase, Jun 2026)
+## Phase 8 — Role Expansion (4 Roles) ✅ (Complete, Jun 14, 2026)
 
 **Goal:** Expand the admin portal to support 4 distinct roles — `admin`, `banker`, `auditor`, `customer`. Add `auditor` as a new read-only staff role, enforce a first-login flow for all staff, and restrict sidebar navigation per role.
 
 **Stories (implement in order):**
 
-| Story   | Repo                                  | Scope                                                                                                            |
-| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| [US-8001](../user-stories/phase-8/US-8001.md) | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup before portal access                       |
-| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                          |
+| Story   | Repo                                  | Scope                                                                                                            | Commit |
+| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| [US-8001](../user-stories/phase-8/US-8001.md) | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` | `ef646d1` |
+| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup before portal access                       | `ef646d1` |
+| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                          | `ef646d1` |
 
 > Read `docs/engineering/security/authorization.md` before writing any code for this phase.
 
@@ -274,24 +274,24 @@ Audit (May 29, 2026) found most items already wired:
 
 ---
 
-## Phase 9 — Fixed Deposit Module 🔴 (Backlog)
+## Phase 9 — Fixed Deposit Module ✅ (Complete, Jun 15, 2026)
 
 **Goal:** Full Fixed Deposit product — lock period, maturity, interest crediting, early withdrawal, auto-renewal.
 
 ### Work items
 
-- [ ] New FD model fields: `principal`, `lockPeriod`, `maturityDate`, `interestRate`, `linkedAccount`, `autoRenew`, `status: active|matured|withdrawn`
-- [ ] FD creation endpoint — validates min RM1,000, lock period (1/3/6/12 months), deducts from source account
-- [ ] Maturity cron (daily at 02:00): marks FD as `matured`, sends notification
-- [ ] Interest crediting on maturity: credit `principal + interest` to linked account
-- [ ] Auto-renewal: if no action within 7 days of maturity, renew for same period at current rate
-- [ ] Early withdrawal endpoint: return principal only, forfeit interest
-- [ ] FD detail page in customer portal: maturity date, expected interest, lock period
-- [ ] FD notification: 7 days before maturity + on maturity day
+- [x] New FD model fields: `principal`, `lockPeriod`, `maturityDate`, `interestRate`, `linkedAccount`, `autoRenew`, `status: active|matured|withdrawn` — ✅
+- [x] FD creation endpoint — validates min RM1,000, lock period (1/3/6/12 months), deducts from source account — ✅
+- [x] Maturity cron (daily at 02:00): marks FD as `matured`, sends notification — ✅
+- [x] Interest crediting on maturity: credit `interest` to linked account on Day 0 — ✅
+- [x] Auto-renewal: if no action within 7 days of maturity, renew for same period at current rate — ✅
+- [x] Early withdrawal endpoint: return principal only, forfeit interest — ✅
+- [x] FD detail page in customer portal: maturity date, expected interest, lock period — ✅
+- [x] FD notification: 7 days before maturity + on maturity day — ✅
 
 ---
 
-## Phase 10 — Dormancy Cron & Account Lifecycle 🔴 (Backlog)
+## Phase 10 — Dormancy Cron & Account Lifecycle 🔵 (Current Phase, Jun 2026)
 
 **Goal:** Full account lifecycle enforcement — dormancy, suspension, closure.
 
