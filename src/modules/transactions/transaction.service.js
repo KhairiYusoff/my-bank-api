@@ -55,7 +55,21 @@ class TransactionService {
       throw err;
     }
 
-    if (fromAccountCheck.status !== ACCOUNT_STATUS.ACTIVE) {
+    if (
+      role === "customer" &&
+      fromAccountCheck.status === ACCOUNT_STATUS.DORMANT
+    ) {
+      const err = new Error(
+        "Account is dormant. Please visit the nearest branch for reactivation.",
+      );
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (
+      fromAccountCheck.status !== ACCOUNT_STATUS.ACTIVE &&
+      role === "customer"
+    ) {
       const err = new Error(
         "This account is not active and cannot process transfers",
       );

@@ -7,7 +7,11 @@ const {
   sendNotification,
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
-const { ACCOUNT_LIMITS, MIN_OPENING_BALANCE, FD_INTEREST_RATES } = require("../../shared/constants/accountLimits");
+const {
+  ACCOUNT_LIMITS,
+  MIN_OPENING_BALANCE,
+  FD_INTEREST_RATES,
+} = require("../../shared/constants/accountLimits");
 const {
   ACCOUNT_STATUS,
   BANKER_MUTABLE_STATUSES,
@@ -15,7 +19,9 @@ const {
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
-const { generateAccountNumber } = require("../../shared/utils/generateAccountNumber");
+const {
+  generateAccountNumber,
+} = require("../../shared/utils/generateAccountNumber");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -244,7 +250,15 @@ class AccountService {
         throw err;
       }
 
-      if (account.status !== ACCOUNT_STATUS.ACTIVE) {
+      if (role === "customer" && account.status === ACCOUNT_STATUS.DORMANT) {
+        const err = new Error(
+          "Account is dormant. Please visit the nearest branch for reactivation.",
+        );
+        err.statusCode = 403;
+        throw err;
+      }
+
+      if (account.status !== ACCOUNT_STATUS.ACTIVE && role === "customer") {
         const err = new Error(
           "This account is not active and cannot receive deposits",
         );
@@ -339,6 +353,14 @@ class AccountService {
       if (!account) {
         const err = new Error("Account not found");
         err.statusCode = 404;
+        throw err;
+      }
+
+      if (role === "customer" && account.status === ACCOUNT_STATUS.DORMANT) {
+        const err = new Error(
+          "Account is dormant. Please visit the nearest branch for reactivation.",
+        );
+        err.statusCode = 403;
         throw err;
       }
 
@@ -581,24 +603,33 @@ class AccountService {
 
     const minBalance = MIN_OPENING_BALANCE[accountType];
     if (!amount || amount < minBalance) {
-      const err = new Error(`Initial deposit amount below minimum for ${accountType} (RM${minBalance})`);
+      const err = new Error(
+        `Initial deposit amount below minimum for ${accountType} (RM${minBalance})`,
+      );
       err.statusCode = 400;
       throw err;
     }
 
     if (accountType === "fixed_deposit") {
       if (!lockPeriod || ![1, 3, 6, 12].includes(lockPeriod)) {
-        const err = new Error("Valid lock period (1, 3, 6, or 12 months) is required for Fixed Deposit");
+        const err = new Error(
+          "Valid lock period (1, 3, 6, or 12 months) is required for Fixed Deposit",
+        );
         err.statusCode = 400;
         throw err;
       }
       if (!linkedAccount) {
-        const err = new Error("Linked account number is required for Fixed Deposit");
+        const err = new Error(
+          "Linked account number is required for Fixed Deposit",
+        );
         err.statusCode = 400;
         throw err;
       }
 
-      const linkedAccountDoc = await Account.findOne({ accountNumber: linkedAccount, user: userId });
+      const linkedAccountDoc = await Account.findOne({
+        accountNumber: linkedAccount,
+        user: userId,
+      });
       if (!linkedAccountDoc) {
         const err = new Error("Linked account not found or access denied");
         err.statusCode = 404;
@@ -610,14 +641,18 @@ class AccountService {
         throw err;
       }
       if (linkedAccountDoc.accountType === "fixed_deposit") {
-        const err = new Error("Cannot link a Fixed Deposit account to another Fixed Deposit");
+        const err = new Error(
+          "Cannot link a Fixed Deposit account to another Fixed Deposit",
+        );
         err.statusCode = 400;
         throw err;
       }
     }
 
     if (accountType === "business" && !companyRegistrationDoc) {
-      const err = new Error("Company registration document is required for Business account");
+      const err = new Error(
+        "Company registration document is required for Business account",
+      );
       err.statusCode = 400;
       throw err;
     }
@@ -633,8 +668,12 @@ class AccountService {
       currency: "MYR",
       principal: accountType === "fixed_deposit" ? amount : undefined,
       lockPeriod: accountType === "fixed_deposit" ? lockPeriod : undefined,
-      linkedAccount: accountType === "fixed_deposit" ? (await Account.findOne({ accountNumber: linkedAccount }))._id : undefined,
-      companyRegistrationDoc: accountType === "business" ? companyRegistrationDoc : undefined,
+      linkedAccount:
+        accountType === "fixed_deposit"
+          ? (await Account.findOne({ accountNumber: linkedAccount }))._id
+          : undefined,
+      companyRegistrationDoc:
+        accountType === "business" ? companyRegistrationDoc : undefined,
       dateOpened: new Date(),
     });
 
@@ -642,11 +681,7 @@ class AccountService {
   }
 
   async getPendingAccountRequests(query) {
-    const {
-      page = 1,
-      limit = 20,
-      sort = "desc",
-    } = query;
+    const { page = 1, limit = 20, sort = "desc" } = query;
 
     const numericPage = Math.max(parseInt(page, 10), 1);
     const numericLimit = Math.max(parseInt(limit, 10), 1);
@@ -692,10 +727,14 @@ class AccountService {
 
       if (account.accountType === "fixed_deposit") {
         account.maturityDate = new Date();
-        account.maturityDate.setMonth(account.maturityDate.getMonth() + account.lockPeriod);
+        account.maturityDate.setMonth(
+          account.maturityDate.getMonth() + account.lockPeriod,
+        );
         account.interestRate = FD_INTEREST_RATES[account.lockPeriod];
-        
-        const linkedAccount = await Account.findById(account.linkedAccount).session(session);
+
+        const linkedAccount = await Account.findById(
+          account.linkedAccount,
+        ).session(session);
         if (!linkedAccount) {
           const err = new Error("Linked account not found");
           err.statusCode = 404;
@@ -727,7 +766,7 @@ class AccountService {
           accountNumber: account.accountNumber,
         },
       });
-      
+
       await session.commitTransaction();
 
       try {
@@ -746,7 +785,10 @@ class AccountService {
           delivered: false,
         });
       } catch (notifyErr) {
-        console.error("Failed to send account approval notification:", notifyErr.message);
+        console.error(
+          "Failed to send account approval notification:",
+          notifyErr.message,
+        );
       }
 
       return account;
@@ -803,7 +845,10 @@ class AccountService {
         delivered: false,
       });
     } catch (notifyErr) {
-      console.error("Failed to send account rejection notification:", notifyErr.message);
+      console.error(
+        "Failed to send account rejection notification:",
+        notifyErr.message,
+      );
     }
 
     return account;
@@ -839,7 +884,9 @@ class AccountService {
     session.startTransaction();
 
     try {
-      const fd = await Account.findOne({ accountNumber, user: userId }).session(session);
+      const fd = await Account.findOne({ accountNumber, user: userId }).session(
+        session,
+      );
       if (!fd) {
         const err = new Error("Account not found");
         err.statusCode = 404;
@@ -872,7 +919,9 @@ class AccountService {
         throw err;
       }
 
-      const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+      const linkedAccount = await Account.findById(fd.linkedAccount).session(
+        session,
+      );
       if (!linkedAccount) {
         const err = new Error("Linked account not found");
         err.statusCode = 404;
@@ -884,33 +933,43 @@ class AccountService {
       await linkedAccount.save({ session });
 
       const reference = await getNextReference();
-      await Transaction.create([{
-        account: linkedAccount._id,
-        amount: fd.principal,
-        type: "credit",
-        direction: "credit",
-        description: `Manual FD Principal Settlement: ${fd.accountNumber}`,
-        reference,
-        currency: "MYR",
-        status: "completed",
-        balanceBefore,
-        balanceAfter: linkedAccount.balance
-      }], { session });
+      await Transaction.create(
+        [
+          {
+            account: linkedAccount._id,
+            amount: fd.principal,
+            type: "credit",
+            direction: "credit",
+            description: `Manual FD Principal Settlement: ${fd.accountNumber}`,
+            reference,
+            currency: "MYR",
+            status: "completed",
+            balanceBefore,
+            balanceAfter: linkedAccount.balance,
+          },
+        ],
+        { session },
+      );
 
       fd.status = ACCOUNT_STATUS.CLOSED;
       fd.balance = 0;
       await fd.save({ session });
 
-      await ActivityLog.create([{
-        action: "FD_PRINCIPAL_SETTLEMENT",
-        actor: userId,
-        target: fd._id,
-        targetType: "Account",
-        details: {
-          accountNumber: fd.accountNumber,
-          amount: fd.principal,
-        },
-      }], { session });
+      await ActivityLog.create(
+        [
+          {
+            action: "FD_PRINCIPAL_SETTLEMENT",
+            actor: userId,
+            target: fd._id,
+            targetType: "Account",
+            details: {
+              accountNumber: fd.accountNumber,
+              amount: fd.principal,
+            },
+          },
+        ],
+        { session },
+      );
 
       await session.commitTransaction();
 
@@ -928,7 +987,10 @@ class AccountService {
           },
         });
       } catch (notifyErr) {
-        console.error("Failed to send FD settlement notification:", notifyErr.message);
+        console.error(
+          "Failed to send FD settlement notification:",
+          notifyErr.message,
+        );
       }
 
       return fd;
@@ -943,7 +1005,7 @@ class AccountService {
   async updateFdInstructions(accountNumber, userId, instructions) {
     const { autoRenew, linkedAccount } = instructions;
     const fd = await Account.findOne({ accountNumber, user: userId });
-    
+
     if (!fd || fd.accountType !== "fixed_deposit") {
       const err = new Error("Fixed Deposit account not found");
       err.statusCode = 404;
@@ -951,16 +1013,21 @@ class AccountService {
     }
 
     if (autoRenew !== undefined) fd.autoRenew = autoRenew;
-    
+
     if (linkedAccount) {
-      const linkedAccDoc = await Account.findOne({ accountNumber: linkedAccount, user: userId });
+      const linkedAccDoc = await Account.findOne({
+        accountNumber: linkedAccount,
+        user: userId,
+      });
       if (!linkedAccDoc) {
         const err = new Error("Invalid linked account");
         err.statusCode = 400;
         throw err;
       }
       if (linkedAccDoc.accountType === "fixed_deposit") {
-        const err = new Error("Cannot link a Fixed Deposit account to another Fixed Deposit");
+        const err = new Error(
+          "Cannot link a Fixed Deposit account to another Fixed Deposit",
+        );
         err.statusCode = 400;
         throw err;
       }
@@ -985,7 +1052,9 @@ class AccountService {
     session.startTransaction();
 
     try {
-      const fd = await Account.findOne({ accountNumber, user: userId }).session(session);
+      const fd = await Account.findOne({ accountNumber, user: userId }).session(
+        session,
+      );
       if (!fd) {
         const err = new Error("Account not found");
         err.statusCode = 404;
@@ -993,7 +1062,9 @@ class AccountService {
       }
 
       if (fd.accountType !== "fixed_deposit") {
-        const err = new Error("Only Fixed Deposit accounts can be withdrawn early");
+        const err = new Error(
+          "Only Fixed Deposit accounts can be withdrawn early",
+        );
         err.statusCode = 400;
         throw err;
       }
@@ -1002,12 +1073,16 @@ class AccountService {
       const maturityDate = new Date(fd.maturityDate);
 
       if (today >= maturityDate) {
-        const err = new Error("Account has matured. Please use the standard settlement flow.");
+        const err = new Error(
+          "Account has matured. Please use the standard settlement flow.",
+        );
         err.statusCode = 400;
         throw err;
       }
 
-      const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
+      const linkedAccount = await Account.findById(fd.linkedAccount).session(
+        session,
+      );
       if (!linkedAccount) {
         const err = new Error("Linked account not found for principal return");
         err.statusCode = 404;
@@ -1019,34 +1094,44 @@ class AccountService {
       await linkedAccount.save({ session });
 
       const reference = await getNextReference();
-      await Transaction.create([{
-        account: linkedAccount._id,
-        amount: fd.principal,
-        type: "credit",
-        direction: "credit",
-        description: `Early FD Principal Withdrawal (Interest Forfeited): ${fd.accountNumber}`,
-        reference,
-        currency: "MYR",
-        status: "completed",
-        balanceBefore,
-        balanceAfter: linkedAccount.balance
-      }], { session });
+      await Transaction.create(
+        [
+          {
+            account: linkedAccount._id,
+            amount: fd.principal,
+            type: "credit",
+            direction: "credit",
+            description: `Early FD Principal Withdrawal (Interest Forfeited): ${fd.accountNumber}`,
+            reference,
+            currency: "MYR",
+            status: "completed",
+            balanceBefore,
+            balanceAfter: linkedAccount.balance,
+          },
+        ],
+        { session },
+      );
 
       fd.status = ACCOUNT_STATUS.CLOSED;
       fd.balance = 0;
       await fd.save({ session });
 
-      await ActivityLog.create([{
-        action: "FD_EARLY_WITHDRAWAL",
-        actor: userId,
-        target: fd._id,
-        targetType: "Account",
-        details: {
-          accountNumber: fd.accountNumber,
-          principal: fd.principal,
-          penalty: "100% Interest Forfeited"
-        },
-      }], { session });
+      await ActivityLog.create(
+        [
+          {
+            action: "FD_EARLY_WITHDRAWAL",
+            actor: userId,
+            target: fd._id,
+            targetType: "Account",
+            details: {
+              accountNumber: fd.accountNumber,
+              principal: fd.principal,
+              penalty: "100% Interest Forfeited",
+            },
+          },
+        ],
+        { session },
+      );
 
       await session.commitTransaction();
 
@@ -1061,11 +1146,14 @@ class AccountService {
           data: {
             amount: fd.principal,
             accountNumber: fd.accountNumber,
-            type: "early_withdrawal"
+            type: "early_withdrawal",
           },
         });
       } catch (notifyErr) {
-        console.error("Failed to send early FD withdrawal notification:", notifyErr.message);
+        console.error(
+          "Failed to send early FD withdrawal notification:",
+          notifyErr.message,
+        );
       }
 
       return fd;
@@ -1079,6 +1167,105 @@ class AccountService {
 
   getAccountLimits() {
     return ACCOUNT_LIMITS;
+  }
+
+  async identifyDormantAccounts() {
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+
+    const elevenMonthsAgo = new Date();
+    elevenMonthsAgo.setMonth(elevenMonthsAgo.getMonth() - 11);
+
+    const activeAccounts = await Account.find({
+      status: ACCOUNT_STATUS.ACTIVE,
+      accountType: { $ne: "fixed_deposit" },
+    });
+
+    const results = { dormant: 0, warned: 0 };
+
+    for (const account of activeAccounts) {
+      const latestTxn = await Transaction.findOne({
+        account: account._id,
+        performedBy: { $ne: null },
+      }).sort({ date: -1 });
+
+      const lastActivityDate = latestTxn ? latestTxn.date : account.dateOpened;
+
+      // Check for 12-month dormancy
+      if (lastActivityDate < twelveMonthsAgo) {
+        account.status = ACCOUNT_STATUS.DORMANT;
+        account.statusUpdatedDate = new Date();
+        await account.save();
+
+        await ActivityLog.create({
+          action: "ACCOUNT_DORMANT",
+          relatedEntity: account._id,
+          relatedEntityModel: "Account",
+          details: {
+            accountNumber: account.accountNumber,
+            lastActivityDate,
+          },
+        });
+
+        try {
+          await sendNotification({
+            type: "account_dormant",
+            title: "Account Dormant",
+            message: `Your account ${account.accountNumber} has been marked as dormant due to 12 months of inactivity. Self-service transactions are disabled.`,
+            link: `/accounts/${account.accountNumber}`,
+            recipient: { role: "customer", userId: account.user.toString() },
+            source: { service: "my-bank-api", id: account._id.toString() },
+            data: { accountNumber: account.accountNumber },
+          });
+        } catch (notifyErr) {
+          console.error("Failed to send dormancy notice:", notifyErr.message);
+        }
+
+        results.dormant++;
+      }
+      // Check for 11-month warning
+      else if (lastActivityDate < elevenMonthsAgo) {
+        // Prevent daily notification spam by checking for recent warnings
+        const recentWarning = await ActivityLog.findOne({
+          action: "DORMANCY_WARNING",
+          relatedEntity: account._id,
+          createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        });
+
+        if (!recentWarning) {
+          await ActivityLog.create({
+            action: "DORMANCY_WARNING",
+            relatedEntity: account._id,
+            relatedEntityModel: "Account",
+            details: {
+              accountNumber: account.accountNumber,
+              lastActivityDate,
+            },
+          });
+
+          try {
+            await sendNotification({
+              type: "account_dormant_warning",
+              title: "Dormancy Warning",
+              message: `Your account ${account.accountNumber} has had no activity for 11 months. It will be marked as dormant in 30 days unless a transaction is performed.`,
+              link: `/accounts/${account.accountNumber}`,
+              recipient: { role: "customer", userId: account.user.toString() },
+              source: { service: "my-bank-api", id: account._id.toString() },
+              data: { accountNumber: account.accountNumber },
+            });
+          } catch (notifyErr) {
+            console.error(
+              "Failed to send dormancy warning:",
+              notifyErr.message,
+            );
+          }
+
+          results.warned++;
+        }
+      }
+    }
+
+    return results;
   }
 }
 

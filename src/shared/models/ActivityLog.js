@@ -5,7 +5,7 @@ const ActivityLogSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
       index: true,
     },
     action: {
@@ -31,6 +31,8 @@ const ActivityLogSchema = new mongoose.Schema(
         // Critical Account Events
         "ACCOUNT_CREATION",
         "ACCOUNT_CLOSURE",
+        "ACCOUNT_DORMANT",
+        "DORMANCY_WARNING",
 
         // User Profile and Preferences
         "PROFILE_UPDATED",
@@ -57,16 +59,16 @@ const ActivityLogSchema = new mongoose.Schema(
       ],
     },
     details: {
-      type: String,
+      type: mongoose.Schema.Types.Mixed,
       required: true,
     },
     ipAddress: {
       type: String,
-      required: true,
+      required: false,
     },
     userAgent: {
       type: String,
-      required: true,
+      required: false,
     },
     status: {
       type: String,

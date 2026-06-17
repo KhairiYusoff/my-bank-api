@@ -31,6 +31,7 @@ const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 // 4. Cron jobs
 require("./modules/cron/savingsInterest.cron");
 require("./modules/cron/maintenanceFee.cron");
+require("./modules/cron/dormancy.cron");
 
 // 5. Initialize Express app
 const app = express();

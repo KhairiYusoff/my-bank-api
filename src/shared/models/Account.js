@@ -38,6 +38,10 @@ const AccountSchema = new mongoose.Schema({
     enum: ACCOUNT_STATUS_VALUES,
     default: "active",
   },
+  statusUpdatedDate: {
+    type: Date,
+    default: Date.now,
+  },
   dateOpened: {
     type: Date,
     default: Date.now,
