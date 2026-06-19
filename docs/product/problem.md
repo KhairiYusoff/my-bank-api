@@ -4,99 +4,71 @@
 
 ## Problem
 
-**Background:** Traditional banking is fragmented across web, mobile, and offline channels. For young professionals and students in Malaysia, there's no unified, transparent banking platform that combines:
+**Background:** Traditional banking is fragmented across web, mobile, and offline channels. For young professionals and students in Malaysia, there is no unified, transparent banking platform that combines:
 
-- Account management (savings, checking)
+- Account management (savings, checking, business, fixed deposits)
 - Transaction tracking
-- Expense categorization
+- Expense categorization and spending analytics
 - Onboarding verification (digital KYC)
-- Admin/banker controls
+- Admin/banker controls and operations
 
-**Who has this problem:** Young professionals, students, self-employed individuals who want digital-first banking without complexity.
+**Target Audience:** Young professionals, students, and self-employed individuals who want digital-first banking without administrative complexity.
 
-**Why now:** The tech stack exists (MongoDB, Node.js, React), and there's demand for fintech solutions in Malaysia (growing digital adoption).
+**Why Now:** The tech stack exists (MongoDB, Node.js, React), and there is strong demand for seamless, transparent fintech solutions in Malaysia due to growing digital adoption.
 
 ---
 
 ## What We're Building
 
-**MyBank** — A full-stack Malaysian digital banking simulation, built to real-world banking standards:
+**MyBank** is a full-stack Malaysian digital banking simulation, built to real-world banking standards:
 
-- **Customer Portal** (React, Vite) — Multi-account management, transfers, transaction receipts, statements, beneficiaries, expense tracking, AI financial assistant
-- **Admin Portal** (React, Vite) — Application approval, user/staff management, account operations, audit trails, transaction oversight
-- **Core API** (Node.js, Express) — Full banking logic: account types with differentiated rules, transaction limits, fee engine, interest crediting, account lifecycle, atomic money operations
-- **Notification Service** (Node.js, Express) — Decoupled event notifications via WebSocket
-- **AI Assistant** (Phase 11+) — Contextual financial chat with user data awareness, persistent across navigation
+- **Customer Portal** (React, Vite) — Multi-account management, transfers, transaction receipts, statement history, beneficiaries, expense tracking, and AI financial assistant.
+- **Admin Portal** (React, Vite) — Account request approvals, user/staff management, status modifications, audit trails, and transaction oversight.
+- **Core API** (Node.js, Express) — Banking business logic: account types with differentiated rules, transaction limits, fee engines, interest crediting, dormancy lifecycles, and atomic database operations.
+- **Notification Service** (Node.js, Express) — Decoupled event notifications via WebSocket.
 
 ---
 
-## Scope (Current — Full Banking System)
+## Product Scope (Functional Capabilities)
 
-### Features ✅ Built
+### Core Features
 
-| Feature                  | Scope                                                           | Status   |
-| ------------------------ | --------------------------------------------------------------- | -------- |
-| **Auth**                 | Login, JWT tokens, httpOnly cookies, refresh                    | ✅ Built |
-| **Onboarding**           | Digital application, KYC verification, profile completion       | ✅ Built |
-| **Accounts**             | Create, view, balance, account types (Savings/Current/Business) | ✅ Built |
-| **Transactions**         | Transfer between accounts, view history, pagination             | ✅ Built |
-| **Deposits/Withdrawals** | Banker deposits, customer withdraws                             | ✅ Built |
-| **Airdrop**              | Admin credits accounts (promo/testing)                          | ✅ Built |
-| **Expenses**             | Track and categorize user expenses                              | ✅ Built |
-| **Admin Functions**      | Approve applications, manage users/staff, audit trails          | ✅ Built |
-| **Audit Logging**        | All HIGH-severity actions logged                                | ✅ Built |
-| **Notifications**        | Real-time WebSocket notifications                               | ✅ Built |
-
-### In Progress / Planned (Core Banking)
-
-| Feature                                                                | Phase    |
-| ---------------------------------------------------------------------- | -------- |
-| Transaction enrichment — reference, counterpart, balanceAfter          | Phase 5  |
-| Admin detail pages — customer and staff profile pages                  | Phase 6  |
-| Account type rules — differentiated limits, overdraft, withdrawal caps | Phase 7  |
-| Role expansion — auditor role, staff first-login, role-based nav       | Phase 8  |
-| Fixed Deposit — lock period, maturity, interest, cron crediting        | Phase 9  |
-| Dormancy cron + full account lifecycle enforcement                     | Phase 10 |
-| Monthly statements — summary endpoint + PDF                            | Phase 11 |
-| Beneficiary management                                                 | Phase 12 |
-| AI enhancement — chat persistency, contextual responses                | Phase 13 |
+- **Authentication & RBAC:** Secure login with JWT tokens via HTTP-only cookies, with role-based access control supporting 4 distinct roles (`admin`, `banker`, `auditor`, `customer`).
+- **Digital Onboarding & KYC:** Customer digital application, banker review/approval, and initial Savings account provisioning.
+- **Multi-Account Management:** Support for Savings, Current, Business, and Fixed Deposit accounts with standardized currency formatting (`RM X,XXX.XX`).
+- **Enriched Transactions:** Account transfers, deposits, and withdrawals, capturing comprehensive audit data (references, counterparts, channel, device info, and running balance).
+- **Automated Lifecycle & Fees:** Cron-based dormancy scanning (after 12 months of inactivity), annual dormancy fees, savings interest crediting, and monthly maintenance fees.
+- **Administrative Controls:** Banker-initiated account suspension/reactivation and managed closure workflows (with early closure penalty checks).
+- **Expense Analytics:** On-demand expense logging, categorization, and monthly/yearly spending breakdowns.
+- **Notification Engine:** Real-time WebSocket notifications and automated alerts for transactional and lifecycle events.
+- **AI Financial Assistant:** Contextual, data-aware chat helping customers with analytics and transaction inquiries.
 
 ### Intentionally Out of Scope
 
 - ❌ Mobile app (web-responsive only)
-- ❌ Interbank transfers (FPX, IBG, DuitNow) — same-bank only
-- ❌ Real KYC verification (Jumio etc.)
-- ❌ Real payment gateway (Stripe/Razorpay)
-- ❌ Credit scoring / loan products
-- ❌ Investment products (Unit Trusts, ASB) — future after FD foundation
-- ❌ Bill payments — future
-- ❌ 2FA — future
-- ❌ `DELETE /users/me` — banking apps do not allow self-deletion (compliance/data retention)
+- ❌ Interbank transfers (FPX, IBG, DuitNow) — same-bank simulation only
+- ❌ Real third-party KYC verification (Jumio etc.)
+- ❌ Real payment gateway integrations (Stripe, Razorpay)
+- ❌ Credit scoring, loans, or investment products (Unit Trusts, ASB)
+- ❌ 2FA (Two-Factor Authentication)
+- ❌ Customer self-deletion of accounts (`DELETE /users/me` blocked for compliance and data retention rules)
 
 ---
 
 ## Success Metrics
 
-- ✅ All endpoints tested (0 runtime errors)
-- ✅ All money operations atomic (MongoDB sessions)
-- ✅ Audit trail complete (every action logged)
-- ✅ Responsive design (375px - 1920px)
-- ✅ Fast load times (< 3s first paint)
-- ✅ Zero security vulnerabilities (validated inputs, role-based access)
+- **Zero Runtime Failures:** Fully validated API inputs and error boundaries.
+- **Data Integrity:** All money transactions executed atomically via Mongoose sessions (all-or-nothing).
+- **Comprehensive Audit Trail:** Every high-severity administrative and financial action captured in `ActivityLog`.
+- **Aesthetic Excellence:** Premium, modern, responsive interfaces (375px to 1920px width).
+- **Performance:** Fast initial page loads (< 3s first paint) and optimized API response times.
 
 ---
 
-## Business Model (Out of Scope)
+## Business Model & POC Purpose
 
-Not building payment processing, subscription, or monetization yet. This is a proof-of-concept for:
+MyBank does not implement actual payment processing or monetization strategies. It serves as a simulation and proof-of-concept demonstrating:
 
-- Technical architecture
-- Feature completeness
-- User experience
-- Portfolio/demo value
-
----
-
----
-
-**Last Updated:** May 29, 2026
+- Clean, production-grade Node.js/React architecture
+- Banking compliance and RBAC implementation
+- Smooth, aesthetic financial user experiences
