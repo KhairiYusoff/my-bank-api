@@ -2,7 +2,7 @@
 
 > This file is the index only. Detailed stories with AC live in `docs/user-stories/phase-N/` — **new features only (Phase 5+)**. Built features have no story file; the code and `business-rules.md` are the source of truth.
 
-**Last Updated:** Jun 10, 2026
+**Last Updated:** Jun 19, 2026
 
 ---
 

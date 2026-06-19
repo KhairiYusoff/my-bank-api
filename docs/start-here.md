@@ -90,20 +90,8 @@ Full rules → [architecture/constraints.md](architecture/constraints.md)
 
 ## Current Status
 
-See [project/tracker.md](project/tracker.md) — always up to date.
-
-**Phase 5 (Transaction Enrichment)** — 4 stories written, ready to build (implement in this order):
-
-1. [US-5001](user-stories/phase-5/US-5001.md) — Transaction model enrichment (new fields, Counter, masking) — **do first**
-2. [US-5002](user-stories/phase-5/US-5002.md) — Transaction receipt view — customer portal
-3. [US-5003](user-stories/phase-5/US-5003.md) — Transaction detail view — admin portal (unmasked)
-4. [US-5004](user-stories/phase-5/US-5004.md) — Currency display standardised `RM X,XXX.XX`
-
-**Phase 6 (Admin Detail Pages)** — 2 stories written, ready after Phase 5:
-
-- [US-6001](user-stories/phase-6/US-6001.md) — Admin views full customer profile — detail page
-- [US-6002](user-stories/phase-6/US-6002.md) — Admin views staff profile — detail page (depends on US-6001)
+See [project/tracker.md](project/tracker.md) for the active phase, current sprint goals, and task checklist.
 
 ---
 
-**Last Updated:** May 30, 2026
+**Last Updated:** Jun 19, 2026

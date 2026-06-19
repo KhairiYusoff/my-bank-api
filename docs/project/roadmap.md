@@ -1,7 +1,9 @@
 # MyBank API — Roadmap
 
 A permanent record of where this project has been, where it is, and where it's going.
-Tracker handles _what's being worked on right now_. This file handles _the full journey_.
+Tracker handles *what's being worked on right now*. This file handles *the full journey*.
+
+For a complete index of individual story statuses, see [user-stories.md](../product/user-stories.md).
 
 ---
 
@@ -9,13 +11,12 @@ Tracker handles _what's being worked on right now_. This file handles _the full 
 
 **Goal:** Get all services live and observable.
 
-- my-bank-api → deployed (Railway/Render)
-- my-bank-admin-portal → deployed (Vercel)
-- notification-service → deployed (Railway/Render)
-- P0 bug: transfer recipient bell icon not updating in real-time → fixed
-- P0 bug: WebSocket CORS blocking localhost in dev → fixed
-- P0 bug: trust proxy + Mongoose deprecation warnings on Render → fixed
-- P0 bug: notification proxy routes misaligned with JWT payload → fixed
+- **Status:** Completed ✅
+- **Key Milestones:**
+  - `my-bank-api` deployed to Railway/Render.
+  - `my-bank-admin-portal` deployed to Vercel.
+  - `notification-service` deployed to Railway/Render.
+  - Resolved P0 WebSockets CORS, trust proxy warnings, and notification JWT proxy alignment.
 
 ---
 
@@ -23,36 +24,13 @@ Tracker handles _what's being worked on right now_. This file handles _the full 
 
 **Goal:** Clean up the codebase so all future work is built on solid foundations. No features — structural only.
 
-### 1A — Dead Code Removed (May 15)
-
-- Deleted `shared/services/transactionService.js` (duplicate of module-level service)
-- Deleted `shared/services/expenseService.js` (duplicate)
-- Deleted `shared/constants/expense.js` (zero imports)
-- Rewired `transaction.controller` + `expense.controller` to their local module services
-
-### 1B — Naming Standardised (May 15)
-
-- 11 files renamed in `shared/middleware/`, `shared/services/`, `shared/utils/` to `dot.notation`
-- 19 import paths updated across all modules + `server.js`
-
-### 1C — Duplicate Middleware Eliminated (May 15)
-
-- Deleted `modules/accounts/account.middleware.js` (identical to shared)
-- Deleted `modules/users/user.middleware.js` (identical to shared)
-
-### 1D — Fat Controllers Extracted (May 18)
-
-- `account.service.js` created — `account.controller.js`: 526 → 149 lines
-- `user.service.js` created — `user.controller.js`: 348 → 113 lines
-- `admin.service.js` created — `admin.controller.js`: 160 → 67 lines
-- All 3 controllers now HTTP-only: extract params → call service → respond
-
-### 1E — Consistency Audit (May 19)
-
-- `handleError` + `err.statusCode` pattern applied to all controllers
-- `success()/error()` utilities applied everywhere
-- `exports.fn` pattern standardised (removed all `module.exports = {}` style)
-- `getAllTransactions` DB logic moved from controller to `transaction.service.js`
+- **Status:** Completed ✅
+- **Key Milestones:**
+  - **Dead Code Removed:** Deleted duplicate transaction and expense services.
+  - **Naming Standardised:** Renamed 11 files in shared directories to use `.dot` notation; updated 19 import paths.
+  - **Duplicate Middleware Eliminated:** Removed duplicate middlewares in `accounts` and `users` modules.
+  - **Fat Controllers Extracted:** Created dedicated services (`account.service.js`, `user.service.js`, `admin.service.js`) and simplified controllers.
+  - **Consistency Audit:** Applied `handleError` and `success()` / `error()` utilities system-wide.
 
 ---
 
@@ -60,273 +38,126 @@ Tracker handles _what's being worked on right now_. This file handles _the full 
 
 **Goal:** Every module follows the route → controller → service contract without exception.
 
-Audit (May 22, 2026) found 4 remaining gaps:
-
-| #   | Module        | Issue                                                                                                                                     |
-| --- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 2A  | `auth`        | No `auth.service.js` — login, logout, refreshToken all fat controllers touching User model directly                                       |
-| 2B  | `onboarding`  | Service only has email helpers — apply, completeProfile, verifyCustomer, getPendingApplications are fat controllers with direct DB access |
-| 2C  | `audit`       | Service only covers writes — getOwnActivity, getUserActivity, getAllActivities have pagination/filter/sort logic in controller            |
-| 2D  | 6 controllers | Local `handleError` copies instead of shared `error()` utility — violates constraint #1                                                   |
-
-**Result (May 25, 2026):** All 4 gaps closed.
-
-- ✅ 2D complete: Replaced local `handleError` copies with shared `error()` utility in 6 controllers
-- ✅ 2A complete: Created `auth.service.js`; controller now HTTP-only
-- ✅ 2B complete: Expanded `onboarding.service.js`; controller now HTTP-only
-- ✅ 2C complete: Expanded `audit.service.js` with shared `_queryLogs` read builder; controller now HTTP-only
+- **Status:** Completed ✅
+- **Key Milestones:**
+  - Standardized local `handleError` copies with shared `error()` utility across all 6 controllers.
+  - Extracted logic into `auth.service.js`, `onboarding.service.js`, and `audit.service.js`.
 
 ---
 
-## Phase 3 — Client Coverage Audit & Gap Closure ✅ (Complete)
-
-**Reprioritised May 29, 2026** — core banking must be fully wired before AI features. Triggered by P0 bug: `GET /transactions/account/:accountNumber` silently returning empty data for all users due to schema mismatch introduced in Phase 1 refactor.
+## Phase 3 — Client Coverage Audit & Gap Closure ✅ (Completed May 29, 2026)
 
 **Goal:** Every API endpoint is either consumed by a client or deliberately removed/documented as internal-only.
 
-### Audit findings (May 29, 2026)
-
-Full cross-reference of all routes vs client calls (my-bank-customer + my-bank-admin-portal):
-
-| Endpoint                                   | Method       | Status                                   |
-| ------------------------------------------ | ------------ | ---------------------------------------- |
-| `POST /auth/login`                         | both clients | ✅                                       |
-| `POST /auth/logout`                        | both clients | ✅                                       |
-| `POST /auth/refresh-token`                 | admin        | ✅                                       |
-| `GET /auth/check-token`                    | customer     | ✅                                       |
-| `GET /users/me`                            | both clients | ✅                                       |
-| `PUT /users/me`                            | both clients | ✅                                       |
-| `PUT /users/me/password`                   | both clients | ✅                                       |
-| `PUT /users/me/preferences`                | admin        | ✅                                       |
-| `POST /users/me/reset-password`            | customer     | ✅                                       |
-| `DELETE /users/me`                         | —            | ❌ **unused**                            |
-| `GET /users/customers`                     | admin        | ✅                                       |
-| `GET /users/staff`                         | admin        | ✅                                       |
-| `POST /accounts/create`                    | —            | ❌ **unused** (banker feature, no UI)    |
-| `DELETE /accounts/:accountNumber`          | —            | ❌ **unused** (banker feature, no UI)    |
-| `GET /accounts/`                           | customer     | ✅                                       |
-| `GET /accounts/balance/:accountNumber`     | customer     | ✅                                       |
-| `GET /accounts/all`                        | admin        | ✅                                       |
-| `POST /accounts/deposit`                   | customer     | ✅                                       |
-| `POST /accounts/withdraw`                  | customer     | ✅                                       |
-| `POST /accounts/airdrop`                   | admin        | ✅                                       |
-| `POST /transactions/transfer`              | customer     | ✅                                       |
-| `GET /transactions/account/:accountNumber` | customer     | ✅ (fixed May 29)                        |
-| `GET /transactions/all`                    | admin        | ✅                                       |
-| `GET /transactions/:transactionId`         | admin        | ✅                                       |
-| `POST /expenses`                           | customer     | ✅                                       |
-| `GET /expenses`                            | customer     | ✅                                       |
-| `GET /expenses/:expenseId`                 | customer     | ✅                                       |
-| `PUT /expenses/:expenseId`                 | customer     | ✅                                       |
-| `DELETE /expenses/:expenseId`              | customer     | ✅                                       |
-| `GET /expenses/analytics/monthly`          | customer     | ✅                                       |
-| `GET /expenses/analytics/yearly`           | customer     | ✅                                       |
-| `GET /expenses/categories`                 | customer     | ✅                                       |
-| `GET /expenses/payment-methods`            | customer     | ✅                                       |
-| `GET /expenses/dashboard/stats`            | customer     | ✅                                       |
-| `POST /ai/chat`                            | —            | ❌ **unused** (Phase 3 work in progress) |
-| `GET /ai/insights`                         | customer     | ✅                                       |
-| `GET /audit/me`                            | admin        | ✅                                       |
-| `GET /audit/user/:userId`                  | admin        | ✅                                       |
-| `GET /audit/all`                           | admin        | ✅                                       |
-| `POST /onboarding/apply`                   | customer     | ✅                                       |
-| `PUT /onboarding/complete-profile`         | customer     | ✅                                       |
-| `GET /onboarding/pending`                  | admin        | ✅                                       |
-| `POST /onboarding/approve/:userId`         | admin        | ✅                                       |
-| `POST /onboarding/verify/:userId`          | admin        | ✅                                       |
-| `POST /admin/create-staff`                 | admin        | ✅                                       |
-| `DELETE /admin/staff/:staffId`             | admin        | ✅                                       |
-| `DELETE /admin/customer/:customerId`       | admin        | ✅                                       |
-| `PUT /admin/staff/:staffId`                | admin        | ✅                                       |
-| `PUT /admin/customer/:customerId`          | admin        | ✅                                       |
-| `GET /notifications/`                      | customer     | ✅                                       |
-| `PATCH /notifications/:id`                 | customer     | ✅                                       |
-| `DELETE /notifications/:id`                | customer     | ✅                                       |
-
-### Work items
-
-- [x] Wire `PUT /admin/staff/:staffId` + `DELETE /admin/staff/:staffId` — ✅ May 29
-- [x] Wire `PUT /admin/customer/:customerId` + `DELETE /admin/customer/:customerId` — ✅ May 29
-- [x] Wire `GET /transactions/:transactionId` — detail dialog in admin TransactionsList — ✅ May 29
-- [x] Wire `GET /accounts/` — ✅ May 29
-- [x] Wire `GET /accounts/balance/:accountNumber` — ✅ May 29
-- [x] Build banker account management UI — deferred: `POST /accounts/create` + `DELETE /accounts/:accountNumber` moved to Phase 6 (requires account type rules)
-- [x] Wire `DELETE /users/me` — intentionally deferred (banking compliance, no self-deletion)
-- [x] Wire `GET /expenses/categories` + `GET /expenses/payment-methods` — ✅ May 29
-- [x] Wire `GET /expenses/dashboard/stats` — ✅ May 29
-- [x] `POST /ai/chat` — deferred to Phase 11
-
-### 3A — Admin Portal gap closure ✅ (May 29, 2026)
-
-Priority order based on impact:
-
-1. **Staff management actions** — `PUT /admin/staff/:staffId`, `DELETE /admin/staff/:staffId`
-   - Edit staff details (name, role, status)
-   - Deactivate / remove staff
-2. **Customer management actions** — `PUT /admin/customer/:customerId`, `DELETE /admin/customer/:customerId`
-   - Edit customer details
-   - Deactivate / remove customer account
-3. **Transaction detail modal** — `GET /transactions/:transactionId`
-   - Drill into a transaction from the transactions list
-4. **Account management** — `POST /accounts/create`, `DELETE /accounts/:accountNumber`
-   - Banker creates/closes accounts from admin portal
-
-### 3B — Customer app gap closure 🔵 (current focus)
-
-Audit (May 29, 2026) found most items already wired:
-
-- [x] `GET /accounts/` — consumed in Dashboard, transfer, withdraw, deposit, expense hooks — ✅
-- [x] `GET /accounts/balance/:accountNumber` — `useGetAccountBalanceQuery` in `AccountDetailsPage` — ✅
-- [x] `GET /expenses/categories` — consumed in `useExpenseActions` — ✅
-- [x] `GET /expenses/payment-methods` — consumed in `useExpenseActions` — ✅
-- [x] `GET /expenses/dashboard/stats` — consumed in `useAnalytics` — ✅
-- [ ] `DELETE /users/me` — API endpoint exists, no UI wired in customer app
+- **Status:** Completed ✅
+- **Key Milestones:**
+  - Conducted full cross-reference of all routes vs client calls.
+  - Wired staff management (`PUT/DELETE` staff routes) and customer management actions.
+  - Completed Transaction detail modal and standard account views.
+  - Formally deferred unused routes (`DELETE /users/me` and AI chat endpoints).
 
 ---
 
 ## Phase 4 — AI Features ⏸️ (ON HOLD)
 
-**Paused indefinitely.** Core banking must reach Phase 10 (Beneficiary Management) before AI features are prioritised. Existing scaffolding (`ai.controller.js`, `ai.service.js`, `ai.guardrails.js`, `ai.tools.js`) is preserved but no new AI work until gate is cleared.
+**Goal:** Wire AI chat and proactive advisor engines.
 
-**Gate:** Phases 5–12 must ship before Phase 13 starts.
-
----
-
-## Phase 5 — Transaction Enrichment ✅ (Jun 1, 2026)
-
-**Goal:** Every transaction record captures complete contextual data at write time — reference number, counterpart, running balance, channel, device, and timing — so customer portals can render full receipts and the system has a fraud-ready audit trail from day one.
-
-**Stories (implement in order):**
-
-| Story   | Repo                                       | Scope                                                                                                                                                                                                                                                         |
-| ------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-5001 | `my-bank-api`                              | 12 new Transaction fields (`reference`, `counterpartAccount`, `counterpartName`, `balanceAfter`, `fee`, `currency`, `memo`, `channel`, `deviceInfo`, `processingTime`), Counter model, `maskName` utility, role-based API masking, `Account.currency` bug fix |
-| US-5002 | `my-bank-customer`                         | Tappable transaction rows + receipt drawer/modal, null field handling for pre-Phase-5 records                                                                                                                                                                 |
-| US-5003 | `my-bank-admin-portal`                     | Unmasked detail panel: full name/account, deviceInfo, processingTime + duration                                                                                                                                                                               |
-| US-5004 | `my-bank-customer`, `my-bank-admin-portal` | Currency display standardised — all amounts show `RM X,XXX.XX`                                                                                                                                                                                                |
-
-**Gate:** US-5001 must be deployed before US-5002, US-5003, or US-5004 can be started.
+- **Status:** Paused indefinitely (ON HOLD) ⏸️
+- **Gate:** Phases 5–12 must ship before Phase 13/14 AI features can start. Scaffolded endpoints are preserved but inactive.
 
 ---
 
-## Phase 6 — Admin Detail Pages ✅ (Complete, Jun 2–3 2026)
+## Phase 5 — Transaction Enrichment ✅ (Completed June 1, 2026)
 
-**Goal:** Replace the current Actions dropdown on Users/Staff list pages with a proper detail page per record. Enables admin and banker to view full customer KYC data and manage status/role from a dedicated page.
+**Goal:** Every transaction record captures complete contextual data at write time (reference, counterpart, running balance, channel, device) for receipts and fraud auditing.
 
-**Stories:**
-
-| Story   | Repo                                  | Scope                                                                                                                                                      | Status |
-| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| US-6001 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/customer/:id` (admin + banker) + CustomerDetailPage with all KYC sections, shared ProfileSection, ChangeStatusModal reused                    | ✅ `8c8610b` / `1718b45` Jun 2 |
-| US-6002 | `my-bank-api`, `my-bank-admin-portal` | `GET /admin/staff/:id` (admin only) + StaffDetailPage, ChangeRoleModal, reuses ProfileSection from US-6001                                               | ✅ `0b85e1d` / `27215ef` Jun 2 |
-| US-6003 | `my-bank-api`, `my-bank-admin-portal` | `GET /accounts/:accountNumber/detail` (admin + banker) + AccountDetailPage with Account Info, Financials, Account Holder sections, ChangeStatusModal reused | ✅ Jun 3 |
-
-**Gate:** Phase 5 must ship first. US-6001 must be done before US-6002 (shares ProfileSection component).
+- **Status:** Completed ✅
+- **Scope:** [US-5001] to [US-5004] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Added 12 new fields to Transaction schema and created `Counter` model.
+  - Built receipt drawer UI in customer portal.
+  - Created unmasked details view in admin portal.
+  - Standardized currency formatting (`RM X,XXX.XX`).
 
 ---
 
-## Phase 7 — Account Type Differentiation ✅ (Jun 6–7, 2026)
+## Phase 6 — Admin Detail Pages ✅ (Completed June 3, 2026)
 
-**Goal:** Enforce differentiated rules per account type in code. All accounts previously behaved identically regardless of type.
+**Goal:** Replace Actions dropdown on admin/staff lists with dedicated details pages showing full customer KYC profiles and account details.
 
-**Pre-phase bug fixes (Jun 6):** Full lifecycle audit before code changes.
-- BUG-01 CRITICAL: Account type enum unified (`savings/current/business/fixed_deposit`) across model, validations, migration script — `d42d94a`
-- BUG-02 CRITICAL: `verifyCustomer` wrapped in Mongoose session (atomic user+account creation) — `d42d94a`
-- BUG-03 CRITICAL: `user.status` enforced in login + auth middleware (suspended/terminated blocked) — `d42d94a`
-- BUG-04 CRITICAL: `CREATE_STAFF` added to ActivityLog enum — `d42d94a`
-- BUG-06 HIGH: Active status guard added to deposit/withdraw/transfer — `568db78`
-- BUG-05 HIGH: Deferred to Phase 10 (soft vs hard delete product decision)
-
-| Story | Repo | Scope | Commit |
-| ----- | ---- | ----- | ------ |
-| US-7001 | `my-bank-api` | Transfer + withdrawal hard blocks: min amounts, self-transfer, FD restrictions, per-type single/daily caps, overdraft-aware balance check | `785e6bb` |
-| ~~US-7002~~ | — | Dropped — savings monthly withdrawal cap (Reg D, not applicable to BNM). Moved to Phase 14 Fraud & Risk backlog | — |
-| US-7003 | `my-bank-api`, `my-bank-admin-portal` | `PATCH /accounts/:accountNumber/overdraft-limit` + Set Overdraft Limit dialog in admin portal | `11d67bf` / `6cd0687` |
-| US-7005 | `my-bank-customer`, `my-bank-api` | `GET /accounts/limits` endpoint; account type chip with \u24d8 tooltip in BalanceCard; limits served from shared constants (single source of truth) | `63b3b05` / `023952f` |
-| US-7006 | `my-bank-api` | Maintenance fee cron — `node-cron`, 00:01 MYT on 1st of month, fee waived if balance < fee, per-account error isolation | `3642e88` |
-| US-7007 | `my-bank-api` | Savings interest cron — 23:59 MYT last day of month, tiered rates 0.5%/1.0%/1.5% p.a., interest Transaction type added to schema | `3642e88` |
-| US-7008 | `my-bank-api` | `notifyBelowThreshold` utility — wired into withdraw and transfer debit leg post-commit | `3642e88` |
-
-**Schema changes (Phase 7):**
-- `Transaction.type` enum: added `"fee"` and `"interest"`
-- `Transaction.performedBy`: `required: true` → `required: false` (null for system cron transactions)
-- `src/shared/constants/accountLimits.js`: canonical limits config (single source used by both enforcement and display)
-
-**Infrastructure note:** `node-cron` jobs run in-process. Render free tier sleeps after 15min idle — migrate to Fly.io for reliable production cron execution. See tracker.md for migration steps.
+- **Status:** Completed ✅
+- **Scope:** [US-6001] to [US-6005] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Added detail pages for customers, staff profiles, and bank accounts.
+  - Built admin Enterprise Dashboard showing KPIs, financials, and AUM.
+  - Standardized all transactions to MYR.
 
 ---
 
-## Phase 8 — Role Expansion (4 Roles) ✅ (Complete, Jun 14, 2026)
+## Phase 7 — Account Type Differentiation ✅ (Completed June 7, 2026)
 
-**Goal:** Expand the admin portal to support 4 distinct roles — `admin`, `banker`, `auditor`, `customer`. Add `auditor` as a new read-only staff role, enforce a first-login flow for all staff, and restrict sidebar navigation per role.
+**Goal:** Enforce differentiated rules (limits, overdrafts, interest) per account type in code.
 
-**Stories (implement in order):**
-
-| Story   | Repo                                  | Scope                                                                                                            | Commit |
-| ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
-| [US-8001](../user-stories/phase-8/US-8001.md) | `my-bank-api`                         | Add `auditor` to User model role enum; update all `authorizeRoles()` calls per RBAC matrix in `authorization.md` | `ef646d1` |
-| US-8002 | `my-bank-api`, `my-bank-admin-portal` | Staff first-login flow — forced password change + basic profile setup before portal access                       | `ef646d1` |
-| US-8003 | `my-bank-admin-portal`                | Role-based navigation — restrict sidebar menus and routes based on logged-in staff role                          | `ef646d1` |
-
-> Read `docs/engineering/security/authorization.md` before writing any code for this phase.
-
-**Gate:** Phase 6 (detail pages) must ship first — auditor needs to view detail pages.
+- **Status:** Completed ✅
+- **Scope:** [US-7001] to [US-7008] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Unified account type enums (`savings`, `current`, `business`, `fixed_deposit`).
+  - Implemented limits, overdraft checks, and monthly maintenance fee / savings interest cron jobs.
+  - Integrated `notifyBelowThreshold` utility.
 
 ---
 
-## Phase 9 — Fixed Deposit Module ✅ (Complete, Jun 15, 2026)
+## Phase 8 — Role Expansion (4 Roles) ✅ (Completed June 14, 2026)
+
+**Goal:** Expand admin portal support to 4 distinct roles (`admin`, `banker`, `auditor`, `customer`) with RBAC and forced staff password reset.
+
+- **Status:** Completed ✅
+- **Scope:** [US-8001] to [US-8003] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Integrated `auditor` role into all authorization guards.
+  - Created staff first-login setup and password reset flows.
+  - Wired role-based sidebar navigation and route guards.
+
+---
+
+## Phase 9 — Fixed Deposit Module ✅ (Completed June 15, 2026)
 
 **Goal:** Full Fixed Deposit product — lock period, maturity, interest crediting, early withdrawal, auto-renewal.
 
-### Work items
-
-- [x] New FD model fields: `principal`, `lockPeriod`, `maturityDate`, `interestRate`, `linkedAccount`, `autoRenew`, `status: active|matured|withdrawn` — ✅
-- [x] FD creation endpoint — validates min RM1,000, lock period (1/3/6/12 months), deducts from source account — ✅
-- [x] Maturity cron (daily at 02:00): marks FD as `matured`, sends notification — ✅
-- [x] Interest crediting on maturity: credit `interest` to linked account on Day 0 — ✅
-- [x] Auto-renewal: if no action within 7 days of maturity, renew for same period at current rate — ✅
-- [x] Early withdrawal endpoint: return principal only, forfeit interest — ✅
-- [x] FD detail page in customer portal: maturity date, expected interest, lock period — ✅
-- [x] FD notification: 7 days before maturity + on maturity day — ✅
+- **Status:** Completed ✅
+- **Scope:** [US-9001] to [US-9006] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Added FD principal, duration, interest rate, renewal instructions, and status.
+  - Developed Unified Provisioning Engine for account requests and banker approvals.
+  - Built maturity cron (credits interest, triggers renewal/grace periods).
+  - Built early withdrawal (forfeits interest) and settlement features.
 
 ---
 
-## Phase 10 — Dormancy Cron & Account Lifecycle 🔵 (Current Phase, Jun 2026)
+## Phase 10 — Dormancy Cron & Account Lifecycle 🔵 (In Progress)
 
-**Goal:** Full account lifecycle enforcement — dormancy, suspension, closure.
+**Goal:** Full account lifecycle enforcement — dormancy automation, suspension, request-based closure.
 
-### Work items
-
-- [ ] Dormancy cron (daily at 02:00): mark accounts dormant after 12 months no activity
-- [ ] Dormant accounts: block all transactions (transfer, deposit, withdraw)
-- [ ] Dormancy fee cron: charge RM10/year on dormancy anniversary
-- [ ] Reactivation endpoint: banker action — `PUT /accounts/:accountNumber/reactivate`
-- [ ] Account suspension: admin action — `PUT /accounts/:accountNumber/suspend`
-- [ ] Account closure flow: customer requests → banker approves → zero balance required
-- [ ] Closed accounts hidden from customer portal, preserved in DB
-- [ ] Notify customer when account becomes dormant (T-30 days warning)
-- [ ] Status audit trail: all status changes logged with actor + timestamp
+- **Status:** Active / In Progress 🔵
+- **Scope:** [US-10001] to [US-10006] (detailed in [user-stories.md](../product/user-stories.md)).
+- **Key Milestones:**
+  - Automated dormancy identification cron (12 months inactivity).
+  - Annual dormancy fee (RM10/year) debit mechanism.
+  - Administrative suspension/reactivation endpoints and UI.
+  - Customer-requested account closure workflow (zero balance check).
 
 ---
 
 ## Phase 11 — Monthly Statements 🔴 (Backlog)
 
-**Goal:** On-demand monthly statement endpoint. PDF generation in Phase 9B.
+**Goal:** On-demand monthly statements and PDF statements.
 
-### Work items
-
-**9A — Statement endpoint**
-
-- [ ] `GET /accounts/:accountNumber/statement?month=5&year=2026`
-- [ ] Response: `{ openingBalance, closingBalance, totalCredits, totalDebits, transactionCount, transactions[] }`
-- [ ] Restrict to account owner (customer) or admin/banker
-- [ ] Statement UI in customer portal — monthly selector, summary header, transaction list
-
-**9B — PDF generation** (later)
-
-- [ ] Server-side PDF via `pdfkit` or `puppeteer`
-- [ ] `GET /accounts/:accountNumber/statement/pdf?month=5&year=2026` — streams PDF
-- [ ] Download button in statement UI
+- **Status:** Planned ⬜
+- **Scope:** [US-11001] to [US-11003].
+- **Key Features:**
+  - Statement summary endpoint (`GET /accounts/:accountNumber/statement`).
+  - Monthly statement history UI.
+  - Server-side PDF generation (`pdfkit` or `puppeteer`).
 
 ---
 
@@ -334,45 +165,33 @@ Audit (May 29, 2026) found most items already wired:
 
 **Goal:** Customer can save frequent recipients for quick transfers.
 
-### Work items
-
-- [ ] Add `beneficiaries: [{ nickname, accountNumber, addedAt }]` to `User` model (max 20)
-- [ ] `GET /users/me/beneficiaries` — list saved beneficiaries
-- [ ] `POST /users/me/beneficiaries` — add new beneficiary (no verification, fails at transfer time if invalid)
-- [ ] `PUT /users/me/beneficiaries/:id` — update nickname
-- [ ] `DELETE /users/me/beneficiaries/:id` — remove beneficiary
-- [ ] Transfer form: beneficiary selector dropdown pre-fills account number field
-- [ ] Beneficiary list page in customer portal
+- **Status:** Planned ⬜
+- **Scope:** [US-12001] to [US-12003].
+- **Key Features:**
+  - Recipient directory in customer profile (max 20).
+  - Transfer form beneficiary autocompletion.
 
 ---
 
 ## Phase 13 — AI Enhancement 🔴 (Backlog)
 
-**Gate:** Phases 5–12 must ship first.
+**Goal:** Production-grade contextual AI chat for customers.
 
-**Goal:** Wire the existing AI chat endpoint with proper client-side persistency and contextual personalisation. The AI scaffolding already exists — this phase makes it production-grade.
-
-### Work items
-
-- [ ] Wire `POST /ai/chat` in customer portal
-- [ ] Chat history stored in Redux — survives navigation, cleared on logout/refresh
-- [ ] Inject user's account balances + recent transactions as context in each request
-- [ ] Remove generic "this is not financial advice" disclaimers from default responses
-- [ ] AI responses personalised to user's actual data (not generic)
-- [ ] Chat UI: message thread, input box, loading state, error state
-- [ ] System prompt updated to reflect contextual banking assistant persona
+- **Status:** Planned ⬜
+- **Scope:** [US-13001] to [US-13005].
+- **Key Features:**
+  - Redux-persisted AI chat UI.
+  - Injection of user account balances and transactions as prompt context.
+  - AI responses personalized to customer data.
 
 ---
 
-## Phase 14 — AI Phase 2 🔴 (Backlog)
+## Phase 14 — AI Phase 2 & Advanced Risk 🔴 (Backlog)
 
-**Gate:** Phase 13 must ship first.
+**Goal:** Proactive AI agent capabilities and advanced transaction monitoring (AML/CFT).
 
-**Goal:** Proactive, agentic AI capabilities.
-
-### Work items
-
-- [ ] Proactive nudges — AI-generated alerts (e.g. "Your balance is low", "Unusual spend in Food this month")
-- [ ] Spend insights — AI narrative on monthly spending breakdown
-- [ ] Agentic advisor — multi-turn goal-oriented conversations (e.g. "help me save RM500 this month")
-- [ ] Notification integration — proactive nudges delivered via notification service
+- **Status:** Planned ⬜
+- **Scope:** [US-14001] to [US-14004] (Risk) and proactive AI alerts.
+- **Key Features:**
+  - BNM AML soft flags (threshold breaches, structuring alerts, rapid drains).
+  - Proactive AI notifications (low balance, unusual category spend alerts).
