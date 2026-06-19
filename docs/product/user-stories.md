@@ -79,7 +79,7 @@ Sub-tasks in story files follow: `US-5001-BE1`, `US-5001-FE1` etc.
 | US-9004  | FD Settlement at Maturity — Customer manually withdraws principal during grace period | 9     | my-bank-api, my-bank-customer          | ✅     | [US-9004.md](../user-stories/phase-9/US-9004.md) |
 | US-9005  | Emergency Early FD Withdrawal — Breaking the lock with interest forfeiture       | 9     | my-bank-api, my-bank-customer          | ✅     | [US-9005.md](../user-stories/phase-9/US-9005.md) |
 | US-9006  | FD Maturity Instruction Management — Toggle auto-renewal and receive alerts      | 9     | my-bank-api, my-bank-customer          | ✅     | [US-9006.md](../user-stories/phase-9/US-9006.md) |
-| US-10001 | Automated Dormancy Engine — Identify accounts with no activity for 12 months | 10    | my-bank-api                            | 🔵     | [US-10001.md](../user-stories/phase-10/US-10001.md) |
+| US-10001 | Automated Dormancy Engine — Identify accounts with no activity for 12 months | 10    | my-bank-api                            | ✅     | [US-10001.md](../user-stories/phase-10/US-10001.md) |
 | US-10002 | Dormancy Maintenance Fees — Annual RM10 fee for dormant accounts             | 10    | my-bank-api                            | 🔵     | [US-10002.md](../user-stories/phase-10/US-10002.md) |
 | US-10003 | Administrative Lifecycle Controls — Manual suspension and reactivation        | 10    | my-bank-api, my-bank-admin-portal      | 🔵     | [US-10003.md](../user-stories/phase-10/US-10003.md) |
 | US-10004 | Managed Account Closure — Request and approval workflow for closing accounts  | 10    | my-bank-api, my-bank-customer          | 🔵     | [US-10004.md](../user-stories/phase-10/US-10004.md) |
