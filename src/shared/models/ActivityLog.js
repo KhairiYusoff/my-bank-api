@@ -33,6 +33,8 @@ const ActivityLogSchema = new mongoose.Schema(
         "ACCOUNT_CLOSURE",
         "ACCOUNT_DORMANT",
         "DORMANCY_WARNING",
+        "DORMANCY_FEE_CHARGE",
+        "DORMANCY_FEE_WARNING",
 
         // User Profile and Preferences
         "PROFILE_UPDATED",

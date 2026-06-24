@@ -43,8 +43,11 @@ const FD_INTEREST_RATES = {
   12: 3.0, // 12 months
 };
 
+const DORMANCY_FEE = 10;
+
 module.exports = {
   ACCOUNT_LIMITS,
   MIN_OPENING_BALANCE,
   FD_INTEREST_RATES,
+  DORMANCY_FEE,
 };

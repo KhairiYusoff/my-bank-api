@@ -15,6 +15,16 @@ cron.schedule(
     } catch (err) {
       console.error("[CRON] Dormancy Engine Failed:", err.message);
     }
+
+    console.log("[CRON] Running Dormancy Maintenance Fee Engine...");
+    try {
+      const results = await accountService.processDormancyFees();
+      console.log(
+        `[CRON] Dormancy Fee Engine Complete: ${results.charged} charged, ${results.warningsLogged} warnings logged, ${results.errors} errors.`,
+      );
+    } catch (err) {
+      console.error("[CRON] Dormancy Fee Engine Failed:", err.message);
+    }
   },
   {
     timezone: "Asia/Kuala_Lumpur",

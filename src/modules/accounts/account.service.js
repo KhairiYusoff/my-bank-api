@@ -11,6 +11,7 @@ const {
   ACCOUNT_LIMITS,
   MIN_OPENING_BALANCE,
   FD_INTEREST_RATES,
+  DORMANCY_FEE,
 } = require("../../shared/constants/accountLimits");
 const {
   ACCOUNT_STATUS,
@@ -22,6 +23,7 @@ const {
 const {
   generateAccountNumber,
 } = require("../../shared/utils/generateAccountNumber");
+const { isDormancyAnniversary } = require("../../shared/utils/date");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -1262,6 +1264,120 @@ class AccountService {
 
           results.warned++;
         }
+      }
+    }
+
+    return results;
+  }
+
+  async processDormancyFees() {
+    const today = new Date();
+    const dormantAccounts = await Account.find({
+      status: ACCOUNT_STATUS.DORMANT,
+    });
+
+    const results = { charged: 0, warningsLogged: 0, errors: 0 };
+
+    for (const account of dormantAccounts) {
+      try {
+        // Skip accounts that already have zero or negative balance
+        if (account.balance <= 0) continue;
+
+        const baselineDate = account.statusUpdatedDate || account.dateOpened;
+        if (!baselineDate) continue;
+
+        if (isDormancyAnniversary(baselineDate, today)) {
+          const session = await mongoose.startSession();
+          session.startTransaction();
+
+          try {
+            const freshAccount = await Account.findById(account._id).session(session);
+
+            if (freshAccount.status !== ACCOUNT_STATUS.DORMANT) {
+              await session.abortTransaction();
+              session.endSession();
+              continue;
+            }
+
+            if (freshAccount.balance <= 0) {
+              await session.abortTransaction();
+              session.endSession();
+              continue;
+            }
+
+            const actualFee = Math.min(freshAccount.balance, DORMANCY_FEE);
+            const balanceBefore = freshAccount.balance;
+
+            freshAccount.balance = Math.round((freshAccount.balance - actualFee) * 100) / 100;
+            await freshAccount.save({ session });
+
+            const reference = await getNextReference();
+            const completedAt = new Date();
+
+            const transaction = new Transaction({
+              account: freshAccount._id,
+              amount: actualFee,
+              type: "fee",
+              direction: "debit",
+              description: "Dormancy Maintenance Fee",
+              memo: "Annual Dormancy Maintenance Fee",
+              reference,
+              fee: 0,
+              balanceBefore,
+              balanceAfter: freshAccount.balance,
+              currency: freshAccount.currency || "MYR",
+              channel: "system",
+              processingTime: { submittedAt: today, completedAt },
+              status: "completed",
+              performedBy: null,
+              counterpartName: "MyBank",
+              counterpartNameRaw: "MyBank",
+            });
+
+            await transaction.save({ session });
+
+            await ActivityLog.create([{
+              action: "DORMANCY_FEE_CHARGE",
+              user: freshAccount.user,
+              details: {
+                accountNumber: freshAccount.accountNumber,
+                feeCharged: actualFee,
+                balanceBefore,
+                balanceAfter: freshAccount.balance,
+              },
+              relatedEntity: freshAccount._id,
+              relatedEntityModel: "Account",
+              severity: "MEDIUM",
+            }], { session });
+
+            if (freshAccount.balance === 0) {
+              await ActivityLog.create([{
+                action: "DORMANCY_FEE_WARNING",
+                user: freshAccount.user,
+                details: {
+                  accountNumber: freshAccount.accountNumber,
+                  message: "Account balance is zero after dormancy maintenance fee deduction. Review required.",
+                  feeCharged: actualFee,
+                },
+                relatedEntity: freshAccount._id,
+                relatedEntityModel: "Account",
+                severity: "HIGH",
+              }], { session });
+              results.warningsLogged++;
+            }
+
+            await session.commitTransaction();
+            results.charged++;
+          } catch (txnErr) {
+            await session.abortTransaction();
+            throw txnErr;
+          } finally {
+            session.endSession();
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to process dormancy fee for account ${account.accountNumber}:`, err.message);
+        results.errors++;
       }
     }
 
