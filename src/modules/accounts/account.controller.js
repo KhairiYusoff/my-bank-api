@@ -367,3 +367,39 @@ exports.rejectAccountRequest = async (req, res) => {
     });
   }
 };
+
+exports.suspendAccount = async (req, res) => {
+  try {
+    const account = await accountService.suspendAccount(
+      req.params.accountNumber,
+    );
+    return success(res, {
+      message: "Account suspended successfully.",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.reactivateAccount = async (req, res) => {
+  try {
+    const account = await accountService.reactivateAccount(
+      req.params.accountNumber,
+    );
+    return success(res, {
+      message: "Account reactivated successfully.",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};

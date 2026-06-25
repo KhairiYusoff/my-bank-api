@@ -16,6 +16,8 @@ const {
   getPendingAccountRequests,
   approveAccountRequest,
   rejectAccountRequest,
+  suspendAccount,
+  reactivateAccount,
 } = require("./account.controller");
 const {
   authMiddleware,
@@ -107,6 +109,20 @@ router.post(
   authorizeRoles("banker"),
   activityLogger("REJECT_ACCOUNT_REQUEST", "Banker rejected account request"),
   rejectAccountRequest,
+);
+
+router.put(
+  "/:accountNumber/suspend",
+  authorizeRoles("banker"),
+  activityLogger("ACCOUNT_SUSPENDED", "Banker suspended an account"),
+  suspendAccount,
+);
+
+router.put(
+  "/:accountNumber/reactivate",
+  authorizeRoles("banker"),
+  activityLogger("ACCOUNT_REACTIVATED", "Banker reactivated an account"),
+  reactivateAccount,
 );
 
 router.post(

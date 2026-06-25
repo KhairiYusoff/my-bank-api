@@ -130,6 +130,14 @@ const ACTIVITY_TYPES = {
     severity: "HIGH",
     getUserId: (req) => req.user?.id,
   },
+  ACCOUNT_SUSPENDED: {
+    severity: "HIGH",
+    getUserId: (req) => req.user?.id,
+  },
+  ACCOUNT_REACTIVATED: {
+    severity: "HIGH",
+    getUserId: (req) => req.user?.id,
+  },
   VIEW_APPLICATIONS: {
     severity: "LOW",
     getUserId: (req) => req.user?.id,

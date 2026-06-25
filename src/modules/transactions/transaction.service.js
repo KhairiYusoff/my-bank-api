@@ -67,6 +67,17 @@ class TransactionService {
     }
 
     if (
+      role === "customer" &&
+      fromAccountCheck.status === ACCOUNT_STATUS.SUSPENDED
+    ) {
+      const err = new Error(
+        "Account is suspended. Please contact the branch for assistance.",
+      );
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (
       fromAccountCheck.status !== ACCOUNT_STATUS.ACTIVE &&
       role === "customer"
     ) {
@@ -212,6 +223,13 @@ class TransactionService {
       }
 
       if (fromAccount.status !== ACCOUNT_STATUS.ACTIVE) {
+        if (fromAccount.status === ACCOUNT_STATUS.SUSPENDED) {
+          const err = new Error(
+            "Account is suspended. Please contact the branch for assistance.",
+          );
+          err.statusCode = 403;
+          throw err;
+        }
         const err = new Error(
           "This account is not active and cannot process transfers",
         );

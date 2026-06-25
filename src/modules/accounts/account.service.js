@@ -260,6 +260,14 @@ class AccountService {
         throw err;
       }
 
+      if (role === "customer" && account.status === ACCOUNT_STATUS.SUSPENDED) {
+        const err = new Error(
+          "Account is suspended. Please contact the branch for assistance.",
+        );
+        err.statusCode = 403;
+        throw err;
+      }
+
       if (account.status !== ACCOUNT_STATUS.ACTIVE && role === "customer") {
         const err = new Error(
           "This account is not active and cannot receive deposits",
@@ -361,6 +369,14 @@ class AccountService {
       if (role === "customer" && account.status === ACCOUNT_STATUS.DORMANT) {
         const err = new Error(
           "Account is dormant. Please visit the nearest branch for reactivation.",
+        );
+        err.statusCode = 403;
+        throw err;
+      }
+
+      if (role === "customer" && account.status === ACCOUNT_STATUS.SUSPENDED) {
+        const err = new Error(
+          "Account is suspended. Please contact the branch for assistance.",
         );
         err.statusCode = 403;
         throw err;
@@ -1382,6 +1398,46 @@ class AccountService {
     }
 
     return results;
+  }
+
+  async suspendAccount(accountNumber) {
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.status === ACCOUNT_STATUS.SUSPENDED) {
+      const err = new Error("Account is already suspended");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = ACCOUNT_STATUS.SUSPENDED;
+    await account.save();
+
+    return account;
+  }
+
+  async reactivateAccount(accountNumber) {
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.status === ACCOUNT_STATUS.ACTIVE) {
+      const err = new Error("Account is already active");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = ACCOUNT_STATUS.ACTIVE;
+    await account.save();
+
+    return account;
   }
 }
 
