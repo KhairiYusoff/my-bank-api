@@ -65,6 +65,7 @@ const EXPENSE_CATEGORIES = {
       { value: "rent", label: "Rent" },
       { value: "mortgage", label: "Mortgage" },
       { value: "car_loan", label: "Car Loan" },
+      { value: "credit_card", label: "Credit Card" },
       { value: "personal_loan", label: "Personal Loan" },
       { value: "student_loan", label: "Student Loan" },
       { value: "property_tax", label: "Property Tax" },
