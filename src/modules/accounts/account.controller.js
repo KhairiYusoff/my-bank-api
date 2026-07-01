@@ -368,6 +368,45 @@ exports.rejectAccountRequest = async (req, res) => {
   }
 };
 
+exports.requestClosure = async (req, res) => {
+  try {
+    const account = await accountService.requestClosure(
+      req.params.accountNumber,
+      req.user.id,
+    );
+    return success(res, {
+      message:
+        "Closure request submitted successfully. Pending banker approval.",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
+exports.approveClosure = async (req, res) => {
+  try {
+    const account = await accountService.approveClosure(
+      req.params.accountNumber,
+      req.user.id,
+    );
+    return success(res, {
+      message: "Account closure approved successfully.",
+      data: account,
+    });
+  } catch (err) {
+    console.error(err.message);
+    return error(res, {
+      message: err.message || "Internal server error",
+      statusCode: err.statusCode || 500,
+    });
+  }
+};
+
 exports.suspendAccount = async (req, res) => {
   try {
     const account = await accountService.suspendAccount(

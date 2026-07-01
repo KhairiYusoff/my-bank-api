@@ -82,7 +82,7 @@ class AccountService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { user: userId };
+    const filter = { user: userId, status: { $ne: ACCOUNT_STATUS.CLOSED } };
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
@@ -1307,7 +1307,9 @@ class AccountService {
           session.startTransaction();
 
           try {
-            const freshAccount = await Account.findById(account._id).session(session);
+            const freshAccount = await Account.findById(account._id).session(
+              session,
+            );
 
             if (freshAccount.status !== ACCOUNT_STATUS.DORMANT) {
               await session.abortTransaction();
@@ -1324,7 +1326,8 @@ class AccountService {
             const actualFee = Math.min(freshAccount.balance, DORMANCY_FEE);
             const balanceBefore = freshAccount.balance;
 
-            freshAccount.balance = Math.round((freshAccount.balance - actualFee) * 100) / 100;
+            freshAccount.balance =
+              Math.round((freshAccount.balance - actualFee) * 100) / 100;
             await freshAccount.save({ session });
 
             const reference = await getNextReference();
@@ -1352,33 +1355,44 @@ class AccountService {
 
             await transaction.save({ session });
 
-            await ActivityLog.create([{
-              action: "DORMANCY_FEE_CHARGE",
-              user: freshAccount.user,
-              details: {
-                accountNumber: freshAccount.accountNumber,
-                feeCharged: actualFee,
-                balanceBefore,
-                balanceAfter: freshAccount.balance,
-              },
-              relatedEntity: freshAccount._id,
-              relatedEntityModel: "Account",
-              severity: "MEDIUM",
-            }], { session });
+            await ActivityLog.create(
+              [
+                {
+                  action: "DORMANCY_FEE_CHARGE",
+                  user: freshAccount.user,
+                  details: {
+                    accountNumber: freshAccount.accountNumber,
+                    feeCharged: actualFee,
+                    balanceBefore,
+                    balanceAfter: freshAccount.balance,
+                  },
+                  relatedEntity: freshAccount._id,
+                  relatedEntityModel: "Account",
+                  severity: "MEDIUM",
+                },
+              ],
+              { session },
+            );
 
             if (freshAccount.balance === 0) {
-              await ActivityLog.create([{
-                action: "DORMANCY_FEE_WARNING",
-                user: freshAccount.user,
-                details: {
-                  accountNumber: freshAccount.accountNumber,
-                  message: "Account balance is zero after dormancy maintenance fee deduction. Review required.",
-                  feeCharged: actualFee,
-                },
-                relatedEntity: freshAccount._id,
-                relatedEntityModel: "Account",
-                severity: "HIGH",
-              }], { session });
+              await ActivityLog.create(
+                [
+                  {
+                    action: "DORMANCY_FEE_WARNING",
+                    user: freshAccount.user,
+                    details: {
+                      accountNumber: freshAccount.accountNumber,
+                      message:
+                        "Account balance is zero after dormancy maintenance fee deduction. Review required.",
+                      feeCharged: actualFee,
+                    },
+                    relatedEntity: freshAccount._id,
+                    relatedEntityModel: "Account",
+                    severity: "HIGH",
+                  },
+                ],
+                { session },
+              );
               results.warningsLogged++;
             }
 
@@ -1392,12 +1406,134 @@ class AccountService {
           }
         }
       } catch (err) {
-        console.error(`Failed to process dormancy fee for account ${account.accountNumber}:`, err.message);
+        console.error(
+          `Failed to process dormancy fee for account ${account.accountNumber}:`,
+          err.message,
+        );
         results.errors++;
       }
     }
 
     return results;
+  }
+
+  async requestClosure(accountNumber, userId) {
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.user.toString() !== userId) {
+      const err = new Error(
+        "You can only request closure on your own accounts",
+      );
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (account.status === ACCOUNT_STATUS.CLOSED) {
+      const err = new Error("Account is already closed");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (account.status === ACCOUNT_STATUS.PENDING_CLOSURE) {
+      const err = new Error("Account already has a pending closure request");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = ACCOUNT_STATUS.PENDING_CLOSURE;
+    await account.save();
+
+    await ActivityLog.create({
+      action: "ACCOUNT_CLOSE_REQUESTED",
+      actor: userId,
+      target: account._id,
+      targetType: "Account",
+      details: {
+        accountNumber: account.accountNumber,
+        accountType: account.accountType,
+      },
+    });
+
+    try {
+      await sendNotification({
+        type: "account_closure_requested",
+        title: "Closure Request Submitted",
+        message: `Your closure request for account ${account.accountNumber} has been submitted and is pending banker approval.`,
+        link: `/accounts/${account.accountNumber}`,
+        recipient: { role: "customer", userId: account.user.toString() },
+        source: { service: "my-bank-api", id: account._id.toString() },
+        data: { accountNumber: account.accountNumber },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error(
+        "Failed to send closure request notification:",
+        notifyErr.message,
+      );
+    }
+
+    return account;
+  }
+
+  async approveClosure(accountNumber, bankerId) {
+    const account = await Account.findOne({ accountNumber });
+    if (!account) {
+      const err = new Error("Account not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (account.status !== ACCOUNT_STATUS.PENDING_CLOSURE) {
+      const err = new Error("Account does not have a pending closure request");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (account.balance > 0) {
+      const err = new Error("Account balance must be zero before closure");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    account.status = ACCOUNT_STATUS.CLOSED;
+    account.dateClosed = new Date();
+    await account.save();
+
+    await ActivityLog.create({
+      action: "ACCOUNT_CLOSED",
+      actor: bankerId,
+      target: account._id,
+      targetType: "Account",
+      details: {
+        accountNumber: account.accountNumber,
+        accountType: account.accountType,
+        closedBy: bankerId,
+      },
+    });
+
+    try {
+      await sendNotification({
+        type: "account_closed",
+        title: "Account Closed",
+        message: `Your account ${account.accountNumber} has been officially closed.`,
+        link: `/accounts/${account.accountNumber}`,
+        recipient: { role: "customer", userId: account.user.toString() },
+        source: { service: "my-bank-api", id: account._id.toString() },
+        data: { accountNumber: account.accountNumber },
+        read: false,
+        delivered: false,
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send closure notification:", notifyErr.message);
+    }
+
+    return account;
   }
 
   async suspendAccount(accountNumber) {

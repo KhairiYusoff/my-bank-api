@@ -23,6 +23,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
+const { requestClosure, approveClosure } = require("./account.controller");
 const {
   validateAccountCreation,
   validateOverdraftLimit,
@@ -123,6 +124,23 @@ router.put(
   authorizeRoles("banker"),
   activityLogger("ACCOUNT_REACTIVATED", "Banker reactivated an account"),
   reactivateAccount,
+);
+
+router.post(
+  "/:accountNumber/close-request",
+  authorizeRoles("customer"),
+  activityLogger(
+    "ACCOUNT_CLOSE_REQUESTED",
+    "Customer requested account closure",
+  ),
+  requestClosure,
+);
+
+router.post(
+  "/:accountNumber/approve-closure",
+  authorizeRoles("banker"),
+  activityLogger("ACCOUNT_CLOSED", "Banker approved account closure"),
+  approveClosure,
 );
 
 router.post(
