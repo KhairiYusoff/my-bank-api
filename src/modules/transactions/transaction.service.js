@@ -200,6 +200,7 @@ class TransactionService {
     let toTransaction;
     let fromBalanceAfter;
     let toBalanceAfter;
+    let fromAccountData;
 
     try {
       // Re-fetch accounts inside session for consistent balance reads
@@ -212,6 +213,7 @@ class TransactionService {
         err.statusCode = 404;
         throw err;
       }
+      fromAccountData = fromAccount.toObject();
 
       const toAccount = await Account.findOne({
         accountNumber: toAccountNumber,
@@ -355,7 +357,7 @@ class TransactionService {
     );
 
     notifyBelowThreshold({
-      ...fromAccount.toObject(),
+      ...fromAccountData,
       balance: fromBalanceAfter,
     }).catch((e) =>
       console.error("Failed to send low balance alert:", e.message),
