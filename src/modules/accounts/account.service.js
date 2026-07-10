@@ -236,6 +236,18 @@ class AccountService {
     const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
 
+    if (amount < 10) {
+      const err = new Error("Minimum deposit amount is RM 10");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (amount > 100000) {
+      const err = new Error("Maximum deposit amount is RM 100,000");
+      err.statusCode = 400;
+      throw err;
+    }
+
     const query = { accountNumber };
     if (role === "customer") query.user = userId;
 
