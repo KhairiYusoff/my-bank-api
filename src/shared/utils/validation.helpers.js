@@ -3,6 +3,7 @@ const {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
 } = require('../../modules/expenses/expense.constants');
+const { ACCOUNT_TYPE_NAMES } = require('../constants/accountLimits');
 
 /**
  * Common validation helpers to reduce code duplication
@@ -153,6 +154,10 @@ const checkExpenseDescription = (res, description) => {
   return handleValidationError(res, result);
 };
 
+const getReadableAccountType = (accountType) => {
+  return ACCOUNT_TYPE_NAMES[accountType] || accountType;
+};
+
 module.exports = {
   validateAmount,
   validateUserExists,
@@ -172,5 +177,6 @@ module.exports = {
   checkExpenseSubcategory,
   checkPaymentMethod,
   checkExpenseDate,
-  checkExpenseDescription
+  checkExpenseDescription,
+  getReadableAccountType
 };

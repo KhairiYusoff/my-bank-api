@@ -43,11 +43,19 @@ const FD_INTEREST_RATES = {
   12: 3.0, // 12 months
 };
 
+const ACCOUNT_TYPE_NAMES = {
+  savings: "Savings Account",
+  current: "Current Account",
+  business: "Business Account",
+  fixed_deposit: "Fixed Deposit Account",
+};
+
 const DORMANCY_FEE = 10;
 
 module.exports = {
   ACCOUNT_LIMITS,
   MIN_OPENING_BALANCE,
   FD_INTEREST_RATES,
+  ACCOUNT_TYPE_NAMES,
   DORMANCY_FEE,
 };

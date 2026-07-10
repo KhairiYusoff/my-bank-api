@@ -24,6 +24,7 @@ const {
   generateAccountNumber,
 } = require("../../shared/utils/generateAccountNumber");
 const { isDormancyAnniversary } = require("../../shared/utils/date");
+const { getReadableAccountType } = require("../../shared/utils/validation.helpers");
 
 const ROLE_TO_CHANNEL = {
   banker: "branch",
@@ -633,8 +634,9 @@ class AccountService {
 
     const minBalance = MIN_OPENING_BALANCE[accountType];
     if (!amount || amount < minBalance) {
+      const readableAccountType = getReadableAccountType(accountType);
       const err = new Error(
-        `Initial deposit amount below minimum for ${accountType} (RM${minBalance})`,
+        `Minimum initial deposit for ${readableAccountType} is RM${minBalance}`,
       );
       err.statusCode = 400;
       throw err;
@@ -803,7 +805,7 @@ class AccountService {
         await sendNotification({
           type: "account_opened",
           title: "Account Approved",
-          message: `Your ${account.accountType} account ${account.accountNumber} has been approved!`,
+          message: `Your ${getReadableAccountType(account.accountType)} ${account.accountNumber} has been approved!`,
           link: `/accounts/${account.accountNumber}`,
           recipient: { role: "customer", userId: account.user.toString() },
           source: { service: "my-bank-api", id: accountId.toString() },
@@ -863,7 +865,7 @@ class AccountService {
       await sendNotification({
         type: "account_rejected",
         title: "Account Request Rejected",
-        message: `Your ${account.accountType} account request has been rejected. Reason: ${reason}`,
+        message: `Your ${getReadableAccountType(account.accountType)} request has been rejected. Reason: ${reason}`,
         link: "/accounts",
         recipient: { role: "customer", userId: account.user.toString() },
         source: { service: "my-bank-api", id: accountId.toString() },
