@@ -698,7 +698,7 @@ class AccountService {
       status: ACCOUNT_STATUS.PENDING_APPROVAL,
       balance: 0,
       currency: "MYR",
-      principal: accountType === "fixed_deposit" ? amount : undefined,
+      principal: amount,
       lockPeriod: accountType === "fixed_deposit" ? lockPeriod : undefined,
       linkedAccount:
         accountType === "fixed_deposit"

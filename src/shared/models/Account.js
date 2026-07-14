@@ -80,9 +80,6 @@ const AccountSchema = new mongoose.Schema({
   },
   principal: {
     type: Number,
-    required: function () {
-      return this.accountType === "fixed_deposit";
-    },
   },
   autoRenew: {
     type: Boolean,
