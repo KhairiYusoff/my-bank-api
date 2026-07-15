@@ -1,6 +1,6 @@
 tags:
   - name: Accounts
-    description: Bank account management — create, deposit, withdraw, balance
+    description: Bank account management — create, deposit, withdraw, balance, requests, FD, and lifecycle
 
 paths:
   /accounts:
@@ -9,6 +9,50 @@ paths:
       tags: [Accounts]
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - in: query
+          name: accountType
+          schema:
+            type: string
+            enum: [savings, current, business, fixed_deposit]
+        - in: query
+          name: branch
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              [
+                pending_approval,
+                active,
+                dormant,
+                suspended,
+                pending_closure,
+                closed,
+              ]
+        - in: query
+          name: currency
+          schema:
+            type: string
+            example: MYR
       responses:
         "200":
           description: List of customer's accounts.
@@ -24,19 +68,48 @@ paths:
                         items:
                           $ref: "#/components/schemas/AccountSummary"
         "403":
-          description: Forbidden.
+          description: Forbidden — customer only.
 
   /accounts/all:
     get:
-      summary: Get all accounts in the bank (admin only)
+      summary: Get all accounts in the bank (admin / auditor)
       tags: [Accounts]
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
       responses:
         "200":
           description: List of all accounts.
         "403":
           description: Forbidden.
+
+  /accounts/limits:
+    get:
+      summary: Get account type limits (transfer, overdraft eligibility, etc.)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account limits by account type.
+        "401":
+          description: Unauthorized.
 
   /accounts/create:
     post:
@@ -50,17 +123,30 @@ paths:
           application/json:
             schema:
               type: object
-              required: [userId, accountType, currency]
+              required: [userId, accountType, branch]
               properties:
                 userId:
                   type: string
                   example: 60c72b2f9b1d8c001f8e4d1e
                 accountType:
                   type: string
-                  enum: [savings, checking]
-                currency:
+                  enum: [savings, current, business, fixed_deposit]
+                branch:
                   type: string
-                  example: MYR
+                  example: KLCC
+                balance:
+                  type: number
+                  format: double
+                  example: 0
+                interestRate:
+                  type: number
+                  format: double
+                overdraftLimit:
+                  type: number
+                  format: double
+                minimumBalance:
+                  type: number
+                  format: double
       responses:
         "201":
           description: Account created successfully.
@@ -69,7 +155,140 @@ paths:
         "403":
           description: Forbidden.
         "404":
-          description: User not found.
+          description: Customer not found.
+
+  /accounts/request:
+    post:
+      summary: Request a new account requiring banker approval (customer only)
+      tags: [Accounts]
+      description: >
+        Customers may request current, business, or fixed_deposit accounts.
+        Fixed deposits require lockPeriod and linkedAccount.
+        Business accounts require companyRegistrationDoc.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [accountType, branch, amount]
+              properties:
+                accountType:
+                  type: string
+                  enum: [current, business, fixed_deposit]
+                branch:
+                  type: string
+                  example: KLCC
+                amount:
+                  type: number
+                  format: double
+                  description: Initial deposit / FD principal
+                  example: 1000
+                lockPeriod:
+                  type: integer
+                  enum: [1, 3, 6, 12]
+                  description: Required for fixed_deposit (months)
+                linkedAccount:
+                  type: string
+                  description: Required for fixed_deposit — source account number
+                companyRegistrationDoc:
+                  type: string
+                  description: Required for business accounts
+      responses:
+        "201":
+          description: Account request submitted (pending_approval).
+        "400":
+          description: Validation error (min balance, FD fields, etc.).
+        "403":
+          description: Forbidden.
+        "404":
+          description: Customer or linked account not found.
+
+  /accounts/account-requests:
+    get:
+      summary: List pending account requests (banker / admin / auditor)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Pending account requests.
+        "403":
+          description: Forbidden.
+
+  /accounts/account-requests/{accountId}/approve:
+    post:
+      summary: Approve a pending account request (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: MongoDB account document ID
+      responses:
+        "200":
+          description: Account request approved.
+        "400":
+          description: Not pending or insufficient funds (FD).
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account request not found.
+
+  /accounts/account-requests/{accountId}/reject:
+    post:
+      summary: Reject a pending account request (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: MongoDB account document ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  example: Incomplete documentation
+      responses:
+        "200":
+          description: Account request rejected.
+        "400":
+          description: Not in pending approval state.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account request not found.
 
   /accounts/deposit:
     post:
@@ -92,6 +311,8 @@ paths:
                   type: number
                   format: double
                   example: 500.00
+                memo:
+                  type: string
       responses:
         "200":
           description: Deposit successful.
@@ -123,6 +344,8 @@ paths:
                   type: number
                   format: double
                   example: 200.00
+                memo:
+                  type: string
       responses:
         "200":
           description: Withdrawal successful.
@@ -135,7 +358,7 @@ paths:
 
   /accounts/airdrop:
     post:
-      summary: Airdrop funds to a user (admin only)
+      summary: Airdrop funds to an account (admin only)
       tags: [Accounts]
       security:
         - bearerAuth: []
@@ -145,20 +368,24 @@ paths:
           application/json:
             schema:
               type: object
-              required: [userId, amount]
+              required: [accountNumber, amount]
               properties:
-                userId:
+                accountNumber:
                   type: string
                 amount:
                   type: number
                   format: double
+                memo:
+                  type: string
       responses:
         "200":
           description: Airdrop successful.
+        "400":
+          description: Invalid amount.
         "403":
           description: Forbidden.
         "404":
-          description: User not found.
+          description: Account not found.
 
   /accounts/balance/{accountNumber}:
     get:
@@ -182,7 +409,7 @@ paths:
 
   /accounts/{accountNumber}:
     delete:
-      summary: Delete a bank account (banker only)
+      summary: Delete / close a bank account (banker only)
       tags: [Accounts]
       security:
         - bearerAuth: []
@@ -194,7 +421,258 @@ paths:
             type: string
       responses:
         "200":
-          description: Account deleted successfully.
+          description: Account closed successfully.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/detail:
+    get:
+      summary: Get account detail by account number (admin / banker / auditor)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account detail with populated user and linked account.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/status:
+    patch:
+      summary: Update account status (admin / banker)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [active, dormant, suspended, closed]
+      responses:
+        "200":
+          description: Account status updated.
+        "400":
+          description: Invalid status or account already closed.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/overdraft-limit:
+    patch:
+      summary: Set overdraft limit (admin / banker)
+      tags: [Accounts]
+      description: Not available for savings or fixed_deposit accounts.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [overdraftLimit]
+              properties:
+                overdraftLimit:
+                  type: number
+                  format: double
+                  minimum: 0
+                  example: 1000
+      responses:
+        "200":
+          description: Overdraft limit updated.
+        "400":
+          description: Validation error or account type not eligible.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/suspend:
+    put:
+      summary: Suspend an account (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account suspended.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/reactivate:
+    put:
+      summary: Reactivate a suspended account (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account reactivated.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/close-request:
+    post:
+      summary: Request account closure (customer only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Closure request submitted (pending banker approval).
+        "400":
+          description: Account not eligible for closure.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/approve-closure:
+    post:
+      summary: Approve account closure (banker only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Account closure approved.
+        "400":
+          description: No pending closure request.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/fd-settle:
+    post:
+      summary: Settle mature Fixed Deposit principal (customer only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: FD principal settled successfully.
+        "400":
+          description: Not an FD, not matured, or settlement failed.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Account not found.
+
+  /accounts/{accountNumber}/fd-instructions:
+    patch:
+      summary: Update Fixed Deposit instructions (customer only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                autoRenew:
+                  type: boolean
+                linkedAccount:
+                  type: string
+                  description: Account number to link for settlement/renewal
+      responses:
+        "200":
+          description: FD instructions updated.
+        "400":
+          description: Invalid linked account.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Fixed Deposit account not found.
+
+  /accounts/{accountNumber}/fd-withdraw-early:
+    post:
+      summary: Early withdrawal of Fixed Deposit principal (customer only)
+      tags: [Accounts]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: accountNumber
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: FD early withdrawal processed.
+        "400":
+          description: Not eligible for early withdrawal.
         "403":
           description: Forbidden.
         "404":

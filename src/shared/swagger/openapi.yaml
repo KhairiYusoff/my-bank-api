@@ -67,7 +67,7 @@ components:
           example: ACC-001234
         accountType:
           type: string
-          enum: [savings, checking]
+          enum: [savings, current, business, fixed_deposit]
         balance:
           type: number
           format: double
@@ -75,6 +75,17 @@ components:
         currency:
           type: string
           example: MYR
+        status:
+          type: string
+          enum:
+            [
+              pending_approval,
+              active,
+              dormant,
+              suspended,
+              pending_closure,
+              closed,
+            ]
 
     ExpenseInput:
       type: object
