@@ -1,18 +1,28 @@
-const YAML = require('yamljs');
-const path = require('path');
+const YAML = require("yamljs");
+const path = require("path");
 
-const swaggerDir = path.join(__dirname, '../shared/swagger');
+const swaggerDir = path.join(__dirname, "../shared/swagger");
 
-const base = YAML.load(path.join(swaggerDir, 'openapi.yaml'));
+const base = YAML.load(path.join(swaggerDir, "openapi.yaml"));
 
-const features = ['auth', 'admin', 'onboarding', 'accounts', 'transactions', 'expenses', 'users', 'ai'];
+const features = [
+  "auth",
+  "admin",
+  "onboarding",
+  "accounts",
+  "transactions",
+  "expenses",
+  "users",
+  "ai",
+  "audit",
+];
 
 const spec = {
   ...base,
   servers: [
     {
-      url: process.env.API_BASE_URL || 'http://localhost:5001/api',
-      description: 'Active server',
+      url: process.env.API_BASE_URL || "http://localhost:5001/api",
+      description: "Active server",
     },
   ],
   tags: [],
@@ -26,4 +36,3 @@ for (const feature of features) {
 }
 
 module.exports = spec;
-
