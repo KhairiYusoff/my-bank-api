@@ -1,11 +1,11 @@
 tags:
   - name: Admin
-    description: Admin-only user and staff management
+    description: Admin user and staff management — create, update, delete, and view profiles
 
 paths:
   /admin/create-staff:
     post:
-      summary: Create a new staff member
+      summary: Create a new staff member (admin only)
       tags: [Admin]
       security:
         - bearerAuth: []
@@ -25,6 +25,8 @@ paths:
                 password:
                   type: string
                   format: password
+                  description: >
+                    Min 8 chars; must include uppercase, lowercase, number, and special character
                 role:
                   type: string
                   enum: [banker, admin]
@@ -43,8 +45,38 @@ paths:
           description: Server error.
 
   /admin/staff/{staffId}:
+    get:
+      summary: Get staff profile by ID (admin / auditor)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: staffId
+          required: true
+          schema:
+            type: string
+          description: Staff user MongoDB ID (banker, admin, or auditor)
+      responses:
+        "200":
+          description: Staff profile fetched.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccess"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Staff not found.
     put:
-      summary: Update staff role or status
+      summary: Update staff role or status (admin only)
       tags: [Admin]
       security:
         - bearerAuth: []
@@ -60,10 +92,11 @@ paths:
           application/json:
             schema:
               type: object
+              description: At least one of role or status is required
               properties:
                 role:
                   type: string
-                  enum: [banker, admin]
+                  enum: [banker, admin, auditor]
                 status:
                   type: string
                   enum: [active, suspended, terminated]
@@ -71,7 +104,7 @@ paths:
         "200":
           description: Staff updated successfully.
         "400":
-          description: Bad request.
+          description: Bad request (self-update, invalid role/status, or no fields).
         "401":
           description: Unauthorized.
         "403":
@@ -79,8 +112,9 @@ paths:
         "404":
           description: Staff not found.
     delete:
-      summary: Delete a staff account
+      summary: Delete a banker staff account (admin only)
       tags: [Admin]
+      description: Only banker accounts can be deleted via this endpoint.
       security:
         - bearerAuth: []
       parameters:
@@ -92,6 +126,8 @@ paths:
       responses:
         "200":
           description: Staff deleted successfully.
+        "400":
+          description: Cannot delete self or non-banker account.
         "401":
           description: Unauthorized.
         "403":
@@ -100,8 +136,38 @@ paths:
           description: Staff not found.
 
   /admin/customer/{customerId}:
+    get:
+      summary: Get customer profile by ID (admin / banker / auditor)
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          schema:
+            type: string
+          description: Customer user MongoDB ID
+      responses:
+        "200":
+          description: Customer profile fetched.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccess"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+        "404":
+          description: Customer not found.
     put:
-      summary: Update customer status
+      summary: Update customer status (admin only)
       tags: [Admin]
       security:
         - bearerAuth: []
@@ -117,6 +183,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [status]
               properties:
                 status:
                   type: string
@@ -124,6 +191,8 @@ paths:
       responses:
         "200":
           description: Customer updated successfully.
+        "400":
+          description: Invalid or missing status, or not a customer.
         "401":
           description: Unauthorized.
         "403":
@@ -131,7 +200,7 @@ paths:
         "404":
           description: Customer not found.
     delete:
-      summary: Delete a customer account
+      summary: Delete a customer account (admin only)
       tags: [Admin]
       security:
         - bearerAuth: []
@@ -144,6 +213,8 @@ paths:
       responses:
         "200":
           description: Customer deleted successfully.
+        "400":
+          description: Cannot delete self or non-customer account.
         "401":
           description: Unauthorized.
         "403":
