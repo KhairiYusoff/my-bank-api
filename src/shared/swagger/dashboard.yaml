@@ -1,0 +1,66 @@
+tags:
+  - name: Dashboard
+    description: Staff dashboard summary metrics
+
+paths:
+  /dashboard:
+    get:
+      summary: Get dashboard summary (admin / banker / auditor)
+      tags: [Dashboard]
+      description: >
+        Returns counts, attention items, and financial totals for today.
+        Staff count is included only for admin and auditor roles.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard summary fetched.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/ApiSuccess"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          counts:
+                            type: object
+                            properties:
+                              customers:
+                                type: integer
+                              accounts:
+                                type: integer
+                              transactionsToday:
+                                type: integer
+                              staff:
+                                type: integer
+                                description: Present only for admin and auditor
+                          attention:
+                            type: object
+                            properties:
+                              pendingApplications:
+                                type: integer
+                              failedTransactionsToday:
+                                type: integer
+                              dormantAccounts:
+                                type: integer
+                          financials:
+                            type: object
+                            properties:
+                              depositsToday:
+                                type: number
+                                format: double
+                              withdrawalsToday:
+                                type: number
+                                format: double
+                              totalPortfolioBalance:
+                                type: number
+                                format: double
+        "401":
+          description: Unauthorized.
+        "403":
+          description: Forbidden.
+        "500":
+          description: Server error.

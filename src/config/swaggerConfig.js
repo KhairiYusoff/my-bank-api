@@ -15,6 +15,7 @@ const features = [
   "users",
   "ai",
   "audit",
+  "dashboard",
 ];
 
 const spec = {
