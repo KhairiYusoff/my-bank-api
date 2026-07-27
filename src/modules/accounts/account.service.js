@@ -83,7 +83,17 @@ class AccountService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { user: userId, status: { $ne: ACCOUNT_STATUS.CLOSED } };
+    const filter = {
+      user: userId,
+      status: {
+        $nin: [
+          ACCOUNT_STATUS.CLOSED,
+          ACCOUNT_STATUS.PENDING_APPROVAL,
+          ACCOUNT_STATUS.PENDING_CLOSURE,
+        ],
+      },
+    };
+    console.log("filter", filter);
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
