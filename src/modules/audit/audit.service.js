@@ -1,5 +1,4 @@
 const ActivityLog = require("../../shared/models/ActivityLog");
-const jwt = require("jsonwebtoken");
 const User = require("../../shared/models/User");
 const mongoose = require("mongoose");
 

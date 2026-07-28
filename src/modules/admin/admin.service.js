@@ -1,9 +1,4 @@
 const User = require("../../shared/models/User");
-const bcrypt = require("bcryptjs");
-const { sendEmail } = require("../../shared/utils/email");
-const {
-  sendNotification,
-} = require("../../shared/services/notification.service");
 
 class AdminService {
   async createStaff({ name, email, password, role }) {
