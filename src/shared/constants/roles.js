@@ -19,3 +19,5 @@ const roles = {
   DIGITAL_USER: "digital_user", // Activated online banking
   MOBILE_USER: "mobile_user", // Mobile app user
 };
+
+module.exports = roles;
