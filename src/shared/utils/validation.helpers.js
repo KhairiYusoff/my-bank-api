@@ -2,7 +2,7 @@ const { error } = require('./response');
 const {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
-} = require('../../modules/expenses/expense.constants');
+} = require('../constants/expenses');
 const { ACCOUNT_TYPE_NAMES } = require('../constants/accountLimits');
 
 /**

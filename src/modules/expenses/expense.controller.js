@@ -3,7 +3,7 @@ const expenseService = require("./expense.service");
 const {
   getAllCategories,
   getPaymentMethodOptions,
-} = require("./expense.constants");
+} = require("../../shared/constants/expenses");
 const {
   checkAmount,
   checkExpenseCategory,

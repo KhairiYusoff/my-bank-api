@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
-} = require("../../modules/expenses/expense.constants");
+} = require("../constants/expenses");
 
 const ExpenseSchema = new mongoose.Schema(
   {

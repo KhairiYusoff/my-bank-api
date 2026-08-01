@@ -483,7 +483,7 @@ class ExpenseService {
    * @returns {object} Validated and normalized data
    */
   _validateAndNormalizeExpenseData(expenseData) {
-    const { EXPENSE_CATEGORIES } = require("./expense.constants");
+    const { EXPENSE_CATEGORIES } = require("../../shared/constants/expenses");
 
     // Ensure date is not in future (unless it's a planned expense)
     const expenseDate = new Date(expenseData.date);
