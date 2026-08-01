@@ -7,16 +7,14 @@ const {
   sendNotification,
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
+const { FD_INTEREST_RATES } = require("../../shared/constants/products");
 const {
   ACCOUNT_LIMITS,
   MIN_OPENING_BALANCE,
   DORMANCY_FEE,
-} = require("../../shared/constants/accountLimits");
-const { FD_INTEREST_RATES } = require("../../shared/constants/products");
-const {
   ACCOUNT_STATUS,
   BANKER_MUTABLE_STATUSES,
-} = require("../../shared/constants/accountStatus");
+} = require("../../shared/constants/accounts");
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");

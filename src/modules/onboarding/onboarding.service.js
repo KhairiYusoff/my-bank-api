@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { sendEmail } = require("../../shared/utils/email");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const mongoose = require("mongoose");
 const {
   notifyNewApplication,

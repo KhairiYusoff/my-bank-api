@@ -3,7 +3,7 @@ const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
 const { getNextReference } = require("../../shared/utils/reference");
 const { sendNotification } = require("../../shared/services/notification.service");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const { getFDRateDecimal } = require("../../shared/constants/products");
 
 // Runs daily at 03:00 AM

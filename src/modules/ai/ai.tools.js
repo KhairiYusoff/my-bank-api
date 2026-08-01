@@ -3,7 +3,7 @@ const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
 const ActivityLog = require("../../shared/models/ActivityLog");
 const User = require("../../shared/models/User");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const AiAuditLog = require("../../shared/models/AiAuditLog");
 
 const PERIOD_DAYS = {

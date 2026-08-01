@@ -1,6 +1,6 @@
 const cron = require("node-cron");
 const Account = require("../../shared/models/Account");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const Transaction = require("../../shared/models/Transaction");
 const { getNextReference } = require("../../shared/utils/reference");
 const {

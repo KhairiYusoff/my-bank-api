@@ -1,7 +1,7 @@
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 
 class DashboardService {
   async getDashboardSummary(userRole) {

@@ -3,7 +3,7 @@ const {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
 } = require('../constants/expenses');
-const { ACCOUNT_TYPE_NAMES } = require('../constants/accountLimits');
+const { ACCOUNT_TYPE_NAMES } = require('../constants/accounts');
 
 /**
  * Common validation helpers to reduce code duplication

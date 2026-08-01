@@ -7,8 +7,7 @@ const {
 } = require("../../shared/services/notification.service");
 const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
-const { ACCOUNT_LIMITS } = require("../../shared/constants/accountLimits");
-const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
+const { ACCOUNT_LIMITS, ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");

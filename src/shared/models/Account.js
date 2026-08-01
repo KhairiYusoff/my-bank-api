@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { ACCOUNT_STATUS_VALUES } = require("../constants/accountStatus");
+const { ACCOUNT_STATUS_VALUES } = require("../constants/accounts");
 
 const AccountSchema = new mongoose.Schema({
   user: {
