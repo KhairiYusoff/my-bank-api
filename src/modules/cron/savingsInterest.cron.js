@@ -6,17 +6,7 @@ const { getNextReference } = require("../../shared/utils/reference");
 const {
   sendNotification,
 } = require("../../shared/services/notification.service");
-
-// Interest tiers (annual rate p.a.) — from business-rules.md
-const INTEREST_TIERS = [
-  { maxBalance: 9999.99, annualRate: 0.5 },
-  { maxBalance: 49999.99, annualRate: 1.0 },
-  { maxBalance: Infinity, annualRate: 1.5 },
-];
-
-function getAnnualRate(balance) {
-  return INTEREST_TIERS.find((tier) => balance <= tier.maxBalance).annualRate;
-}
+const { getSavingsAnnualRate } = require("../../shared/constants/products");
 
 // Runs at 23:59 on days 28–31; last-day check inside prevents double-runs
 cron.schedule(
@@ -43,7 +33,7 @@ cron.schedule(
 
       for (const account of accounts) {
         try {
-          const annualRate = getAnnualRate(account.balance);
+          const annualRate = getSavingsAnnualRate(account.balance);
           const interest =
             Math.round(((account.balance * (annualRate / 100)) / 12) * 100) /
             100;

@@ -9,14 +9,7 @@ const {
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
-
-// Fee rules — from business-rules.md
-// Fee applies when current balance < threshold at cron run time (MVP approximation)
-const FEE_RULES = {
-  savings: { fee: 5, threshold: 1000 },
-  current: { fee: 8, threshold: 2000 },
-  business: { fee: 15, threshold: 5000 },
-};
+const { MAINTENANCE_FEE_RULES } = require("../../shared/constants/products");
 
 // Runs at 00:01 on the 1st of every month
 cron.schedule(
@@ -39,7 +32,7 @@ cron.schedule(
 
       for (const account of accounts) {
         try {
-          const rule = FEE_RULES[account.accountType];
+          const rule = MAINTENANCE_FEE_RULES[account.accountType];
           if (!rule) continue;
 
           // Only charge if balance is below the maintenance threshold
