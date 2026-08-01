@@ -10,9 +10,9 @@ const { getNextReference } = require("../../shared/utils/reference");
 const {
   ACCOUNT_LIMITS,
   MIN_OPENING_BALANCE,
-  FD_INTEREST_RATES,
   DORMANCY_FEE,
 } = require("../../shared/constants/accountLimits");
+const { FD_INTEREST_RATES } = require("../../shared/constants/products");
 const {
   ACCOUNT_STATUS,
   BANKER_MUTABLE_STATUSES,

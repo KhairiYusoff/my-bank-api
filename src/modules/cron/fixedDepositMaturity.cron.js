@@ -4,14 +4,7 @@ const Transaction = require("../../shared/models/Transaction");
 const { getNextReference } = require("../../shared/utils/reference");
 const { sendNotification } = require("../../shared/services/notification.service");
 const { ACCOUNT_STATUS } = require("../../shared/constants/accountStatus");
-
-// Interest rates (annual p.a.) from business-rules.md
-const FD_RATES = {
-  1: 0.025,
-  3: 0.028,
-  6: 0.031,
-  12: 0.035,
-};
+const { getFDRateDecimal } = require("../../shared/constants/products");
 
 // Runs daily at 03:00 AM
 cron.schedule(
@@ -47,7 +40,7 @@ cron.schedule(
           if (diffDays >= 0 && !fd.interestPaid) {
             console.log(`[Cron] FD ${fd.accountNumber} matured today. Processing interest payout.`);
             
-            const interest = fd.principal * FD_RATES[fd.lockPeriod] * (fd.lockPeriod / 12);
+            const interest = fd.principal * getFDRateDecimal(fd.lockPeriod) * (fd.lockPeriod / 12);
             
             const linkedAccount = await Account.findById(fd.linkedAccount).session(session);
             if (linkedAccount) {
