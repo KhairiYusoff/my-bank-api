@@ -1,19 +1,5 @@
 const Counter = require("../models/Counter");
-const { getBranchCode } = require("../constants/branchCodes");
-
-/**
- * MyBank Product Codes (3-digit prefix)
- * 100 - Savings
- * 300 - Current
- * 500 - Business
- * 700 - Fixed Deposit
- */
-const PRODUCT_CODES = {
-  savings: "100",
-  current: "300",
-  business: "500",
-  fixed_deposit: "700",
-};
+const { getBranchCode, PRODUCT_CODES } = require("../constants/reference");
 
 /**
  * Calculates a Luhn checksum digit for a string of digits.

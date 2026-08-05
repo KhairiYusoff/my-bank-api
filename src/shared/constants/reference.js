@@ -1,5 +1,5 @@
 /**
- * Mapping of branch names to 3-digit codes with state-based prefixes:
+ * Branch name → 3-digit code mapping with state-based prefixes:
  * - 1xx: Pahang
  * - 3xx: Johor
  * - 5xx: Selangor & KL
@@ -32,14 +32,8 @@ const BRANCH_CODES = {
  */
 function getBranchCode(branchName) {
   if (!branchName) return BRANCH_CODES["Default"];
-  
-  // If it's already a 3-digit number string, return it
   if (/^\d{3}$/.test(branchName)) return branchName;
-  
-  // Look up in mapping
   if (BRANCH_CODES[branchName]) return BRANCH_CODES[branchName];
-  
-  // Fallback: derive a code from the string hash if not found
   let hash = 0;
   for (let i = 0; i < branchName.length; i++) {
     hash = (hash << 5) - hash + branchName.charCodeAt(i);
@@ -48,7 +42,24 @@ function getBranchCode(branchName) {
   return String(Math.abs(hash) % 1000).padStart(3, "0");
 }
 
+/**
+ * MyBank Product Codes (3-digit prefix for account numbers)
+ * 100 - Savings | 300 - Current | 500 - Business | 700 - Fixed Deposit
+ */
+const PRODUCT_CODES = {
+  savings: "100",
+  current: "300",
+  business: "500",
+  fixed_deposit: "700",
+};
+
+const CURRENCIES = {
+  MYR: "MYR",
+};
+
 module.exports = {
   BRANCH_CODES,
   getBranchCode,
+  PRODUCT_CODES,
+  CURRENCIES,
 };
