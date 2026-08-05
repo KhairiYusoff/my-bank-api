@@ -1,4 +1,4 @@
-const roles = {
+const ROLES = {
   // Bank Staff Roles
   SUPER_ADMIN: "super_admin", // Bank's system administrator
   BRANCH_MANAGER: "branch_manager", // Branch manager approval rights
@@ -20,4 +20,10 @@ const roles = {
   MOBILE_USER: "mobile_user", // Mobile app user
 };
 
-module.exports = roles;
+// Roles that receive real-time staff notifications (admin portal websocket channel)
+const STAFF_ROLES = ["admin", "banker"];
+
+module.exports = {
+  ROLES,
+  STAFF_ROLES,
+};

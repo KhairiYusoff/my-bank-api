@@ -1,4 +1,5 @@
 const socketIo = require("socket.io");
+const { STAFF_ROLES } = require("../constants/access");
 
 let io;
 
@@ -7,8 +8,6 @@ const connectedStaff = new Map(); // Maps socketId -> {userId, role}
 
 // Store connected customers
 const connectedCustomers = new Map(); // Maps socketId -> userId
-
-const STAFF_ROLES = ["admin", "banker"];
 
 // Initialize socket.io
 const initializeSocket = (server) => {
