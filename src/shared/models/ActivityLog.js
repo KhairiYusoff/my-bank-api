@@ -1,4 +1,10 @@
 const mongoose = require("mongoose");
+const {
+  ACTIVITY_ACTION_VALUES,
+  ACTIVITY_STATUS_VALUES,
+  SEVERITY_LEVEL_VALUES,
+  AUDIT_ENTITY_TYPE_VALUES,
+} = require("../constants/activities");
 
 const ActivityLogSchema = new mongoose.Schema(
   {
@@ -11,54 +17,7 @@ const ActivityLogSchema = new mongoose.Schema(
     action: {
       type: String,
       required: true,
-      enum: [
-        // Critical Security Events
-        "CUSTOMER_APPLICATION",
-        "CUSTOMER_REGISTRATION",
-        "LOGIN",
-        "LOGOUT",
-        "LOGIN_FAILED",
-
-        // Critical Financial Events
-        "DEPOSIT",
-        "WITHDRAW",
-        "AIRDROP",
-        "TRANSACTION_COMPLETE",
-        "TRANSFER_INITIATED",
-        "TRANSFER_COMPLETED",
-        "TRANSFER_FAILED",
-
-        // Critical Account Events
-        "ACCOUNT_CREATION",
-        "ACCOUNT_CLOSURE",
-        "ACCOUNT_DORMANT",
-        "DORMANCY_WARNING",
-        "DORMANCY_FEE_CHARGE",
-        "DORMANCY_FEE_WARNING",
-
-        // User Profile and Preferences
-        "PROFILE_UPDATED",
-        "PASSWORD_CHANGED",
-        "PREFERENCES_UPDATED",
-
-        // V2 Onboarding Flow
-        "APPROVE_APPLICATION",
-        "VERIFY_CUSTOMER",
-        "PROFILE_COMPLETED",
-
-        // Admin Actions
-        "VIEW_APPLICATIONS",
-        "DELETE_STAFF",
-        "DELETE_CUSTOMER",
-        "UPDATE_STAFF",
-        "UPDATE_CUSTOMER",
-        "VIEW_CUSTOMER_PROFILE",
-        "VIEW_STAFF_PROFILE",
-        "VIEW_ACCOUNT_DETAIL",
-        "ACCOUNT_STATUS_CHANGED",
-        "CREATE_STAFF",
-        "UPDATE_OVERDRAFT_LIMIT",
-      ],
+      enum: ACTIVITY_ACTION_VALUES,
     },
     details: {
       type: mongoose.Schema.Types.Mixed,
@@ -74,12 +33,12 @@ const ActivityLogSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["SUCCESS", "FAILED"],
+      enum: ACTIVITY_STATUS_VALUES,
       default: "SUCCESS",
     },
     severity: {
       type: String,
-      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      enum: SEVERITY_LEVEL_VALUES,
       default: "MEDIUM",
     },
     metadata: {
@@ -94,7 +53,7 @@ const ActivityLogSchema = new mongoose.Schema(
     },
     relatedEntityModel: {
       type: String,
-      enum: ["User", "Account", "Transaction"],
+      enum: AUDIT_ENTITY_TYPE_VALUES,
     },
     location: {
       country: String,

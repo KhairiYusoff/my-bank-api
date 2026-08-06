@@ -1,163 +1,8 @@
 const ActivityLog = require("../../shared/models/ActivityLog");
-const User = require("../../shared/models/User");
-const mongoose = require("mongoose");
-
-// Core activity types with their configurations
-const ACTIVITY_TYPES = {
-  // Critical Security Events
-  CUSTOMER_APPLICATION: {
-    severity: "HIGH",
-    getUserId: async (req, data) => {
-      // For new applications, the user ID will be in the response data
-      if (data?.data?.userId) {
-        return new mongoose.Types.ObjectId(data.data.userId);
-      }
-      // Try to find user by email if not in response
-      if (req.body?.email) {
-        const user = await User.findOne({ email: req.body.email });
-        return user?._id;
-      }
-      return null;
-    },
-  },
-
-  CUSTOMER_REGISTRATION: {
-    severity: "HIGH",
-    getUserId: async (req, data) => {
-      // Try to get user ID from response data first
-      if (data?.data?.userId) {
-        return new mongoose.Types.ObjectId(data.data.userId);
-      }
-      // Fallback to finding user by email
-      const user = await User.findOne({ email: req.body.email });
-      return user?._id;
-    },
-  },
-  LOGIN: {
-    severity: "HIGH",
-    getUserId: async (req, data) => {
-      // FIX: Extract ID from the 'user' object in response data
-      if (data?.data?.user?.id) {
-        return data.data.user.id;
-      }
-      // Fallback: If not in response, try to find by email in request body
-      if (req.body?.email) {
-        const user = await User.findOne({ email: req.body.email });
-        return user?._id;
-      }
-      return null;
-    },
-  },
-  LOGIN_FAILED: {
-    severity: "HIGH",
-    getUserId: async (req) => {
-      // Find the user who attempted to login
-      if (req.body?.email) {
-        const user = await User.findOne({ email: req.body.email });
-        return user?._id;
-      }
-      return null;
-    },
-  },
-  LOGOUT: {
-    severity: "MEDIUM",
-    getUserId: (req) => req.user?.id,
-  },
-
-  // Critical Financial Events
-  DEPOSIT: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  WITHDRAW: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  AIRDROP: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  TRANSACTION_COMPLETE: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  TRANSFER_INITIATED: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-
-  // Critical Account Events
-  ACCOUNT_CREATION: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  ACCOUNT_CLOSURE: {
-    severity: "CRITICAL",
-    getUserId: (req) => req.user?.id,
-  },
-  PROFILE_UPDATED: {
-    severity: "MEDIUM",
-    getUserId: (req) => req.user?.id,
-  },
-  PASSWORD_CHANGED: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  PREFERENCES_UPDATED: {
-    severity: "LOW",
-    getUserId: (req) => req.user?.id,
-  },
-
-  // V2 Onboarding Flow
-  APPROVE_APPLICATION: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  VERIFY_CUSTOMER: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-
-  // User completes their profile
-  PROFILE_COMPLETED: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id || req.body.userId,
-  },
-
-  // Admin Actions
-  CREATE_STAFF: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  ACCOUNT_SUSPENDED: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  ACCOUNT_REACTIVATED: {
-    severity: "HIGH",
-    getUserId: (req) => req.user?.id,
-  },
-  VIEW_APPLICATIONS: {
-    severity: "LOW",
-    getUserId: (req) => req.user?.id,
-  },
-  DELETE_STAFF: {
-    severity: "CRITICAL",
-    getUserId: (req) => req.user?.id,
-  },
-  DELETE_CUSTOMER: {
-    severity: "CRITICAL",
-    getUserId: (req) => req.user?.id,
-  },
-  UPDATE_STAFF: {
-    severity: "MEDIUM",
-    getUserId: (req) => req.user?.id,
-  },
-  UPDATE_CUSTOMER: {
-    severity: "MEDIUM",
-    getUserId: (req) => req.user?.id,
-  },
-};
+const {
+  ACTIVITY_TYPES,
+  ACTIVITY_STATUS,
+} = require("../../shared/constants/activities");
 
 const logActivity = async (req, res, action, details = "") => {
   try {
@@ -186,7 +31,9 @@ const logActivity = async (req, res, action, details = "") => {
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.headers["user-agent"],
       status:
-        res.statusCode >= 200 && res.statusCode < 300 ? "SUCCESS" : "FAILED",
+        res.statusCode >= 200 && res.statusCode < 300
+          ? ACTIVITY_STATUS.SUCCESS
+          : ACTIVITY_STATUS.FAILED,
       severity: activityConfig.severity,
       metadata: {
         method: req.method,
