@@ -99,6 +99,14 @@ const ACTIVITY_TYPES = {
     getUserId: (req) => req.user?.id || req.body?.userId,
   },
 
+  APPROVE_ACCOUNT_REQUEST: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  REJECT_ACCOUNT_REQUEST: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  FD_PRINCIPAL_SETTLEMENT: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  UPDATE_FD_INSTRUCTIONS: { severity: SEVERITY_LEVELS.MEDIUM, getUserId: (req) => req.user?.id },
+  FD_EARLY_WITHDRAWAL: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  ACCOUNT_CLOSE_REQUESTED: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  ACCOUNT_CLOSED: { severity: SEVERITY_LEVELS.CRITICAL, getUserId: (req) => req.user?.id },
+
   // ── Admin Actions ───────────────────────────────────────────────────
   VIEW_APPLICATIONS: { severity: SEVERITY_LEVELS.LOW, getUserId: (req) => req.user?.id },
   DELETE_STAFF: { severity: SEVERITY_LEVELS.CRITICAL, getUserId: (req) => req.user?.id },
