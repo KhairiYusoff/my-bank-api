@@ -1,5 +1,18 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const {
+  APPLICATION_STATUS_VALUES,
+  USER_ROLE_VALUES,
+  USER_STATUS_VALUES,
+  ACCOUNT_TYPE_VALUES,
+  EMPLOYMENT_TYPE_VALUES,
+  SALARY_BRACKET_VALUES,
+  PURPOSE_OF_ACCOUNT_VALUES,
+  RELATIONSHIP_VALUES,
+  MARITAL_STATUS_VALUES,
+  EDUCATION_LEVEL_VALUES,
+  RESIDENCY_STATUS_VALUES,
+} = require("../constants/user");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -43,7 +56,7 @@ const UserSchema = new mongoose.Schema(
     },
     applicationStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected", "on_hold", "completed"],
+      enum: APPLICATION_STATUS_VALUES,
       default: "pending",
     },
     isVerified: {
@@ -60,12 +73,12 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["customer", "banker", "auditor", "admin"],
+      enum: USER_ROLE_VALUES,
       default: "customer",
     },
     status: {
       type: String,
-      enum: ["active", "suspended", "terminated"],
+      enum: USER_STATUS_VALUES,
       default: "active",
     },
     address: {
@@ -120,7 +133,7 @@ const UserSchema = new mongoose.Schema(
     },
     accountType: {
       type: String,
-      enum: ["savings", "current", "business", "fixed_deposit"],
+      enum: ACCOUNT_TYPE_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
@@ -150,36 +163,21 @@ const UserSchema = new mongoose.Schema(
     },
     employmentType: {
       type: String,
-      enum: ["salaried", "self-employed", "unemployed", "retired", "student"],
+      enum: EMPLOYMENT_TYPE_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
     },
     salary: {
       type: String,
-      enum: [
-        "<1000",
-        "1000-2999",
-        "3000-4999",
-        "5000-6999",
-        "7000-9999",
-        "10000+",
-      ],
+      enum: SALARY_BRACKET_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
     },
     purposeOfAccount: {
       type: String,
-      enum: [
-        "savings",
-        "salary credit",
-        "investment",
-        "business",
-        "education",
-        "travel",
-        "others",
-      ],
+      enum: PURPOSE_OF_ACCOUNT_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
@@ -199,15 +197,7 @@ const UserSchema = new mongoose.Schema(
       },
       relationship: {
         type: String,
-        enum: [
-          "parent",
-          "spouse",
-          "child",
-          "sibling",
-          "relative",
-          "friend",
-          "other",
-        ],
+        enum: RELATIONSHIP_VALUES,
         required: function () {
           return this.role === "customer" && this.isProfileComplete;
         },
@@ -215,28 +205,21 @@ const UserSchema = new mongoose.Schema(
     },
     maritalStatus: {
       type: String,
-      enum: ["single", "married", "divorced", "widowed"],
+      enum: MARITAL_STATUS_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
     },
     educationLevel: {
       type: String,
-      enum: [
-        "none",
-        "primary",
-        "secondary",
-        "diploma",
-        "degree",
-        "postgraduate",
-      ],
+      enum: EDUCATION_LEVEL_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
     },
     residencyStatus: {
       type: String,
-      enum: ["citizen", "permanent resident", "foreigner"],
+      enum: RESIDENCY_STATUS_VALUES,
       required: function () {
         return this.role === "customer" && this.isProfileComplete;
       },
