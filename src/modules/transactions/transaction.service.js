@@ -8,15 +8,10 @@ const {
 const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
 const { ACCOUNT_LIMITS, ACCOUNT_STATUS } = require("../../shared/constants/accounts");
+const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
-
-const ROLE_TO_CHANNEL = {
-  banker: "branch",
-  admin: "system",
-  customer: "web",
-};
 
 class TransactionService {
   async transferFunds(

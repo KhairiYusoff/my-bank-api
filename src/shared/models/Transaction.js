@@ -1,4 +1,10 @@
 const mongoose = require("mongoose");
+const {
+  TRANSACTION_TYPE_VALUES,
+  TRANSACTION_STATUS_VALUES,
+  CHANNEL_VALUES,
+  DIRECTION_VALUES,
+} = require("../constants/transactions");
 
 const TransactionSchema = new mongoose.Schema({
   account: {
@@ -8,7 +14,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["deposit", "withdrawal", "airdrop", "transfer", "fee", "interest"],
+    enum: TRANSACTION_TYPE_VALUES,
     required: true,
   },
   amount: {
@@ -18,7 +24,7 @@ const TransactionSchema = new mongoose.Schema({
   description: String,
   status: {
     type: String,
-    enum: ["pending", "completed", "failed"],
+    enum: TRANSACTION_STATUS_VALUES,
     default: "completed",
   },
   performedBy: {
@@ -55,7 +61,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   channel: {
     type: String,
-    enum: ["web", "branch", "mobile", "api", "system"],
+    enum: CHANNEL_VALUES,
   },
   deviceInfo: {
     ip: { type: String },
@@ -80,7 +86,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   direction: {
     type: String,
-    enum: ["debit", "credit"],
+    enum: DIRECTION_VALUES,
   },
   twoFactorVerified: {
     type: Boolean,

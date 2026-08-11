@@ -23,12 +23,7 @@ const {
 } = require("../../shared/utils/generateAccountNumber");
 const { isDormancyAnniversary } = require("../../shared/utils/date");
 const { getReadableAccountType } = require("../../shared/utils/validation.helpers");
-
-const ROLE_TO_CHANNEL = {
-  banker: "branch",
-  admin: "system",
-  customer: "web",
-};
+const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
 
 class AccountService {
   async createAccount(userId, accountData) {
