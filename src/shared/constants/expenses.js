@@ -176,9 +176,29 @@ const getPaymentMethodOptions = () => {
   return Object.values(PAYMENT_METHODS);
 };
 
+const RECURRENCE_OPTIONS = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  MONTHLY: "monthly",
+  YEARLY: "yearly",
+  NONE: null,
+};
+
+const EXPENSE_STATUSES = {
+  ACTIVE: "active",
+  DELETED: "deleted",
+};
+
+const RECURRENCE_VALUES = Object.values(RECURRENCE_OPTIONS);
+const EXPENSE_STATUS_VALUES = Object.values(EXPENSE_STATUSES);
+
 module.exports = {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
+  RECURRENCE_OPTIONS,
+  RECURRENCE_VALUES,
+  EXPENSE_STATUSES,
+  EXPENSE_STATUS_VALUES,
   getAllCategories,
   getCategoryOptions,
   getSubcategoriesByCategory,

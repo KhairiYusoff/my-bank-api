@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const {
   EXPENSE_CATEGORIES,
   PAYMENT_METHODS,
+  RECURRENCE_VALUES,
+  EXPENSE_STATUS_VALUES,
 } = require("../constants/expenses");
 
 const ExpenseSchema = new mongoose.Schema(
@@ -91,7 +93,7 @@ const ExpenseSchema = new mongoose.Schema(
     
     recurringPattern: {
       type: String,
-      enum: ["daily", "weekly", "monthly", "yearly", null],
+      enum: RECURRENCE_VALUES,
       default: null
     },
     
@@ -131,7 +133,7 @@ const ExpenseSchema = new mongoose.Schema(
     // Status and soft delete
     status: {
       type: String,
-      enum: ["active", "deleted"],
+      enum: EXPENSE_STATUS_VALUES,
       default: "active",
       index: true
     }
