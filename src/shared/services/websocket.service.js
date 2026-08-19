@@ -1,5 +1,5 @@
 const socketIo = require("socket.io");
-const { STAFF_ROLES } = require("../constants/access");
+const { STAFF_ROLES } = require("../constants/user");
 
 let io;
 
