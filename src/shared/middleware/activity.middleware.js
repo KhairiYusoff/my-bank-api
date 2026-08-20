@@ -3,7 +3,7 @@ const User = require("../models/User");
 const checkActivityAccess = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const user = req.userObj;
+    const user = req.user;
 
     // Admin can access any user's activity
     if (user.role === "admin") {

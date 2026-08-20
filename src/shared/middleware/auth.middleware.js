@@ -56,23 +56,16 @@ const authMiddleware = async function (req, res, next) {
 };
 
 const authorizeRoles = (...allowedRoles) => {
-  return async (req, res, next) => {
-    try {
-      const user = await User.findById(req.user.id);
-
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
-      }
-
-      if (!allowedRoles.includes(user.role)) {
-        return res.status(403).json({ msg: "Access denied" });
-      }
-
-      req.userObj = user;
-      next();
-    } catch (err) {
-      res.status(500).json({ msg: "Server error" });
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ msg: "Authentication required" });
     }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ msg: "Access denied" });
+    }
+
+    next();
   };
 };
 
