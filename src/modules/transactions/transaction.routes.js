@@ -15,25 +15,40 @@ const {
   validateTransfer,
   validateTransaction,
 } = require("../../shared/middleware/validation.middleware");
+const { USER_ROLES } = require("../../shared/constants/user");
 
 router.use(authMiddleware);
 
 router.post(
   "/transfer",
-  authorizeRoles("customer", "banker"),
+  authorizeRoles(USER_ROLES.CUSTOMER, USER_ROLES.BANKER),
   validateTransfer,
   activityLogger("TRANSFER_INITIATED", "Funds transfer initiated"),
   transferFunds,
 );
 router.get(
   "/account/:accountNumber",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getAccountTransactions,
 );
-router.get("/all", authorizeRoles("admin", "auditor"), getAllTransactions);
+router.get(
+  "/all",
+  authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.AUDITOR),
+  getAllTransactions,
+);
 router.get(
   "/:transactionId",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getTransactionDetails,
 );
 
