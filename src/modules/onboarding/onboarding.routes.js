@@ -13,6 +13,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
+const { USER_ROLES } = require("../../shared/constants/user");
 const {
   verifyProfileCompletionToken,
 } = require("../../shared/middleware/token.middleware");
@@ -41,17 +42,21 @@ router.put("/complete-profile", [
 router.use(authMiddleware);
 
 router.get("/pending", [
-  authorizeRoles("admin", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.ADMIN,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   activityLogger("VIEW_APPLICATIONS", "Staff viewing pending applications"),
   getPendingApplications,
 ]);
 router.post("/approve/:userId", [
-  authorizeRoles("admin", "banker"),
+  authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.BANKER),
   activityLogger("APPROVE_APPLICATION", "Staff approved initial application"),
   approveApplication,
 ]);
 router.post("/verify/:userId", [
-  authorizeRoles("admin", "banker"),
+  authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.BANKER),
   activityLogger("VERIFY_CUSTOMER", "Staff verified customer account"),
   verifyCustomer,
 ]);
