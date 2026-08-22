@@ -5,11 +5,16 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
+const { USER_ROLES } = require("../../shared/constants/user");
 const { activityLogger } = require("../audit/audit.service");
 
 router.get("/", [
   authMiddleware,
-  authorizeRoles("admin", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.ADMIN,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   activityLogger("VIEW_DASHBOARD", "Staff viewed dashboard"),
   getDashboardSummary,
 ]);
