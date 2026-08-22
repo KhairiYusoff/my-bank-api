@@ -4,6 +4,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
+const { USER_ROLES } = require("../../shared/constants/user");
 const {
   createExpense,
   getExpenses,
@@ -19,46 +20,86 @@ const {
 
 router.use(authMiddleware);
 
-router.post("/", authorizeRoles("customer", "banker"), createExpense);
+router.post(
+  "/",
+  authorizeRoles(USER_ROLES.CUSTOMER, USER_ROLES.BANKER),
+  createExpense,
+);
 router.get(
   "/",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getExpenses,
 );
 router.get(
   "/categories",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getExpenseCategories,
 );
 router.get(
   "/payment-methods",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getPaymentMethods,
 );
 router.get(
   "/analytics/monthly",
-  authorizeRoles("customer", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   getMonthlyAnalytics,
 );
 router.get(
   "/analytics/yearly",
-  authorizeRoles("customer", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   getYearlyAnalytics,
 );
 router.get(
   "/dashboard/stats",
-  authorizeRoles("customer", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   getDashboardStats,
 );
 router.get(
   "/:expenseId",
-  authorizeRoles("customer", "banker", "admin", "auditor"),
+  authorizeRoles(
+    USER_ROLES.CUSTOMER,
+    USER_ROLES.BANKER,
+    USER_ROLES.ADMIN,
+    USER_ROLES.AUDITOR,
+  ),
   getExpenseById,
 );
-router.put("/:expenseId", authorizeRoles("customer", "banker"), updateExpense);
+router.put(
+  "/:expenseId",
+  authorizeRoles(USER_ROLES.CUSTOMER, USER_ROLES.BANKER),
+  updateExpense,
+);
 router.delete(
   "/:expenseId",
-  authorizeRoles("customer", "banker"),
+  authorizeRoles(USER_ROLES.CUSTOMER, USER_ROLES.BANKER),
   deleteExpense,
 );
 
