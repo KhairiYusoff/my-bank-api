@@ -24,6 +24,7 @@ const {
 const { isDormancyAnniversary } = require("../../shared/utils/date");
 const { getReadableAccountType } = require("../../shared/utils/validation.helpers");
 const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
+const { USER_ROLES } = require("../../shared/constants/user");
 
 class AccountService {
   async createAccount(userId, accountData) {
@@ -36,7 +37,10 @@ class AccountService {
       minimumBalance,
     } = accountData;
 
-    const customer = await User.findOne({ _id: userId, role: "customer" });
+    const customer = await User.findOne({
+      _id: userId,
+      role: USER_ROLES.CUSTOMER,
+    });
     if (!customer) {
       const err = new Error("Customer not found or is not a customer");
       err.statusCode = 404;
@@ -206,7 +210,7 @@ class AccountService {
 
   async getBalance(accountNumber, userId, role) {
     const query = { accountNumber };
-    if (role === "customer") query.user = userId;
+    if (role === USER_ROLES.CUSTOMER) query.user = userId;
 
     const account = await Account.findOne(query);
     if (!account) {
@@ -253,7 +257,7 @@ class AccountService {
     }
 
     const query = { accountNumber };
-    if (role === "customer") query.user = userId;
+    if (role === USER_ROLES.CUSTOMER) query.user = userId;
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -268,7 +272,10 @@ class AccountService {
         throw err;
       }
 
-      if (role === "customer" && account.status === ACCOUNT_STATUS.DORMANT) {
+      if (
+        role === USER_ROLES.CUSTOMER &&
+        account.status === ACCOUNT_STATUS.DORMANT
+      ) {
         const err = new Error(
           "Account is dormant. Please visit the nearest branch for reactivation.",
         );
@@ -276,7 +283,10 @@ class AccountService {
         throw err;
       }
 
-      if (role === "customer" && account.status === ACCOUNT_STATUS.SUSPENDED) {
+      if (
+        role === USER_ROLES.CUSTOMER &&
+        account.status === ACCOUNT_STATUS.SUSPENDED
+      ) {
         const err = new Error(
           "Account is suspended. Please contact the branch for assistance.",
         );
@@ -284,7 +294,10 @@ class AccountService {
         throw err;
       }
 
-      if (account.status !== ACCOUNT_STATUS.ACTIVE && role === "customer") {
+      if (
+        account.status !== ACCOUNT_STATUS.ACTIVE &&
+        role === USER_ROLES.CUSTOMER
+      ) {
         const err = new Error(
           "This account is not active and cannot receive deposits",
         );
@@ -367,7 +380,7 @@ class AccountService {
     }
 
     const query = { accountNumber };
-    if (role === "customer") query.user = userId;
+    if (role === USER_ROLES.CUSTOMER) query.user = userId;
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -382,7 +395,10 @@ class AccountService {
         throw err;
       }
 
-      if (role === "customer" && account.status === ACCOUNT_STATUS.DORMANT) {
+      if (
+        role === USER_ROLES.CUSTOMER &&
+        account.status === ACCOUNT_STATUS.DORMANT
+      ) {
         const err = new Error(
           "Account is dormant. Please visit the nearest branch for reactivation.",
         );
@@ -390,7 +406,10 @@ class AccountService {
         throw err;
       }
 
-      if (role === "customer" && account.status === ACCOUNT_STATUS.SUSPENDED) {
+      if (
+        role === USER_ROLES.CUSTOMER &&
+        account.status === ACCOUNT_STATUS.SUSPENDED
+      ) {
         const err = new Error(
           "Account is suspended. Please contact the branch for assistance.",
         );
@@ -628,7 +647,10 @@ class AccountService {
       throw err;
     }
 
-    const customer = await User.findOne({ _id: userId, role: "customer" });
+    const customer = await User.findOne({
+      _id: userId,
+      role: USER_ROLES.CUSTOMER,
+    });
     if (!customer) {
       const err = new Error("Customer not found");
       err.statusCode = 404;
