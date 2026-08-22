@@ -8,6 +8,7 @@ const {
   authMiddleware,
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
+const { USER_ROLES } = require("../../shared/constants/user");
 
 const router = express.Router();
 
@@ -16,9 +17,17 @@ router.use(authMiddleware);
 router.get("/me", getOwnActivity);
 router.get(
   "/user/:userId",
-  authorizeRoles("admin", "banker", "auditor"),
+  authorizeRoles(
+    USER_ROLES.ADMIN,
+    USER_ROLES.BANKER,
+    USER_ROLES.AUDITOR,
+  ),
   getUserActivity,
 );
-router.get("/all", authorizeRoles("admin", "auditor"), getAllActivities);
+router.get(
+  "/all",
+  authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.AUDITOR),
+  getAllActivities,
+);
 
 module.exports = router;
