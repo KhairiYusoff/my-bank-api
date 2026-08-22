@@ -1,9 +1,12 @@
 const User = require("../../shared/models/User");
+const {
+  USER_ROLES,
+  STAFF_ROLES,
+} = require("../../shared/constants/user");
 
 class AdminService {
   async createStaff({ name, email, password, role }) {
-    const validRoles = ["admin", "banker", "auditor"];
-    if (!validRoles.includes(role)) {
+    if (!STAFF_ROLES.includes(role)) {
       const err = new Error("Invalid role assignment");
       err.statusCode = 400;
       throw err;
@@ -42,7 +45,7 @@ class AdminService {
       err.statusCode = 404;
       throw err;
     }
-    if (staff.role !== "banker" && staff.role !== "admin" && staff.role !== "auditor") {
+    if (!STAFF_ROLES.includes(staff.role)) {
       const err = new Error(
         "Only staff (banker/admin/auditor) can be updated via this endpoint.",
       );
@@ -50,12 +53,11 @@ class AdminService {
       throw err;
     }
 
-    const allowedRoles = ["banker", "admin", "auditor"];
     const allowedStatus = ["active", "suspended", "terminated"];
     let updated = false;
 
     if (role) {
-      if (!allowedRoles.includes(role)) {
+      if (!STAFF_ROLES.includes(role)) {
         const err = new Error("Invalid role.");
         err.statusCode = 400;
         throw err;
@@ -95,7 +97,7 @@ class AdminService {
       err.statusCode = 404;
       throw err;
     }
-    if (customer.role !== "customer") {
+    if (customer.role !== USER_ROLES.CUSTOMER) {
       const err = new Error("Only customers can be updated via this endpoint.");
       err.statusCode = 400;
       throw err;
@@ -126,7 +128,7 @@ class AdminService {
       err.statusCode = 404;
       throw err;
     }
-    if (staff.role !== "banker") {
+    if (staff.role !== USER_ROLES.BANKER) {
       const err = new Error(
         "Only banker accounts can be deleted via this endpoint.",
       );
@@ -150,7 +152,7 @@ class AdminService {
       err.statusCode = 404;
       throw err;
     }
-    if (customer.role !== "customer") {
+    if (customer.role !== USER_ROLES.CUSTOMER) {
       const err = new Error(
         "Only customer accounts can be deleted via this endpoint.",
       );
@@ -166,7 +168,7 @@ class AdminService {
     try {
       customer = await User.findOne({
         _id: customerId,
-        role: "customer",
+        role: USER_ROLES.CUSTOMER,
       }).select("-password -refreshToken");
     } catch (err) {
       if (err.name === "CastError") {
@@ -191,7 +193,7 @@ class AdminService {
     try {
       staff = await User.findOne({
         _id: staffId,
-        role: { $in: ["banker", "admin", "auditor"] },
+        role: { $in: STAFF_ROLES },
       }).select("-password -refreshToken");
     } catch (err) {
       if (err.name === "CastError") {
