@@ -9,6 +9,7 @@ const { getNextReference } = require("../../shared/utils/reference");
 const { maskName } = require("../../shared/utils/maskName");
 const { ACCOUNT_LIMITS, ACCOUNT_STATUS } = require("../../shared/constants/accounts");
 const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
+const { USER_ROLES } = require("../../shared/constants/user");
 const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
@@ -50,7 +51,7 @@ class TransactionService {
     }
 
     if (
-      role === "customer" &&
+      role === USER_ROLES.CUSTOMER &&
       fromAccountCheck.status === ACCOUNT_STATUS.DORMANT
     ) {
       const err = new Error(
@@ -61,7 +62,7 @@ class TransactionService {
     }
 
     if (
-      role === "customer" &&
+      role === USER_ROLES.CUSTOMER &&
       fromAccountCheck.status === ACCOUNT_STATUS.SUSPENDED
     ) {
       const err = new Error(
@@ -73,7 +74,7 @@ class TransactionService {
 
     if (
       fromAccountCheck.status !== ACCOUNT_STATUS.ACTIVE &&
-      role === "customer"
+      role === USER_ROLES.CUSTOMER
     ) {
       const err = new Error(
         "This account is not active and cannot process transfers",
@@ -377,7 +378,7 @@ class TransactionService {
     sort = "desc",
   ) {
     const accountFilter =
-      user.role === "customer"
+      user.role === USER_ROLES.CUSTOMER
         ? { accountNumber, user: user.id }
         : { accountNumber };
 
@@ -403,7 +404,7 @@ class TransactionService {
 
     const total = await Transaction.countDocuments(query);
 
-    const isCustomer = user.role === "customer";
+    const isCustomer = user.role === USER_ROLES.CUSTOMER;
     const shaped = transactions.map((tx) =>
       this._shapeTxForRole(tx, isCustomer),
     );
@@ -427,7 +428,7 @@ class TransactionService {
       throw err;
     }
 
-    if (user.role === "customer") {
+    if (user.role === USER_ROLES.CUSTOMER) {
       const account = await Account.findOne({
         _id: transaction.account,
         user: user.id,
@@ -443,7 +444,7 @@ class TransactionService {
       .populate("account", "accountNumber user")
       .populate("performedBy", "name role");
 
-    return this._shapeTxForRole(full, user.role === "customer");
+    return this._shapeTxForRole(full, user.role === USER_ROLES.CUSTOMER);
   }
 
   async getAllTransactions({
