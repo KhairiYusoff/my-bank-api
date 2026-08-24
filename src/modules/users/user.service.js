@@ -1,5 +1,9 @@
 const User = require("../../shared/models/User");
 const bcrypt = require("bcryptjs");
+const {
+  USER_ROLES,
+  STAFF_ROLES,
+} = require("../../shared/constants/user");
 
 class UserService {
   async getProfile(userId) {
@@ -158,7 +162,7 @@ class UserService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { role: "customer" };
+    const filter = { role: USER_ROLES.CUSTOMER };
     if (name) filter.name = new RegExp(name, "i");
     if (email) filter.email = new RegExp(email, "i");
     if (phoneNumber) filter.phoneNumber = new RegExp(phoneNumber, "i");
@@ -227,7 +231,7 @@ class UserService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { role: { $in: ["banker", "auditor", "admin"] } };
+    const filter = { role: { $in: STAFF_ROLES } };
     if (name) filter.name = new RegExp(name, "i");
     if (email) filter.email = new RegExp(email, "i");
     if (status) filter.status = status;
