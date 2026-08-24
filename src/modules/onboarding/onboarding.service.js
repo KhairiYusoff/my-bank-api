@@ -3,6 +3,7 @@ const { sendEmail } = require("../../shared/utils/email");
 const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
+const { USER_ROLES } = require("../../shared/constants/user");
 const mongoose = require("mongoose");
 const {
   notifyNewApplication,
@@ -83,7 +84,7 @@ class OnboardingService {
         name,
         email,
         phoneNumber,
-        role: "customer",
+        role: USER_ROLES.CUSTOMER,
         isVerified: false,
         isProfileComplete: false,
         applicationStatus: "pending",
@@ -242,7 +243,7 @@ class OnboardingService {
     const numericLimit = Math.max(parseInt(limit, 10), 1);
     const skip = (numericPage - 1) * numericLimit;
 
-    const filter = { isVerified: false, role: "customer" };
+    const filter = { isVerified: false, role: USER_ROLES.CUSTOMER };
     if (name) filter.name = new RegExp(name, "i");
     if (email) filter.email = new RegExp(email, "i");
     if (phoneNumber) filter.phoneNumber = new RegExp(phoneNumber, "i");
