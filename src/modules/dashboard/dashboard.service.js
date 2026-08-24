@@ -2,6 +2,10 @@ const User = require("../../shared/models/User");
 const Account = require("../../shared/models/Account");
 const Transaction = require("../../shared/models/Transaction");
 const { ACCOUNT_STATUS } = require("../../shared/constants/accounts");
+const {
+  USER_ROLES,
+  STAFF_ROLES,
+} = require("../../shared/constants/user");
 
 class DashboardService {
   async getDashboardSummary(userRole) {
@@ -21,19 +25,19 @@ class DashboardService {
       portfolioResult,
     ] = await Promise.all([
       // customer count
-      User.countDocuments({ role: "customer" }),
+      User.countDocuments({ role: USER_ROLES.CUSTOMER }),
 
       // account count
       Account.countDocuments(),
 
       // staff count
-      User.countDocuments({ role: { $in: ["banker", "admin", "auditor"] } }),
+      User.countDocuments({ role: { $in: STAFF_ROLES } }),
 
       // transactions today
       Transaction.countDocuments({ createdAt: { $gte: todayStart } }),
 
       // pending applications
-      User.countDocuments({ role: "customer", isVerified: false }),
+      User.countDocuments({ role: USER_ROLES.CUSTOMER, isVerified: false }),
 
       // failed transactions today
       Transaction.countDocuments({
@@ -93,7 +97,7 @@ class DashboardService {
       },
     };
 
-    if (["admin", "auditor"].includes(userRole)) {
+    if ([USER_ROLES.ADMIN, USER_ROLES.AUDITOR].includes(userRole)) {
       summary.counts.staff = staffCount;
     }
 
