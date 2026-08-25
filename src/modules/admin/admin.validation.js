@@ -1,4 +1,5 @@
 const { check } = require("express-validator");
+const { STAFF_ASSIGNABLE_ROLES } = require("../../shared/constants/user");
 
 const validateStaffRegistration = [
   check("name", "Name is required").not().isEmpty().trim().escape(),
@@ -20,7 +21,7 @@ const validateStaffRegistration = [
   check("role", "Role is required")
     .not()
     .isEmpty()
-    .isIn(["banker", "admin"]),
+    .isIn(STAFF_ASSIGNABLE_ROLES),
 ];
 
 module.exports = { validateStaffRegistration };
