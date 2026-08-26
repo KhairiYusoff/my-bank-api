@@ -2,11 +2,12 @@ const User = require("../../shared/models/User");
 const {
   USER_ROLES,
   STAFF_ROLES,
+  STAFF_ASSIGNABLE_ROLES,
 } = require("../../shared/constants/user");
 
 class AdminService {
   async createStaff({ name, email, password, role }) {
-    if (!STAFF_ROLES.includes(role)) {
+    if (!STAFF_ASSIGNABLE_ROLES.includes(role)) {
       const err = new Error("Invalid role assignment");
       err.statusCode = 400;
       throw err;
@@ -57,7 +58,7 @@ class AdminService {
     let updated = false;
 
     if (role) {
-      if (!STAFF_ROLES.includes(role)) {
+      if (!STAFF_ASSIGNABLE_ROLES.includes(role)) {
         const err = new Error("Invalid role.");
         err.statusCode = 400;
         throw err;
