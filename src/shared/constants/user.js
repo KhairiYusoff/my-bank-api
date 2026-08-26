@@ -15,17 +15,17 @@ const USER_ROLES = {
   ADMIN: "admin",
 };
 
-const STAFF_ROLES = [
+const STAFF_ROLES = Object.freeze([
   USER_ROLES.ADMIN,
   USER_ROLES.BANKER,
   USER_ROLES.AUDITOR,
-];
+]);
 
-const STAFF_ASSIGNABLE_ROLES = [
+const STAFF_ASSIGNABLE_ROLES = Object.freeze([
   USER_ROLES.BANKER,
   USER_ROLES.ADMIN,
   USER_ROLES.AUDITOR,
-];
+]);
 
 const USER_STATUSES = {
   ACTIVE: "active",
