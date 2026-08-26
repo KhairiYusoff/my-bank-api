@@ -12,6 +12,7 @@ const {
   MARITAL_STATUS_VALUES,
   EDUCATION_LEVEL_VALUES,
   RESIDENCY_STATUS_VALUES,
+  USER_ROLES,
 } = require("../constants/user");
 
 const UserSchema = new mongoose.Schema(
@@ -34,7 +35,7 @@ const UserSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       required: function () {
-        return this.role === "customer";
+        return this.role === USER_ROLES.CUSTOMER;
       },
       unique: true,
       trim: true,
@@ -42,7 +43,7 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.role !== "customer" || this.isVerified;
+        return this.role !== USER_ROLES.CUSTOMER || this.isVerified;
       },
     },
     identityNumber: {
@@ -51,7 +52,7 @@ const UserSchema = new mongoose.Schema(
       sparse: true,
       trim: true,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     applicationStatus: {
@@ -74,7 +75,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: USER_ROLE_VALUES,
-      default: "customer",
+      default: USER_ROLES.CUSTOMER,
     },
     status: {
       type: String,
@@ -85,63 +86,63 @@ const UserSchema = new mongoose.Schema(
       street: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
       city: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
       state: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
       postalCode: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
     },
     dateOfBirth: {
       type: Date,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     job: {
       type: String,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     age: {
       type: Number,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     nationality: {
       type: String,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     accountType: {
       type: String,
       enum: ACCOUNT_TYPE_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     branch: {
       type: String,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     preferences: {
@@ -158,48 +159,48 @@ const UserSchema = new mongoose.Schema(
     employerName: {
       type: String,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     employmentType: {
       type: String,
       enum: EMPLOYMENT_TYPE_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     salary: {
       type: String,
       enum: SALARY_BRACKET_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     purposeOfAccount: {
       type: String,
       enum: PURPOSE_OF_ACCOUNT_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     nextOfKin: {
       name: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
       phone: {
         type: String,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
       relationship: {
         type: String,
         enum: RELATIONSHIP_VALUES,
         required: function () {
-          return this.role === "customer" && this.isProfileComplete;
+          return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
         },
       },
     },
@@ -207,21 +208,21 @@ const UserSchema = new mongoose.Schema(
       type: String,
       enum: MARITAL_STATUS_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     educationLevel: {
       type: String,
       enum: EDUCATION_LEVEL_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
     residencyStatus: {
       type: String,
       enum: RESIDENCY_STATUS_VALUES,
       required: function () {
-        return this.role === "customer" && this.isProfileComplete;
+        return this.role === USER_ROLES.CUSTOMER && this.isProfileComplete;
       },
     },
   },
