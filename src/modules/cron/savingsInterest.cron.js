@@ -6,6 +6,7 @@ const { getNextReference } = require("../../shared/utils/reference");
 const {
   sendNotification,
 } = require("../../shared/services/notification.service");
+const { USER_ROLES } = require("../../shared/constants/user");
 const { getSavingsAnnualRate } = require("../../shared/constants/products");
 
 // Runs at 23:59 on days 28–31; last-day check inside prevents double-runs
@@ -72,7 +73,7 @@ cron.schedule(
               message: `RM ${interest.toFixed(2)} interest has been credited to your Savings account ${account.accountNumber}.`,
               link: `/accounts/${account.accountNumber}`,
               recipient: {
-                role: "customer",
+                role: USER_ROLES.CUSTOMER,
                 userId: account.user.toString(),
               },
               source: {

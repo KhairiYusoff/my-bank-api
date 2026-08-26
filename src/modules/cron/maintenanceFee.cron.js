@@ -10,6 +10,7 @@ const {
   notifyBelowThreshold,
 } = require("../../shared/utils/maintenanceThreshold");
 const { MAINTENANCE_FEE_RULES } = require("../../shared/constants/products");
+const { USER_ROLES } = require("../../shared/constants/user");
 
 // Runs at 00:01 on the 1st of every month
 cron.schedule(
@@ -83,7 +84,7 @@ cron.schedule(
               message: `RM ${rule.fee}.00 monthly maintenance fee has been deducted from account ${account.accountNumber}. Maintain a balance of RM ${rule.threshold.toLocaleString()} or above to waive this fee.`,
               link: `/accounts/${account.accountNumber}`,
               recipient: {
-                role: "customer",
+                role: USER_ROLES.CUSTOMER,
                 userId: account.user.toString(),
               },
               source: {
