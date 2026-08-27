@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const { ACCOUNT_STATUS_VALUES } = require("../constants/accounts");
 
+function isFixedDeposit() {
+  return this.accountType === "fixed_deposit";
+}
+
 const AccountSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -61,22 +65,16 @@ const AccountSchema = new mongoose.Schema({
   lockPeriod: {
     type: Number,
     enum: [1, 3, 6, 12],
-    required: function () {
-      return this.accountType === "fixed_deposit";
-    },
+    required: isFixedDeposit,
   },
   maturityDate: {
     type: Date,
-    required: function () {
-      return this.accountType === "fixed_deposit";
-    },
+    required: isFixedDeposit,
   },
   linkedAccount: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Account",
-    required: function () {
-      return this.accountType === "fixed_deposit";
-    },
+    required: isFixedDeposit,
   },
   principal: {
     type: Number,
