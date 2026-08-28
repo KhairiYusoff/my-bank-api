@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { ACCOUNT_STATUS_VALUES } = require("../constants/accounts");
+const { ACCOUNT_TYPE_VALUES } = require("../constants/user");
 
 function isFixedDeposit() {
   return this.accountType === "fixed_deposit";
@@ -18,7 +19,7 @@ const AccountSchema = new mongoose.Schema({
   },
   accountType: {
     type: String,
-    enum: ["savings", "current", "business", "fixed_deposit"],
+    enum: ACCOUNT_TYPE_VALUES,
     required: false,
   },
   branch: {
