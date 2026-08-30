@@ -94,7 +94,7 @@ const TransactionSchema = new mongoose.Schema({
   },
   riskFlags: {
     type: Array,
-    default: [],
+    default: () => [],
   },
   isReversed: {
     type: Boolean,
