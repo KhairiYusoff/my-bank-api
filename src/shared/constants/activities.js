@@ -119,6 +119,10 @@ const ACTIVITY_TYPES = {
   ACCOUNT_STATUS_CHANGED: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
   CREATE_STAFF: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
   UPDATE_OVERDRAFT_LIMIT: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  ACCOUNT_REQUEST: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  ACCOUNT_SUSPENDED: { severity: SEVERITY_LEVELS.HIGH, getUserId: (req) => req.user?.id },
+  ACCOUNT_REACTIVATED: { severity: SEVERITY_LEVELS.MEDIUM, getUserId: (req) => req.user?.id },
+  VIEW_DASHBOARD: { severity: SEVERITY_LEVELS.LOW, getUserId: (req) => req.user?.id },
 };
 
 const ACTIVITY_ACTION_VALUES = Object.keys(ACTIVITY_TYPES);

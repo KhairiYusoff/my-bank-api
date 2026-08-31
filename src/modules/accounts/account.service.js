@@ -90,7 +90,6 @@ class AccountService {
         ],
       },
     };
-    console.log("filter", filter);
     if (accountType) filter.accountType = accountType;
     if (branch) filter.branch = branch;
     if (status) filter.status = status;
