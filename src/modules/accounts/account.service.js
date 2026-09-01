@@ -1394,18 +1394,10 @@ class AccountService {
   }
 
   async requestClosure(accountNumber, userId) {
-    const account = await Account.findOne({ accountNumber });
+    const account = await Account.findOne({ accountNumber, user: userId });
     if (!account) {
       const err = new Error("Account not found");
       err.statusCode = 404;
-      throw err;
-    }
-
-    if (account.user.toString() !== userId) {
-      const err = new Error(
-        "You can only request closure on your own accounts",
-      );
-      err.statusCode = 403;
       throw err;
     }
 
