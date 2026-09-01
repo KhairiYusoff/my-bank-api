@@ -813,16 +813,6 @@ class AccountService {
       account.dateOpened = new Date();
 
       await account.save({ session });
-      await ActivityLog.create({
-        action: ACTIVITY_ACTIONS.APPROVE_ACCOUNT_REQUEST,
-        user: bankerId,
-        relatedEntity: accountId,
-        relatedEntityModel: "Account",
-        details: {
-          accountType: account.accountType,
-          accountNumber: account.accountNumber,
-        },
-      });
 
       await session.commitTransaction();
 
@@ -873,18 +863,6 @@ class AccountService {
 
     account.status = ACCOUNT_STATUS.CLOSED;
     await account.save();
-
-    await ActivityLog.create({
-      action: ACTIVITY_ACTIONS.REJECT_ACCOUNT_REQUEST,
-      user: bankerId,
-      relatedEntity: accountId,
-      relatedEntityModel: "Account",
-      details: {
-        accountType: account.accountType,
-        accountNumber: account.accountNumber,
-        reason,
-      },
-    });
 
     try {
       await sendNotification({
@@ -1012,22 +990,6 @@ class AccountService {
       fd.balance = 0;
       await fd.save({ session });
 
-      await ActivityLog.create(
-        [
-          {
-            action: ACTIVITY_ACTIONS.FD_PRINCIPAL_SETTLEMENT,
-            user: userId,
-            relatedEntity: fd._id,
-            relatedEntityModel: "Account",
-            details: {
-              accountNumber: fd.accountNumber,
-              amount: fd.principal,
-            },
-          },
-        ],
-        { session },
-      );
-
       await session.commitTransaction();
 
       try {
@@ -1092,14 +1054,6 @@ class AccountService {
     }
 
     await fd.save();
-
-    await ActivityLog.create({
-      action: ACTIVITY_ACTIONS.UPDATE_FD_INSTRUCTIONS,
-      user: userId,
-      relatedEntity: fd._id,
-      relatedEntityModel: "Account",
-      details: instructions,
-    });
 
     return fd;
   }
@@ -1172,23 +1126,6 @@ class AccountService {
       fd.status = ACCOUNT_STATUS.CLOSED;
       fd.balance = 0;
       await fd.save({ session });
-
-      await ActivityLog.create(
-        [
-          {
-            action: ACTIVITY_ACTIONS.FD_EARLY_WITHDRAWAL,
-            user: userId,
-            relatedEntity: fd._id,
-            relatedEntityModel: "Account",
-            details: {
-              accountNumber: fd.accountNumber,
-              principal: fd.principal,
-              penalty: "100% Interest Forfeited",
-            },
-          },
-        ],
-        { session },
-      );
 
       await session.commitTransaction();
 
@@ -1487,17 +1424,6 @@ class AccountService {
     account.status = ACCOUNT_STATUS.PENDING_CLOSURE;
     await account.save();
 
-    await ActivityLog.create({
-      action: ACTIVITY_ACTIONS.ACCOUNT_CLOSE_REQUESTED,
-      user: userId,
-      relatedEntity: account._id,
-      relatedEntityModel: "Account",
-      details: {
-        accountNumber: account.accountNumber,
-        accountType: account.accountType,
-      },
-    });
-
     try {
       await sendNotification({
         type: "account_closure_requested",
@@ -1543,18 +1469,6 @@ class AccountService {
     account.status = ACCOUNT_STATUS.CLOSED;
     account.dateClosed = new Date();
     await account.save();
-
-    await ActivityLog.create({
-      action: ACTIVITY_ACTIONS.ACCOUNT_CLOSED,
-      user: bankerId,
-      relatedEntity: account._id,
-      relatedEntityModel: "Account",
-      details: {
-        accountNumber: account.accountNumber,
-        accountType: account.accountType,
-        closedBy: bankerId,
-      },
-    });
 
     try {
       await sendNotification({
