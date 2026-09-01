@@ -18,7 +18,10 @@ const {
   validateTransaction,
 } = require("../../shared/middleware/validation.middleware");
 const { USER_ROLES } = require("../../shared/constants/user");
-const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
+const {
+  ACTIVITY_ACTIONS,
+  ACTIVITY_DETAILS,
+} = require("../../shared/constants/activities");
 
 router.use(authMiddleware);
 
@@ -26,7 +29,7 @@ router.post(
   "/transfer",
   authorizeRoles(USER_ROLES.CUSTOMER, USER_ROLES.BANKER),
   validateTransfer,
-  activityLogger(ACTIVITY_ACTIONS.TRANSFER_INITIATED, "Funds transfer initiated"),
+  activityLogger(ACTIVITY_ACTIONS.TRANSFER_INITIATED, ACTIVITY_DETAILS.TRANSFER_INITIATED),
   transferFunds,
 );
 router.get(
