@@ -1,16 +1,21 @@
 const ActivityLog = require("../../shared/models/ActivityLog");
 const {
   ACTIVITY_TYPES,
+  ACTIVITY_ACTION_VALUES,
   ACTIVITY_STATUS,
 } = require("../../shared/constants/activities");
 
+const validateActivityAction = (action) => {
+  if (!ACTIVITY_ACTION_VALUES.includes(action)) {
+    throw new TypeError(`Unknown activity type: ${action}`);
+  }
+  return action;
+};
+
 const logActivity = async (req, res, action, details = "") => {
   try {
-    const activityConfig = ACTIVITY_TYPES[action];
-    if (!activityConfig) {
-      console.error(`Unknown activity type: ${action}`);
-      return;
-    }
+    const validatedAction = validateActivityAction(action);
+    const activityConfig = ACTIVITY_TYPES[validatedAction];
 
     const userId = await activityConfig.getUserId(req, res.locals.responseData);
 
@@ -26,7 +31,7 @@ const logActivity = async (req, res, action, details = "") => {
 
     const activityLog = new ActivityLog({
       user: userId,
-      action,
+      action: validatedAction,
       details,
       ipAddress: req.ip || req.connection.remoteAddress,
       userAgent: req.headers["user-agent"],
@@ -54,13 +59,15 @@ const logActivity = async (req, res, action, details = "") => {
  * Intercepts res.json to capture the response payload before async logging.
  */
 const activityLogger = (action, details = "") => {
+  const validatedAction = validateActivityAction(action);
+
   return async (req, res, next) => {
     try {
       const originalJson = res.json;
       res.json = function (data) {
         res.locals.responseData = data;
         originalJson.call(this, data);
-        logActivity(req, res, action, details);
+        logActivity(req, res, validatedAction, details);
       };
       req._startTime = Date.now();
       next();
@@ -146,6 +153,7 @@ async function getAllActivityLogs(queryParams) {
 module.exports = {
   activityLogger,
   logActivity,
+  validateActivityAction,
   ACTIVITY_TYPES,
   getOwnActivityLogs,
   getUserActivityLogs,
