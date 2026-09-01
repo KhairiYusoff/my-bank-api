@@ -815,9 +815,9 @@ class AccountService {
       await account.save({ session });
       await ActivityLog.create({
         action: ACTIVITY_ACTIONS.APPROVE_ACCOUNT_REQUEST,
-        actor: bankerId,
-        target: accountId,
-        targetType: "Account",
+        user: bankerId,
+        relatedEntity: accountId,
+        relatedEntityModel: "Account",
         details: {
           accountType: account.accountType,
           accountNumber: account.accountNumber,
@@ -876,9 +876,9 @@ class AccountService {
 
     await ActivityLog.create({
       action: ACTIVITY_ACTIONS.REJECT_ACCOUNT_REQUEST,
-      actor: bankerId,
-      target: accountId,
-      targetType: "Account",
+      user: bankerId,
+      relatedEntity: accountId,
+      relatedEntityModel: "Account",
       details: {
         accountType: account.accountType,
         accountNumber: account.accountNumber,
@@ -1016,9 +1016,9 @@ class AccountService {
         [
           {
             action: ACTIVITY_ACTIONS.FD_PRINCIPAL_SETTLEMENT,
-            actor: userId,
-            target: fd._id,
-            targetType: "Account",
+            user: userId,
+            relatedEntity: fd._id,
+            relatedEntityModel: "Account",
             details: {
               accountNumber: fd.accountNumber,
               amount: fd.principal,
@@ -1095,9 +1095,9 @@ class AccountService {
 
     await ActivityLog.create({
       action: ACTIVITY_ACTIONS.UPDATE_FD_INSTRUCTIONS,
-      actor: userId,
-      target: fd._id,
-      targetType: "Account",
+      user: userId,
+      relatedEntity: fd._id,
+      relatedEntityModel: "Account",
       details: instructions,
     });
 
@@ -1177,9 +1177,9 @@ class AccountService {
         [
           {
             action: ACTIVITY_ACTIONS.FD_EARLY_WITHDRAWAL,
-            actor: userId,
-            target: fd._id,
-            targetType: "Account",
+            user: userId,
+            relatedEntity: fd._id,
+            relatedEntityModel: "Account",
             details: {
               accountNumber: fd.accountNumber,
               principal: fd.principal,
@@ -1489,9 +1489,9 @@ class AccountService {
 
     await ActivityLog.create({
       action: ACTIVITY_ACTIONS.ACCOUNT_CLOSE_REQUESTED,
-      actor: userId,
-      target: account._id,
-      targetType: "Account",
+      user: userId,
+      relatedEntity: account._id,
+      relatedEntityModel: "Account",
       details: {
         accountNumber: account.accountNumber,
         accountType: account.accountType,
@@ -1546,9 +1546,9 @@ class AccountService {
 
     await ActivityLog.create({
       action: ACTIVITY_ACTIONS.ACCOUNT_CLOSED,
-      actor: bankerId,
-      target: account._id,
-      targetType: "Account",
+      user: bankerId,
+      relatedEntity: account._id,
+      relatedEntityModel: "Account",
       details: {
         accountNumber: account.accountNumber,
         accountType: account.accountType,
