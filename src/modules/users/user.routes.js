@@ -20,6 +20,7 @@ const {
   validatePreferencesUpdate,
 } = require("../../shared/middleware/user.middleware");
 const { USER_ROLES } = require("../../shared/constants/user");
+const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
 const { activityLogger } = require("../audit/audit.service");
 
 router.post("/me/reset-password", resetPassword);
@@ -30,20 +31,20 @@ router.get("/me", getProfile);
 router.put(
   "/me",
   validateProfileUpdate,
-  activityLogger("PROFILE_UPDATED", "User updated their profile"),
+  activityLogger(ACTIVITY_ACTIONS.PROFILE_UPDATED, "User updated their profile"),
   updateProfile,
 );
 router.delete("/me", deleteAccount);
 router.put(
   "/me/password",
   validatePasswordChange,
-  activityLogger("PASSWORD_CHANGED", "User changed their password"),
+  activityLogger(ACTIVITY_ACTIONS.PASSWORD_CHANGED, "User changed their password"),
   changePassword,
 );
 router.put(
   "/me/preferences",
   validatePreferencesUpdate,
-  activityLogger("PREFERENCES_UPDATED", "User updated preferences"),
+  activityLogger(ACTIVITY_ACTIONS.PREFERENCES_UPDATED, "User updated preferences"),
   updatePreferences,
 );
 router.get(

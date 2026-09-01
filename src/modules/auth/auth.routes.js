@@ -7,6 +7,7 @@ const {
 } = require("./auth.controller");
 const { authMiddleware } = require("../../shared/middleware/auth.middleware");
 const { validateLogin } = require("./auth.validation");
+const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
 const { activityLogger } = require("../audit/audit.service");
 const {
   authRateLimit,
@@ -16,12 +17,12 @@ const router = express.Router();
 router.post("/login", [
   authRateLimit,
   validateLogin,
-  activityLogger("LOGIN", "User login attempt"),
+  activityLogger(ACTIVITY_ACTIONS.LOGIN, "User login attempt"),
   login,
 ]);
 router.post("/logout", [
   authMiddleware,
-  activityLogger("LOGOUT", "User logout"),
+  activityLogger(ACTIVITY_ACTIONS.LOGOUT, "User logout"),
   logout,
 ]);
 router.post("/refresh-token", refreshToken);

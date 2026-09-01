@@ -14,6 +14,7 @@ const {
   authorizeRoles,
 } = require("../../shared/middleware/auth.middleware");
 const { USER_ROLES } = require("../../shared/constants/user");
+const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
 const {
   verifyProfileCompletionToken,
 } = require("../../shared/middleware/token.middleware");
@@ -29,13 +30,13 @@ const {
 router.post("/apply", [
   authRateLimit,
   validateInitialApplication,
-  activityLogger("CUSTOMER_APPLICATION", "New customer application submitted"),
+  activityLogger(ACTIVITY_ACTIONS.CUSTOMER_APPLICATION, "New customer application submitted"),
   apply,
 ]);
 router.put("/complete-profile", [
   verifyProfileCompletionToken,
   validateFullRegistration,
-  activityLogger("PROFILE_COMPLETED", "Customer completed profile"),
+  activityLogger(ACTIVITY_ACTIONS.PROFILE_COMPLETED, "Customer completed profile"),
   completeProfile,
 ]);
 
@@ -47,17 +48,17 @@ router.get("/pending", [
     USER_ROLES.BANKER,
     USER_ROLES.AUDITOR,
   ),
-  activityLogger("VIEW_APPLICATIONS", "Staff viewing pending applications"),
+  activityLogger(ACTIVITY_ACTIONS.VIEW_APPLICATIONS, "Staff viewing pending applications"),
   getPendingApplications,
 ]);
 router.post("/approve/:userId", [
   authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.BANKER),
-  activityLogger("APPROVE_APPLICATION", "Staff approved initial application"),
+  activityLogger(ACTIVITY_ACTIONS.APPROVE_APPLICATION, "Staff approved initial application"),
   approveApplication,
 ]);
 router.post("/verify/:userId", [
   authorizeRoles(USER_ROLES.ADMIN, USER_ROLES.BANKER),
-  activityLogger("VERIFY_CUSTOMER", "Staff verified customer account"),
+  activityLogger(ACTIVITY_ACTIONS.VERIFY_CUSTOMER, "Staff verified customer account"),
   verifyCustomer,
 ]);
 

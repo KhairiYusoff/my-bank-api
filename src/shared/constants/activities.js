@@ -125,13 +125,20 @@ const ACTIVITY_TYPES = {
   VIEW_DASHBOARD: { severity: SEVERITY_LEVELS.LOW, getUserId: (req) => req.user?.id },
 };
 
-const ACTIVITY_ACTION_VALUES = Object.keys(ACTIVITY_TYPES);
+const ACTIVITY_ACTIONS = Object.freeze(
+  Object.keys(ACTIVITY_TYPES).reduce(
+    (actions, action) => ({ ...actions, [action]: action }),
+    {},
+  ),
+);
+const ACTIVITY_ACTION_VALUES = Object.values(ACTIVITY_ACTIONS);
 const ACTIVITY_STATUS_VALUES = Object.values(ACTIVITY_STATUS);
 const SEVERITY_LEVEL_VALUES = Object.values(SEVERITY_LEVELS);
 const AUDIT_ENTITY_TYPE_VALUES = Object.values(AUDIT_ENTITY_TYPES);
 
 module.exports = {
   ACTIVITY_TYPES,
+  ACTIVITY_ACTIONS,
   ACTIVITY_ACTION_VALUES,
   ACTIVITY_STATUS,
   ACTIVITY_STATUS_VALUES,
