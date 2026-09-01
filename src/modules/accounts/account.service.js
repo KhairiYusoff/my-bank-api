@@ -25,6 +25,7 @@ const { isDormancyAnniversary } = require("../../shared/utils/date");
 const { getReadableAccountType } = require("../../shared/utils/validation.helpers");
 const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
 const { USER_ROLES } = require("../../shared/constants/user");
+const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
 
 class AccountService {
   async createAccount(userId, accountData) {
@@ -813,7 +814,7 @@ class AccountService {
 
       await account.save({ session });
       await ActivityLog.create({
-        action: "APPROVE_ACCOUNT_REQUEST",
+        action: ACTIVITY_ACTIONS.APPROVE_ACCOUNT_REQUEST,
         actor: bankerId,
         target: accountId,
         targetType: "Account",
@@ -874,7 +875,7 @@ class AccountService {
     await account.save();
 
     await ActivityLog.create({
-      action: "REJECT_ACCOUNT_REQUEST",
+      action: ACTIVITY_ACTIONS.REJECT_ACCOUNT_REQUEST,
       actor: bankerId,
       target: accountId,
       targetType: "Account",
@@ -1014,7 +1015,7 @@ class AccountService {
       await ActivityLog.create(
         [
           {
-            action: "FD_PRINCIPAL_SETTLEMENT",
+            action: ACTIVITY_ACTIONS.FD_PRINCIPAL_SETTLEMENT,
             actor: userId,
             target: fd._id,
             targetType: "Account",
@@ -1093,7 +1094,7 @@ class AccountService {
     await fd.save();
 
     await ActivityLog.create({
-      action: "UPDATE_FD_INSTRUCTIONS",
+      action: ACTIVITY_ACTIONS.UPDATE_FD_INSTRUCTIONS,
       actor: userId,
       target: fd._id,
       targetType: "Account",
@@ -1175,7 +1176,7 @@ class AccountService {
       await ActivityLog.create(
         [
           {
-            action: "FD_EARLY_WITHDRAWAL",
+            action: ACTIVITY_ACTIONS.FD_EARLY_WITHDRAWAL,
             actor: userId,
             target: fd._id,
             targetType: "Account",
@@ -1254,7 +1255,7 @@ class AccountService {
         await account.save();
 
         await ActivityLog.create({
-          action: "ACCOUNT_DORMANT",
+          action: ACTIVITY_ACTIONS.ACCOUNT_DORMANT,
           relatedEntity: account._id,
           relatedEntityModel: "Account",
           details: {
@@ -1283,14 +1284,14 @@ class AccountService {
       else if (lastActivityDate < elevenMonthsAgo) {
         // Prevent daily notification spam by checking for recent warnings
         const recentWarning = await ActivityLog.findOne({
-          action: "DORMANCY_WARNING",
+          action: ACTIVITY_ACTIONS.DORMANCY_WARNING,
           relatedEntity: account._id,
           createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
         });
 
         if (!recentWarning) {
           await ActivityLog.create({
-            action: "DORMANCY_WARNING",
+            action: ACTIVITY_ACTIONS.DORMANCY_WARNING,
             relatedEntity: account._id,
             relatedEntityModel: "Account",
             details: {
@@ -1396,7 +1397,7 @@ class AccountService {
             await ActivityLog.create(
               [
                 {
-                  action: "DORMANCY_FEE_CHARGE",
+                  action: ACTIVITY_ACTIONS.DORMANCY_FEE_CHARGE,
                   user: freshAccount.user,
                   details: {
                     accountNumber: freshAccount.accountNumber,
@@ -1416,7 +1417,7 @@ class AccountService {
               await ActivityLog.create(
                 [
                   {
-                    action: "DORMANCY_FEE_WARNING",
+                    action: ACTIVITY_ACTIONS.DORMANCY_FEE_WARNING,
                     user: freshAccount.user,
                     details: {
                       accountNumber: freshAccount.accountNumber,
@@ -1487,7 +1488,7 @@ class AccountService {
     await account.save();
 
     await ActivityLog.create({
-      action: "ACCOUNT_CLOSE_REQUESTED",
+      action: ACTIVITY_ACTIONS.ACCOUNT_CLOSE_REQUESTED,
       actor: userId,
       target: account._id,
       targetType: "Account",
@@ -1544,7 +1545,7 @@ class AccountService {
     await account.save();
 
     await ActivityLog.create({
-      action: "ACCOUNT_CLOSED",
+      action: ACTIVITY_ACTIONS.ACCOUNT_CLOSED,
       actor: bankerId,
       target: account._id,
       targetType: "Account",
