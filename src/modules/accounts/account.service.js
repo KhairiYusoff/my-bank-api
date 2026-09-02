@@ -164,36 +164,33 @@ class AccountService {
       if (openedDateTo) filter.dateOpened.$lte = new Date(openedDateTo);
     }
 
-    let accountsQuery = Account.find(filter)
+    let accountsFilter = filter;
+    if (search) {
+      const searchRegex = new RegExp(search, "i");
+      const matchingUsers = await User.find({
+        $or: [{ name: searchRegex }, { email: searchRegex }],
+      })
+        .select("_id")
+        .lean();
+
+      accountsFilter = {
+        ...filter,
+        $or: [
+          { accountNumber: searchRegex },
+          { user: { $in: matchingUsers.map((user) => user._id) } },
+        ],
+      };
+    }
+
+    const accountsQuery = Account.find(accountsFilter)
       .populate("user", "name email role")
       .populate("linkedAccount", "accountNumber")
       .sort({ dateOpened: sort === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(numericLimit);
 
-    if (search) {
-      accountsQuery = Account.find({
-        ...filter,
-        $or: [{ accountNumber: new RegExp(search, "i") }],
-      })
-        .populate({
-          path: "user",
-          match: {
-            $or: [
-              { name: new RegExp(search, "i") },
-              { email: new RegExp(search, "i") },
-            ],
-          },
-          select: "name email role",
-        })
-        .populate("linkedAccount", "accountNumber")
-        .sort({ dateOpened: sort === "asc" ? 1 : -1 })
-        .skip(skip)
-        .limit(numericLimit);
-    }
-
     const [total, accounts] = await Promise.all([
-      Account.countDocuments(filter),
+      Account.countDocuments(accountsFilter),
       accountsQuery,
     ]);
 
