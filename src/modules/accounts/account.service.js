@@ -934,6 +934,12 @@ class AccountService {
         throw err;
       }
 
+      if (fd.status !== ACCOUNT_STATUS.ACTIVE) {
+        const err = new Error("Fixed Deposit account is not active");
+        err.statusCode = 400;
+        throw err;
+      }
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const maturityDate = new Date(fd.maturityDate);
@@ -1076,6 +1082,12 @@ class AccountService {
         const err = new Error(
           "Only Fixed Deposit accounts can be withdrawn early",
         );
+        err.statusCode = 400;
+        throw err;
+      }
+
+      if (fd.status !== ACCOUNT_STATUS.ACTIVE) {
+        const err = new Error("Fixed Deposit account is not active");
         err.statusCode = 400;
         throw err;
       }
