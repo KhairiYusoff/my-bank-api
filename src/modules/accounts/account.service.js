@@ -1072,6 +1072,11 @@ class AccountService {
         err.statusCode = 400;
         throw err;
       }
+      if (linkedAccDoc.status !== ACCOUNT_STATUS.ACTIVE) {
+        const err = new Error("Linked account is not active");
+        err.statusCode = 400;
+        throw err;
+      }
       fd.linkedAccount = linkedAccDoc._id;
     }
 
