@@ -969,13 +969,30 @@ class AccountService {
         throw err;
       }
 
+      const fdBalanceBefore = fd.balance;
       const balanceBefore = linkedAccount.balance;
       linkedAccount.balance += fd.principal;
-      await linkedAccount.save({ session });
+      fd.balance = 0;
+      await Promise.all([
+        linkedAccount.save({ session }),
+        fd.save({ session }),
+      ]);
 
       const reference = await getNextReference();
       await Transaction.create(
         [
+          {
+            account: fd._id,
+            amount: fd.principal,
+            type: "debit",
+            direction: "debit",
+            description: `Manual FD Principal Settlement: ${fd.accountNumber}`,
+            reference,
+            currency: "MYR",
+            status: "completed",
+            balanceBefore: fdBalanceBefore,
+            balanceAfter: fd.balance,
+          },
           {
             account: linkedAccount._id,
             amount: fd.principal,
@@ -993,7 +1010,6 @@ class AccountService {
       );
 
       fd.status = ACCOUNT_STATUS.CLOSED;
-      fd.balance = 0;
       await fd.save({ session });
 
       await session.commitTransaction();
@@ -1112,13 +1128,30 @@ class AccountService {
         throw err;
       }
 
+      const fdBalanceBefore = fd.balance;
       const balanceBefore = linkedAccount.balance;
       linkedAccount.balance += fd.principal;
-      await linkedAccount.save({ session });
+      fd.balance = 0;
+      await Promise.all([
+        linkedAccount.save({ session }),
+        fd.save({ session }),
+      ]);
 
       const reference = await getNextReference();
       await Transaction.create(
         [
+          {
+            account: fd._id,
+            amount: fd.principal,
+            type: "debit",
+            direction: "debit",
+            description: `Early FD Principal Withdrawal (Interest Forfeited): ${fd.accountNumber}`,
+            reference,
+            currency: "MYR",
+            status: "completed",
+            balanceBefore: fdBalanceBefore,
+            balanceAfter: fd.balance,
+          },
           {
             account: linkedAccount._id,
             amount: fd.principal,
@@ -1136,7 +1169,6 @@ class AccountService {
       );
 
       fd.status = ACCOUNT_STATUS.CLOSED;
-      fd.balance = 0;
       await fd.save({ session });
 
       await session.commitTransaction();
