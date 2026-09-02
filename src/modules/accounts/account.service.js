@@ -27,6 +27,14 @@ const { ROLE_TO_CHANNEL } = require("../../shared/constants/transactions");
 const { USER_ROLES } = require("../../shared/constants/user");
 const { ACTIVITY_ACTIONS } = require("../../shared/constants/activities");
 
+const validatePositiveAmount = (amount) => {
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    const err = new Error("Amount must be a positive finite number");
+    err.statusCode = 400;
+    throw err;
+  }
+};
+
 class AccountService {
   async createAccount(userId, accountData) {
     const {
@@ -237,6 +245,7 @@ class AccountService {
   }
 
   async deposit(accountNumber, amount, userId, role, memo, ip, userAgent) {
+    validatePositiveAmount(amount);
     const submittedAt = new Date();
     const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
@@ -366,6 +375,7 @@ class AccountService {
   }
 
   async withdraw(accountNumber, amount, userId, role, memo, ip, userAgent) {
+    validatePositiveAmount(amount);
     const submittedAt = new Date();
     const channel = ROLE_TO_CHANNEL[role] ?? "web";
     const reference = await getNextReference();
@@ -506,6 +516,7 @@ class AccountService {
   }
 
   async airdrop(accountNumber, amount, memo, userId, role, ip, userAgent) {
+    validatePositiveAmount(amount);
     const submittedAt = new Date();
     const channel = ROLE_TO_CHANNEL[role] ?? "system";
     const reference = await getNextReference();
