@@ -35,6 +35,14 @@ const validatePositiveAmount = (amount) => {
   }
 };
 
+const notifyAccountBestEffort = async (payload, failureMessage) => {
+  try {
+    await sendNotification(payload);
+  } catch (notifyErr) {
+    console.error(failureMessage, notifyErr.message);
+  }
+};
+
 class AccountService {
   async createAccount(userId, accountData) {
     const {
@@ -351,8 +359,8 @@ class AccountService {
       session.endSession();
     }
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "deposit",
         title: "Deposit Received",
         message: `Your account ${account.accountNumber} has received a deposit of RM${amount}.`,
@@ -366,10 +374,9 @@ class AccountService {
         },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send deposit notification:", notifyErr.message);
-    }
+      },
+      "Failed to send deposit notification:",
+    );
 
     return { account, transaction };
   }
@@ -487,8 +494,8 @@ class AccountService {
       session.endSession();
     }
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "withdrawal",
         title: "Withdrawal Processed",
         message: `A withdrawal of RM${amount} has been made from your account ${account.accountNumber}.`,
@@ -502,13 +509,9 @@ class AccountService {
         },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error(
-        "Failed to send withdrawal notification:",
-        notifyErr.message,
-      );
-    }
+      },
+      "Failed to send withdrawal notification:",
+    );
 
     await notifyBelowThreshold(account);
 
@@ -574,8 +577,8 @@ class AccountService {
       session.endSession();
     }
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "airdrop",
         title: "Airdrop Received",
         message: `Your account ${account.accountNumber} has received an airdrop of RM${amount}.`,
@@ -589,10 +592,9 @@ class AccountService {
         },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send airdrop notification:", notifyErr.message);
-    }
+      },
+      "Failed to send airdrop notification:",
+    );
 
     return { account, transaction };
   }
@@ -824,8 +826,8 @@ class AccountService {
 
       await session.commitTransaction();
 
-      try {
-        await sendNotification({
+      await notifyAccountBestEffort(
+        {
           type: "account_opened",
           title: "Account Approved",
           message: `Your ${getReadableAccountType(account.accountType)} ${account.accountNumber} has been approved!`,
@@ -838,13 +840,9 @@ class AccountService {
           },
           read: false,
           delivered: false,
-        });
-      } catch (notifyErr) {
-        console.error(
-          "Failed to send account approval notification:",
-          notifyErr.message,
-        );
-      }
+        },
+        "Failed to send account approval notification:",
+      );
 
       return account;
     } catch (err) {
@@ -872,8 +870,8 @@ class AccountService {
     account.status = ACCOUNT_STATUS.CLOSED;
     await account.save();
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "account_rejected",
         title: "Account Request Rejected",
         message: `Your ${getReadableAccountType(account.accountType)} request has been rejected. Reason: ${reason}`,
@@ -886,13 +884,9 @@ class AccountService {
         },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error(
-        "Failed to send account rejection notification:",
-        notifyErr.message,
-      );
-    }
+      },
+      "Failed to send account rejection notification:",
+    );
 
     return account;
   }
@@ -1022,8 +1016,8 @@ class AccountService {
 
       await session.commitTransaction();
 
-      try {
-        await sendNotification({
+      await notifyAccountBestEffort(
+        {
           type: "fd_settled",
           title: "FD Principal Withdrawn",
           message: `Your manual withdrawal of RM${fd.principal.toFixed(2)} from FD ${fd.accountNumber} has been processed.`,
@@ -1034,13 +1028,9 @@ class AccountService {
             amount: fd.principal,
             accountNumber: fd.accountNumber,
           },
-        });
-      } catch (notifyErr) {
-        console.error(
-          "Failed to send FD settlement notification:",
-          notifyErr.message,
-        );
-      }
+        },
+        "Failed to send FD settlement notification:",
+      );
 
       return fd;
     } catch (err) {
@@ -1186,8 +1176,8 @@ class AccountService {
 
       await session.commitTransaction();
 
-      try {
-        await sendNotification({
+      await notifyAccountBestEffort(
+        {
           type: "fd_settled",
           title: "Early FD Withdrawal Processed",
           message: `Your emergency early withdrawal of RM${fd.principal.toFixed(2)} from FD ${fd.accountNumber} has been processed. Accrued interest was forfeited.`,
@@ -1199,13 +1189,9 @@ class AccountService {
             accountNumber: fd.accountNumber,
             type: "early_withdrawal",
           },
-        });
-      } catch (notifyErr) {
-        console.error(
-          "Failed to send early FD withdrawal notification:",
-          notifyErr.message,
-        );
-      }
+        },
+        "Failed to send early FD withdrawal notification:",
+      );
 
       return fd;
     } catch (err) {
@@ -1258,8 +1244,8 @@ class AccountService {
           },
         });
 
-        try {
-          await sendNotification({
+        await notifyAccountBestEffort(
+          {
             type: "account_dormant",
             title: "Account Dormant",
             message: `Your account ${account.accountNumber} has been marked as dormant due to 12 months of inactivity. Self-service transactions are disabled.`,
@@ -1267,10 +1253,9 @@ class AccountService {
             recipient: { role: "customer", userId: account.user.toString() },
             source: { service: "my-bank-api", id: account._id.toString() },
             data: { accountNumber: account.accountNumber },
-          });
-        } catch (notifyErr) {
-          console.error("Failed to send dormancy notice:", notifyErr.message);
-        }
+          },
+          "Failed to send dormancy notice:",
+        );
 
         results.dormant++;
       }
@@ -1294,8 +1279,8 @@ class AccountService {
             },
           });
 
-          try {
-            await sendNotification({
+          await notifyAccountBestEffort(
+            {
               type: "account_dormant_warning",
               title: "Dormancy Warning",
               message: `Your account ${account.accountNumber} has had no activity for 11 months. It will be marked as dormant in 30 days unless a transaction is performed.`,
@@ -1303,13 +1288,9 @@ class AccountService {
               recipient: { role: "customer", userId: account.user.toString() },
               source: { service: "my-bank-api", id: account._id.toString() },
               data: { accountNumber: account.accountNumber },
-            });
-          } catch (notifyErr) {
-            console.error(
-              "Failed to send dormancy warning:",
-              notifyErr.message,
-            );
-          }
+            },
+            "Failed to send dormancy warning:",
+          );
 
           results.warned++;
         }
@@ -1473,8 +1454,8 @@ class AccountService {
     account.status = ACCOUNT_STATUS.PENDING_CLOSURE;
     await account.save();
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "account_closure_requested",
         title: "Closure Request Submitted",
         message: `Your closure request for account ${account.accountNumber} has been submitted and is pending banker approval.`,
@@ -1484,13 +1465,9 @@ class AccountService {
         data: { accountNumber: account.accountNumber },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error(
-        "Failed to send closure request notification:",
-        notifyErr.message,
-      );
-    }
+      },
+      "Failed to send closure request notification:",
+    );
 
     return account;
   }
@@ -1519,8 +1496,8 @@ class AccountService {
     account.dateClosed = new Date();
     await account.save();
 
-    try {
-      await sendNotification({
+    await notifyAccountBestEffort(
+      {
         type: "account_closed",
         title: "Account Closed",
         message: `Your account ${account.accountNumber} has been officially closed.`,
@@ -1530,10 +1507,9 @@ class AccountService {
         data: { accountNumber: account.accountNumber },
         read: false,
         delivered: false,
-      });
-    } catch (notifyErr) {
-      console.error("Failed to send closure notification:", notifyErr.message);
-    }
+      },
+      "Failed to send closure notification:",
+    );
 
     return account;
   }
